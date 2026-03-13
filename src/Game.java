@@ -7,11 +7,12 @@ import java.util.Scanner;
  */
 public class Game {
     // 1. Declare your ArrayList here to store scores between games.
-    ArrayList<String> scoreBoard = new ArrayList<>();
+    private ArrayList<String> scoreBoard = new ArrayList<>();
 
     // 2. Declare your two Player objects here so they persist.
     Player playerOne = new Player(null);
     Player playerTwo = new Player(null);
+
     // 3. Declare a Scanner to be used throughout the class.
     private Scanner universalInput = new Scanner(System.in);
 
@@ -44,7 +45,7 @@ public class Game {
             // - Choice 3: Tutorial
             System.out.println("Choice 3: How to Play");
             // - Choice 4: Exit (Ends program)
-            System.out.println("End program and exit");
+            System.out.println("Choice 4: End program and exit");
             String input = universalInput.nextLine(); // takes input as string
 
             try {
@@ -52,10 +53,8 @@ public class Game {
 
                 switch (menuChoice) { // attempting a switch case menu
                     case 1:
-                        universalInput.nextLine(); // clear input
                         System.out.println("Please enter in the name of Player one: ");
                         playerOne.setName(universalInput.nextLine()); // takes input and changes player one name
-                        universalInput.nextLine(); // clear input
                         System.out.println("Please enter in the name of Player two: ");
                         playerTwo.setName(universalInput.nextLine()); // takes input and changes player two name
                         runGame();
@@ -67,6 +66,7 @@ public class Game {
                         showTutorial();
                         break;
                     case 4:
+                        System.out.println("Ending Program...");
                         System.exit(0);
                         break;
                     default:
@@ -87,26 +87,118 @@ public class Game {
      */
     private void runGame() {
         // TODO: Reset player positions to random (0-120).
+        playerOne.setStartingPosition();
+        playerTwo.setStartingPosition();
 
-        // TODO: Turn Loop
-        // 1. Get Power/Angle from active player (use try-catch blueprint).
-        // 2. Check for 20% Wind trigger.
-        // 3. Calculate shot distance.
-        // 4. Report distance and how far they missed by.
-        // 5. Check if distance < 1 (Hit!).
-        // 6. "Wait for Enter" before next turn.
+        boolean hit = false;
+        while (!hit) {
+            System.out.println("\n" + playerOne.getName() + " is at " + playerOne.getStartingPosition());
+            System.out.println(playerTwo.getName() + " is at " + playerTwo.getStartingPosition());
 
-        // TODO: After a winner is found, add the result to the ArrayList.
+            Player[] players = { playerOne, playerTwo };
+            String[] promptList = {
+                    "Please enter in a power between 1 - 1000: ",
+                    "Please enter an angle between 0 and 180: "
+            };
+            double[][] minAndMax = { { 1, 1000 }, { 0, 180 } };
+
+            for (Player currentPlayer : players) {
+                System.out.println("\n" + currentPlayer.getName() + "'s turn:");
+                double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
+                double angle = getValidatedDouble(promptList[1], minAndMax[1][0], minAndMax[1][1]);
+                currentPlayer.setPower((int) power);
+                currentPlayer.setAngle((int) angle);
+            }
+
+            // .20% wind scrapped for now until I figure out how to build or get tired
+
+            // 3. Calculate shot distance.
+            double shotOne = playerOne.getShot();
+            double shotTwo = playerTwo.getShot();
+
+            // 4. Report distance and how far they missed by.
+            double missOne = Math.abs(shotOne - playerTwo.getStartingPosition());
+            double missTwo = Math.abs(shotTwo - playerOne.getStartingPosition());
+
+            System.out.printf("\n%s's shot landed at %.2f (Missed by %.2f)\n", playerOne.getName(), shotOne, missOne);
+            System.out.printf("%s's shot landed at %.2f (Missed by %.2f)\n", playerTwo.getName(), shotTwo, missTwo);
+
+            // 5. Check if distance < 1 (Hit!).
+            if (missOne < 1 || missTwo < 1) {
+                hit = true;
+                if (missOne < 1 && missTwo < 1) {
+                    System.out.println("It's a tie! Both hit!");
+                    scoreBoard.add("Tie: " + playerOne.getName() + " and " + playerTwo.getName());
+                } else if (missOne < 1) {
+                    System.out.println(playerOne.getName() + " wins!");
+                    scoreBoard.add("Winner: " + playerOne.getName());
+                } else {
+                    System.out.println(playerTwo.getName() + " wins!");
+                    scoreBoard.add("Winner: " + playerTwo.getName());
+                }
+            } else {
+                // 6. "Wait for Enter" before next turn.
+                System.out.println("No hit! Press enter to continue to the next turn.");
+                universalInput.nextLine();
+            }
+        }
     }
 
+    // TODO: After a winner is found, add the result to the ArrayList.
+
     private void showScoreboard() {
-        // TODO: Iterate through ArrayList and print all past results.
-        // TODO: Find and print the best score (closest hit or most wins).
+        if (scoreBoard.isEmpty()) {
+            System.out.println("There is no scoreboard! Play a game first!");
+            System.out.println("Press enter to go back to main menu");
+            universalInput.nextLine();
+
+        } else {
+            // TODO: Iterate through ArrayList and print all past results.
+            for (String eachsScore : scoreBoard) {
+                System.out.println(eachsScore);
+            }
+            // TODO: Find and print the best score (closest hit or most wins).
+            ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
+            bestScore.sort(null);
+            System.out.println("Top Score: " + bestScore.get(0));
+        }
+        System.out.println("Press enter to go back to main menu");
+        universalInput.nextLine();
     }
 
     private void showTutorial() {
         // TODO: Print the instructions and the physics formulas.
+        System.out.println("This is a two player game.");
+        System.out.println("To play simply enter in the usernames for your players.");
+        System.out.println("The objective of the game is to hit the other player with your shot");
+        System.out.println("Each player is placed at a random spot between 0 and 120");
+        System.out.println(
+                "Then each player sets the power and angle of their shot and attempts to hit the other player");
+        System.out.println("TFirst person to strike the other player wins");
+        System.out.println("Press enter to go back to main menu");
+        universalInput.nextLine();
+    }
 
+    private double getValidatedDouble(String prompt, double min, double max) {
+        double value = 0;
+        boolean isValid = false;
+        while (!isValid) {
+            System.out.println(prompt + " (" + min + "-" + max + "): ");
+            String input = universalInput.nextLine(); // Always read as a string first
+            try {
+                value = Double.parseDouble(input); // Try to convert string to number
+                // Check if it's within the required range
+                if (value >= min && value <= max) {
+                    isValid = true;
+                } else {
+                    System.out.println("Error: Please enter a number between " + min + " and " + max + ".");
+                }
+            } catch (NumberFormatException e) {
+                // This runs if parseDouble() fails (e.g. user typed "abc")
+                System.out.println("Error: Invalid input. Please enter a valid number.");
+            }
+        }
+        return value;
     }
 
 }
