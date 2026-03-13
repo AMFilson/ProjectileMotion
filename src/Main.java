@@ -6,7 +6,7 @@ public class Main {
 
   public static void main(String[] args){
 
-    /*The main game will be ran here*/
+    /*The main game will be run here*/
     /*There will be two players in total*/
 
 
