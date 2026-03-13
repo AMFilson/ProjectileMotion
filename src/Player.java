@@ -11,8 +11,6 @@ public class Player {
   private int power;
   private int angle;
   private int startingPosition;
-  static private int gamesPlayed = 0;
-  private int score = 0;
   /* private double shot; */
 
   public Player(String name) {
@@ -62,13 +60,6 @@ public class Player {
   public int setStartingPosition() {
     return startingPosition = (int) (Math.random() * 121);
     // has to be 121 because int rounds down 120.99 to 120;
-  }
-
-  public void addWin() {
-    // Save details of won game here
-    int finalScore = score;
-    int winningGame = gamesPlayed + 1;
-    // append these details to an array list inside of game.java
   }
 
 }

@@ -16,6 +16,12 @@ public class Game {
     // 3. Declare a Scanner to be used throughout the class.
     private Scanner universalInput = new Scanner(System.in);
 
+    // declare games played counter
+    private int gamesPlayed = 0;
+
+    // declare currentRound counter
+    private int currentRound = 0;
+
     public Game(Scanner universalInput, ArrayList<String> scoreBoard) {
         // Constructor: Initialize your scanner and lists here.
         this.universalInput = universalInput;
@@ -92,8 +98,10 @@ public class Game {
 
         boolean hit = false;
         while (!hit) {
+            currentRound++;
             System.out.println("\n" + playerOne.getName() + " is at " + playerOne.getStartingPosition());
             System.out.println(playerTwo.getName() + " is at " + playerTwo.getStartingPosition());
+            System.out.printf("Round: %d \n", currentRound);
 
             Player[] players = { playerOne, playerTwo };
             String[] promptList = {
@@ -126,15 +134,20 @@ public class Game {
             // 5. Check if distance < 1 (Hit!).
             if (missOne < 1 || missTwo < 1) {
                 hit = true;
+                gamesPlayed++; // Increment for any win or tie
                 if (missOne < 1 && missTwo < 1) {
                     System.out.println("It's a tie! Both hit!");
-                    scoreBoard.add("Tie: " + playerOne.getName() + " and " + playerTwo.getName());
+                    scoreBoard.add(
+                            "Tie: " + playerOne.getName() + " and " + playerTwo.getName() + " Game: " + gamesPlayed
+                                    + " Round: " + currentRound);
                 } else if (missOne < 1) {
                     System.out.println(playerOne.getName() + " wins!");
-                    scoreBoard.add("Winner: " + playerOne.getName());
+                    scoreBoard.add(
+                            "Winner: " + playerOne.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
                 } else {
                     System.out.println(playerTwo.getName() + " wins!");
-                    scoreBoard.add("Winner: " + playerTwo.getName());
+                    scoreBoard.add(
+                            "Winner: " + playerTwo.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
                 }
             } else {
                 // 6. "Wait for Enter" before next turn.
@@ -157,13 +170,19 @@ public class Game {
             for (String eachsScore : scoreBoard) {
                 System.out.println(eachsScore);
             }
+            /*
+             * Ammended this for now, no idea how to sort the arraylist based on
+             * a specific parameter from the scoreboard string
+             */
             // TODO: Find and print the best score (closest hit or most wins).
-            ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
-            bestScore.sort(null);
-            System.out.println("Top Score: " + bestScore.get(0));
+            // ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
+            // bestScore.sort(null);
+            // System.out.println("Top Score: " + bestScore.get(0));
+
+            System.out.println("Press enter to go back to main menu");
+            universalInput.nextLine();
         }
-        System.out.println("Press enter to go back to main menu");
-        universalInput.nextLine();
+
     }
 
     private void showTutorial() {
@@ -174,7 +193,7 @@ public class Game {
         System.out.println("Each player is placed at a random spot between 0 and 120");
         System.out.println(
                 "Then each player sets the power and angle of their shot and attempts to hit the other player");
-        System.out.println("TFirst person to strike the other player wins");
+        System.out.println("First person to strike the other player wins");
         System.out.println("Press enter to go back to main menu");
         universalInput.nextLine();
     }
