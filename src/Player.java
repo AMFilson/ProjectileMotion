@@ -27,6 +27,10 @@ public class Player {
     return name;
   }
 
+  public void setName(String inputName) {
+    name = inputName;
+  }
+
   public int getPower() {
     return power;
   }
