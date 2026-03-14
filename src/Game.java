@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * Game Class Blueprint
- * This class handles the menu system, game sessions, and scoreboard.
- */
+/* 
+Name:Game.java (ProjectileMotion)
+Author:Andrew Filson
+Date: March Friday the 13th 2026!
+Desc:This class handles the menu system, game sessions, and scoreboard.
+*/
 public class Game {
     // 1. Declare your ArrayList here to store scores between games.
     private ArrayList<String> scoreBoard = new ArrayList<>();

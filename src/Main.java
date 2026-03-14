@@ -1,6 +1,6 @@
 
 /* 
-Name:ProjectileMotion
+Name:Main.java (ProjectileMotion)
 Author:Andrew Filson
 Date: March Friday the 13th 2026!
 Desc: A game of shoot at a target

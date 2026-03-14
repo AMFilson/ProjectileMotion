@@ -1,5 +1,11 @@
 import java.math.*;
 
+/* 
+Name:Player.java (ProjectileMotion)
+Author:Andrew Filson
+Date: March Friday the 13th 2026!
+Desc: A player class in the game Projectile Motion
+ */
 public class Player {
   /*
    * The plan is to define a player with the requisite properties, methods,
