@@ -4,7 +4,7 @@ import java.math.*;
 Name:Player.java (ProjectileMotion)
 Author:Andrew Filson
 Date: March Friday the 13th 2026!
-Desc: A player class in the game Projectile Motion
+Desc: A player  in the game Projectile Motion
  */
 public class Player {
   /*

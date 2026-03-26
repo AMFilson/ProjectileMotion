@@ -15,6 +15,14 @@ public class Game {
     Player playerOne = new Player(null);
     Player playerTwo = new Player(null);
 
+    /*
+     * This is actually redundant I could have just set these to
+     * private ArrayList<String> scoreBoard;
+     * private Scanner universalInput;
+     * this is because these variables are overriden with the ones
+     * via the Game Constructor grabbing the variables with the values
+     * from Main
+     */
     // 3. Declare a Scanner to be used throughout the class.
     private Scanner universalInput = new Scanner(System.in);
 
@@ -26,6 +34,10 @@ public class Game {
 
     public Game(Scanner universalInput, ArrayList<String> scoreBoard) {
         // Constructor: Initialize your scanner and lists here.
+        /*
+         * Takes the value from the parameter on the right
+         * saves it into the class variable on the left
+         */
         this.universalInput = universalInput;
         this.scoreBoard = scoreBoard;
 
@@ -54,6 +66,7 @@ public class Game {
             System.out.println("Choice 3: How to Play");
             // - Choice 4: Exit (Ends program)
             System.out.println("Choice 4: End program and exit");
+            /* Ensures I always clear the buffer vs using nextInt */
             String input = universalInput.nextLine(); // takes input as string
 
             try {
@@ -112,6 +125,7 @@ public class Game {
             };
             double[][] minAndMax = { { 1, 1000 }, { 0, 180 } };
 
+            /* currentPlayer would be better known as eachPlayer */
             for (Player currentPlayer : players) {
                 System.out.println("\n" + currentPlayer.getName() + "'s turn:");
                 double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
@@ -127,12 +141,17 @@ public class Game {
             double shotTwo = playerTwo.getShot();
 
             // 4. Report distance and how far they missed by.
+            /* Absolute to avoid negative numbers and false wins */
             double missOne = Math.abs(shotOne - playerTwo.getStartingPosition());
             double missTwo = Math.abs(shotTwo - playerOne.getStartingPosition());
 
-            System.out.printf("\n%s's shot landed at %.2f (Missed by %.2f)\n", playerOne.getName(), shotOne, missOne);
-            System.out.printf("%s's shot landed at %.2f (Missed by %.2f)\n", playerTwo.getName(), shotTwo, missTwo);
-
+            if (missOne > 1) {
+                System.out.printf("\n%s's shot landed at %.2f (Missed by %.2f)\n", playerOne.getName(), shotOne,
+                        missOne);
+            }
+            if (missTwo > 1) {
+                System.out.printf("%s's shot landed at %.2f (Missed by %.2f)\n", playerTwo.getName(), shotTwo, missTwo);
+            }
             // 5. Check if distance < 1 (Hit!).
             if (missOne < 1 || missTwo < 1) {
                 hit = true;
@@ -155,6 +174,7 @@ public class Game {
                 // 6. "Wait for Enter" before next turn.
                 System.out.println("No hit! Press enter to continue to the next turn.");
                 universalInput.nextLine();
+                /* I want to add an option to return to main Menu for GUI version */
             }
         }
     }
@@ -218,6 +238,7 @@ public class Game {
                 // This runs if parseDouble() fails (e.g. user typed "abc")
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
+
         }
         return value;
     }
