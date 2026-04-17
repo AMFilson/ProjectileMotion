@@ -158,15 +158,19 @@ public class Game {
                 gamesPlayed++; // Increment for any win or tie
                 if (missOne < 1 && missTwo < 1) {
                     System.out.println("It's a tie! Both hit!");
+                    playerOne.setScore(playerOne.getScore() + 1);
+                    playerTwo.setScore(playerTwo.getScore() + 1);
                     scoreBoard.add(
                             "Tie: " + playerOne.getName() + " and " + playerTwo.getName() + " Game: " + gamesPlayed
                                     + " Round: " + currentRound);
                 } else if (missOne < 1) {
                     System.out.println(playerOne.getName() + " wins!");
+                    playerOne.setScore(playerOne.getScore() + 1);
                     scoreBoard.add(
                             "Winner: " + playerOne.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
                 } else {
                     System.out.println(playerTwo.getName() + " wins!");
+                    playerTwo.setScore(playerTwo.getScore() + 1);
                     scoreBoard.add(
                             "Winner: " + playerTwo.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
                 }

@@ -29,7 +29,10 @@ public class MainWindow extends JFrame {
     // DESIGN:
     // utilize a GridLayout or GridBagLayout to cleanly organize JLabel and
     // JTextField pairs.
-    /* There should be a window added for Animations later on */
+    /*
+     * There should be a window added for Animations later on
+     * this will require JPanel so a seperate file from this atm
+     */
 
     // Components:
     // 1. JTextField player1NameField
@@ -44,7 +47,10 @@ public class MainWindow extends JFrame {
     // 4. JTextField player1AngleField
     private JTextField player1AngleField = new JTextField(20);
 
-    // 5. JTextField player2NameField
+    // 5. JTextField player1ScoreField
+    private JTextField player1ScoreField = new JTextField(20);
+
+    // 6. JTextField player2NameField
     private JTextField player2NameField = new JTextField(20);
 
     // 6. JTextField player2PositionField
@@ -56,10 +62,13 @@ public class MainWindow extends JFrame {
     // 8. JTextField player2AngleField
     private JTextField player2AngleField = new JTextField(20);
 
-    // 9. JTextField gamesPlayedField
+    // 9. JTextField player2ScoreField
+    private JTextField player2ScoreField = new JTextField(20);
+
+    // 10. JTextField gamesPlayedField
     private JTextField gamesPlayedField = new JTextField(20);
 
-    // 10. JTextField currentRoundField
+    // 11. JTextField currentRoundField
     private JTextField currentRoundField = new JTextField(20);
 
     // Buttons:
@@ -90,6 +99,9 @@ public class MainWindow extends JFrame {
         inputPanel.add(player1PowerField);
         inputPanel.add(new JLabel("Player 1 Angle:"));
         inputPanel.add(player1AngleField);
+        /* need to include score tracking to as well */
+        inputPanel.add(new JLabel("Player 1 Score:"));
+        inputPanel.add(player1ScoreField);
 
         // Add components with labels for player 2
         inputPanel.add(new JLabel("Player 2 Name:"));
@@ -100,6 +112,9 @@ public class MainWindow extends JFrame {
         inputPanel.add(player2PowerField);
         inputPanel.add(new JLabel("Player 2 Angle:"));
         inputPanel.add(player2AngleField);
+        /* need to include score tracking to as well */
+        inputPanel.add(new JLabel("Player 2 Score:"));
+        inputPanel.add(player2ScoreField);
 
         // Panel for Games Played
         inputPanel.add(new JLabel("Games Played:"));

@@ -17,6 +17,8 @@ public class Player {
   private int power;
   private int angle;
   private int startingPosition;
+  /* Need to have a property for tracking score */
+  private int score;
   /* private double shot; */
 
   public Player(String name) {
@@ -49,6 +51,16 @@ public class Player {
 
   public int getAngle() {
     return angle;
+  }
+
+  /* added for score tracking */
+  public int getScore() {
+    return score;
+  }
+
+  /* added for score tracking */
+  public void setScore(int score) {
+    this.score = score;
   }
 
   public int getStartingPosition() {
