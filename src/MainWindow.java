@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 
 public class MainWindow extends JFrame {
 
@@ -132,9 +134,72 @@ public class MainWindow extends JFrame {
         add(inputPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Action Listener for Save button
+        btnSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveToFile();
+            }
+        });
+
         // Display the frame
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    /**
+     * Gathers all data from the JTextFields and exports them to a text file.
+     * This method triggers a file selection dialog and handles the file writing process.
+     */
+    private void saveToFile() {
+        // Create a new JFileChooser instance for file selection
+        JFileChooser fileChooser = new JFileChooser();
+        
+        // Show the 'Save' dialog window. This returns JFileChooser.APPROVE_OPTION 
+        // if the user clicks the "Save" button after selecting a file path.
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // Get the File object representing the location chosen by the user
+            File file = fileChooser.getSelectedFile();
+
+            /*
+             * We use a try-with-resources statement to ensure the BufferedWriter 
+             * and FileWriter are closed automatically, even if an exception occurs.
+             * BufferedReader/FileWriter are used for efficient character output.
+             */
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                
+                /* 
+                 * The following write operations output the text from each field 
+                 * followed by a newline (\n). THE ORDER IS CRITICAL:
+                 * it must match the order expected by the 'Open File' logic.
+                 */
+                
+                // Line 1-5: Player 1 Data (Name, Pos, Power, Angle, Score)
+                writer.write(player1NameField.getText() + "\n");
+                writer.write(player1PositionField.getText() + "\n");
+                writer.write(player1PowerField.getText() + "\n");
+                writer.write(player1AngleField.getText() + "\n");
+                writer.write(player1ScoreField.getText() + "\n");
+                
+                // Line 6-10: Player 2 Data (Name, Pos, Power, Angle, Score)
+                writer.write(player2NameField.getText() + "\n");
+                writer.write(player2PositionField.getText() + "\n");
+                writer.write(player2PowerField.getText() + "\n");
+                writer.write(player2AngleField.getText() + "\n");
+                writer.write(player2ScoreField.getText() + "\n");
+                
+                // Line 11-12: General Game Stats
+                writer.write(gamesPlayedField.getText() + "\n");
+                writer.write(currentRoundField.getText() + "\n");
+
+                // Show a confirmation dialog to the user upon successful save
+                JOptionPane.showMessageDialog(this, "Game state saved successfully!");
+            } catch (IOException ex) {
+                // If an error occurs (e.g., permission denied, disk full), show an error dialog
+                JOptionPane.showMessageDialog(this, "Error saving to file: " + ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     // Test to see if this works will relink back to main
