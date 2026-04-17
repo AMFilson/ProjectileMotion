@@ -142,6 +142,14 @@ public class MainWindow extends JFrame {
             }
         });
 
+        // Action Listener for Open button
+        btnOpen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openFromFile();
+            }
+        });
+
         // Display the frame
         setLocationRelativeTo(null);
         setVisible(true);
@@ -198,6 +206,50 @@ public class MainWindow extends JFrame {
             } catch (IOException ex) {
                 // If an error occurs (e.g., permission denied, disk full), show an error dialog
                 JOptionPane.showMessageDialog(this, "Error saving to file: " + ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Opens a file selection dialog and populates the GUI fields with data from
+     * the selected text file. Expected format is 12 lines of data.
+     */
+    private void openFromFile() {
+        // Create a new JFileChooser instance for file selection
+        JFileChooser fileChooser = new JFileChooser();
+
+        // Show the 'Open' dialog window and check if the user approved the selection
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // Get the File object representing the location chosen by the user
+            File file = fileChooser.getSelectedFile();
+
+            /*
+             * use a try-with-resources statement to ensure the BufferedReader
+             * is closed automatically.
+             */
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                // Read each field value from the file in the specific saved order
+                player1NameField.setText(reader.readLine());
+                player1PositionField.setText(reader.readLine());
+                player1PowerField.setText(reader.readLine());
+                player1AngleField.setText(reader.readLine());
+                player1ScoreField.setText(reader.readLine());
+
+                player2NameField.setText(reader.readLine());
+                player2PositionField.setText(reader.readLine());
+                player2PowerField.setText(reader.readLine());
+                player2AngleField.setText(reader.readLine());
+                player2ScoreField.setText(reader.readLine());
+
+                gamesPlayedField.setText(reader.readLine());
+                currentRoundField.setText(reader.readLine());
+
+                // Notify user of success
+                JOptionPane.showMessageDialog(this, "Game state loaded successfully!");
+            } catch (IOException ex) {
+                // If an error occurs (e.g., file not found), show an error dialog
+                JOptionPane.showMessageDialog(this, "Error opening file: " + ex.getMessage(), "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
         }
