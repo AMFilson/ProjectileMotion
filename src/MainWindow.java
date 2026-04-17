@@ -203,9 +203,4 @@ public class MainWindow extends JFrame {
         }
     }
 
-    // Test to see if this works will relink back to main
-    public static void main(String[] args) {
-
-        SwingUtilities.invokeLater(() -> new MainWindow());
-    }
 }
