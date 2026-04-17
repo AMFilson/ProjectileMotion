@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 
 public class MainWindow extends JFrame {
 
@@ -28,6 +29,7 @@ public class MainWindow extends JFrame {
     // DESIGN:
     // utilize a GridLayout or GridBagLayout to cleanly organize JLabel and
     // JTextField pairs.
+    /* There should be a window added for Animations later on */
 
     // Components:
     // 1. JTextField player1NameField
@@ -65,4 +67,64 @@ public class MainWindow extends JFrame {
     private JButton btnSave = new JButton("Save to File");
 
     // 2. JButton btnOpen: "Open File"
+    private JButton btnOpen = new JButton("Open File");
+
+    /* The primary JFrame Constructor */
+    public MainWindow() {
+        // Set up the frame
+        setTitle("Projectile Motion Data Entry");
+        setSize(400, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        // Panel for input fields using GridLayout
+        JPanel inputPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Add components with labels for player 1
+        inputPanel.add(new JLabel("Player 1 Name:"));
+        inputPanel.add(player1NameField);
+        inputPanel.add(new JLabel("Player 1 Position:"));
+        inputPanel.add(player1PositionField);
+        inputPanel.add(new JLabel("Player 1 Power:"));
+        inputPanel.add(player1PowerField);
+        inputPanel.add(new JLabel("Player 1 Angle:"));
+        inputPanel.add(player1AngleField);
+
+        // Add components with labels for player 2
+        inputPanel.add(new JLabel("Player 2 Name:"));
+        inputPanel.add(player2NameField);
+        inputPanel.add(new JLabel("Player 2 Position:"));
+        inputPanel.add(player2PositionField);
+        inputPanel.add(new JLabel("Player 2 Power:"));
+        inputPanel.add(player2PowerField);
+        inputPanel.add(new JLabel("Player 2 Angle:"));
+        inputPanel.add(player2AngleField);
+
+        // Panel for Games Played
+        inputPanel.add(new JLabel("Games Played:"));
+        inputPanel.add(gamesPlayedField);
+        // Panel for Current Round
+        inputPanel.add(new JLabel("Current Round:"));
+        inputPanel.add(currentRoundField);
+
+        // Panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(btnSave);
+        buttonPanel.add(btnOpen);
+
+        // Add panels to frame
+        add(inputPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Display the frame
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    // Test to see if this works will relink back to main
+    public static void main(String[] args) {
+
+        SwingUtilities.invokeLater(() -> new MainWindow());
+    }
 }
