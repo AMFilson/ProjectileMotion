@@ -40,8 +40,8 @@ public class MainWindow extends JFrame {
     // 1. JTextField player1NameField
     private JTextField player1NameField = new JTextField(20);
 
-    // 2. JTextField player1PositionField
-    private JTextField player1PositionField = new JTextField(20);
+    // 2. JLabel player1PositionField
+    private JLabel player1PositionField = new JLabel("0");
 
     // 3. JTextField player1PowerField
     private JTextField player1PowerField = new JTextField(20);
@@ -49,14 +49,14 @@ public class MainWindow extends JFrame {
     // 4. JTextField player1AngleField
     private JTextField player1AngleField = new JTextField(20);
 
-    // 5. JTextField player1ScoreField
-    private JTextField player1ScoreField = new JTextField(20);
+    // 5. JLabel player1ScoreField
+    private JLabel player1ScoreField = new JLabel("0");
 
     // 6. JTextField player2NameField
     private JTextField player2NameField = new JTextField(20);
 
-    // 6. JTextField player2PositionField
-    private JTextField player2PositionField = new JTextField(20);
+    // 6. JLabel player2PositionField
+    private JLabel player2PositionField = new JLabel("0");
 
     // 7. JTextField player2PowerField
     private JTextField player2PowerField = new JTextField(20);
@@ -64,14 +64,14 @@ public class MainWindow extends JFrame {
     // 8. JTextField player2AngleField
     private JTextField player2AngleField = new JTextField(20);
 
-    // 9. JTextField player2ScoreField
-    private JTextField player2ScoreField = new JTextField(20);
+    // 9. JLabel player2ScoreField
+    private JLabel player2ScoreField = new JLabel("0");
 
-    // 10. JTextField gamesPlayedField
-    private JTextField gamesPlayedField = new JTextField(20);
+    // 10. JLabel gamesPlayedField
+    private JLabel gamesPlayedField = new JLabel("0");
 
-    // 11. JTextField currentRoundField
-    private JTextField currentRoundField = new JTextField(20);
+    // 11. JLabel currentRoundField
+    private JLabel currentRoundField = new JLabel("0");
 
     // Buttons:
     // 1. JButton btnSave: "Save to File"
@@ -80,59 +80,111 @@ public class MainWindow extends JFrame {
     // 2. JButton btnOpen: "Open File"
     private JButton btnOpen = new JButton("Open File");
 
+    // Player 1 Directional Buttons
+    private JButton player1Up = new JButton("▲");
+    private JButton player1Down = new JButton("▼");
+    private JButton player1Left = new JButton("◄");
+    private JButton player1Right = new JButton("►");
+
+    // Player 2 Directional Buttons
+    private JButton player2Up = new JButton("▲");
+    private JButton player2Down = new JButton("▼");
+    private JButton player2Left = new JButton("◄");
+    private JButton player2Right = new JButton("►");
+
+    // Animation Panel
+    private AnimationPanel animationPanel = new AnimationPanel();
+
     /* The primary JFrame Constructor */
     public MainWindow() {
         // Set up the frame
         setTitle("Projectile Motion Data Entry");
-        setSize(400, 500);
+        setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel for input fields using GridLayout
-        JPanel inputPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Panel for input fields: Split into two columns (Player 1 and Player 2)
+        JPanel p1Panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        p1Panel.setBorder(BorderFactory.createTitledBorder("Player 1"));
 
-        // Add components with labels for player 1
-        inputPanel.add(new JLabel("Player 1 Name:"));
-        inputPanel.add(player1NameField);
-        inputPanel.add(new JLabel("Player 1 Position:"));
-        inputPanel.add(player1PositionField);
-        inputPanel.add(new JLabel("Player 1 Power:"));
-        inputPanel.add(player1PowerField);
-        inputPanel.add(new JLabel("Player 1 Angle:"));
-        inputPanel.add(player1AngleField);
-        /* need to include score tracking to as well */
-        inputPanel.add(new JLabel("Player 1 Score:"));
-        inputPanel.add(player1ScoreField);
+        JPanel p2Panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        p2Panel.setBorder(BorderFactory.createTitledBorder("Player 2"));
 
-        // Add components with labels for player 2
-        inputPanel.add(new JLabel("Player 2 Name:"));
-        inputPanel.add(player2NameField);
-        inputPanel.add(new JLabel("Player 2 Position:"));
-        inputPanel.add(player2PositionField);
-        inputPanel.add(new JLabel("Player 2 Power:"));
-        inputPanel.add(player2PowerField);
-        inputPanel.add(new JLabel("Player 2 Angle:"));
-        inputPanel.add(player2AngleField);
-        /* need to include score tracking to as well */
-        inputPanel.add(new JLabel("Player 2 Score:"));
-        inputPanel.add(player2ScoreField);
+        // Add P1 components
+        p1Panel.add(new JLabel("Name:"));
+        p1Panel.add(player1NameField);
+        p1Panel.add(new JLabel("Position:"));
+        p1Panel.add(player1PositionField);
+        p1Panel.add(new JLabel("Power:"));
+        p1Panel.add(player1PowerField);
+        p1Panel.add(new JLabel("Angle:"));
+        p1Panel.add(player1AngleField);
+        p1Panel.add(new JLabel("Games Won:"));
+        p1Panel.add(player1ScoreField);
 
-        // Panel for Games Played
-        inputPanel.add(new JLabel("Games Played:"));
-        inputPanel.add(gamesPlayedField);
-        // Panel for Current Round
-        inputPanel.add(new JLabel("Current Round:"));
-        inputPanel.add(currentRoundField);
+        // Add P2 components
+        p2Panel.add(new JLabel("Name:"));
+        p2Panel.add(player2NameField);
+        p2Panel.add(new JLabel("Position:"));
+        p2Panel.add(player2PositionField);
+        p2Panel.add(new JLabel("Power:"));
+        p2Panel.add(player2PowerField);
+        p2Panel.add(new JLabel("Angle:"));
+        p2Panel.add(player2AngleField);
+        p2Panel.add(new JLabel("Games Won:"));
+        p2Panel.add(player2ScoreField);
 
-        // Panel for buttons
+        // Stats Panel for the very bottom
+        JPanel statsPanel = new JPanel(new GridLayout(1, 4, 10, 5));
+        statsPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        statsPanel.add(new JLabel("Games Played:"));
+        statsPanel.add(gamesPlayedField);
+        statsPanel.add(new JLabel("Current Round:"));
+        statsPanel.add(currentRoundField);
+
+        // Assemble the input panel
+        JPanel playersGrid = new JPanel(new GridLayout(1, 2, 10, 10));
+        playersGrid.add(p1Panel);
+        playersGrid.add(p2Panel);
+
+        // Arrow Key Panels for each player
+        JPanel p1ArrowPad = createArrowKeyPanel(player1Up, player1Down, player1Left, player1Right);
+        JPanel p2ArrowPad = createArrowKeyPanel(player2Up, player2Down, player2Left, player2Right);
+
+        // Wrap pads to center them under their respective player columns
+        JPanel p1PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        p1PadWrapper.add(p1ArrowPad);
+        JPanel p2PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        p2PadWrapper.add(p2ArrowPad);
+
+        // Grid for the directional pads
+        JPanel directionalGrid = new JPanel(new GridLayout(1, 2, 10, 10));
+        directionalGrid.add(p1PadWrapper);
+        directionalGrid.add(p2PadWrapper);
+
+        // Combined data and directional controls
+        JPanel mainContentPanel = new JPanel(new BorderLayout());
+        mainContentPanel.add(playersGrid, BorderLayout.CENTER);
+        mainContentPanel.add(directionalGrid, BorderLayout.SOUTH);
+
+        // Panel for footer buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(btnSave);
         buttonPanel.add(btnOpen);
 
+        // Lower UI Assembly
+        JPanel lowerUI = new JPanel(new BorderLayout());
+        lowerUI.add(mainContentPanel, BorderLayout.CENTER);
+        
+        JPanel footerPanel = new JPanel(new BorderLayout());
+        footerPanel.add(statsPanel, BorderLayout.NORTH);
+        footerPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        lowerUI.add(footerPanel, BorderLayout.SOUTH);
+
         // Add panels to frame
-        add(inputPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(animationPanel, BorderLayout.CENTER); // Animation takes the top/center space
+        add(lowerUI, BorderLayout.SOUTH); // Controls move to the bottom
 
         // Action Listener for Save button
         btnSave.addActionListener(new ActionListener() {
@@ -253,6 +305,20 @@ public class MainWindow extends JFrame {
                         JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    /**
+     * Helper method to create a standardized D-Pad layout for arrow keys.
+     */
+    private JPanel createArrowKeyPanel(JButton up, JButton down, JButton left, JButton right) {
+        JPanel panel = new JPanel(new GridLayout(2, 3, 5, 5));
+        panel.add(new JLabel("")); // Spacer
+        panel.add(up);
+        panel.add(new JLabel("")); // Spacer
+        panel.add(left);
+        panel.add(down);
+        panel.add(right);
+        return panel;
     }
 
 }

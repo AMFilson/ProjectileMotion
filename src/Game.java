@@ -120,18 +120,21 @@ public class Game {
 
             Player[] players = { playerOne, playerTwo };
             String[] promptList = {
-                    "Please enter in a power between 1 - 1000: ",
+                    "Please enter in a power between 1 - 100: ",
                     "Please enter an angle between 0 and 180: "
             };
-            double[][] minAndMax = { { 1, 1000 }, { 0, 180 } };
+            double[][] minAndMax = { { 1, 100 }, { 0, 180 } };
 
-            /* currentPlayer would be better known as eachPlayer */
-            for (Player currentPlayer : players) {
-                System.out.println("\n" + currentPlayer.getName() + "'s turn:");
+            /*
+             * eachPlayer would be better known as eachPlayer
+             * Appended
+             */
+            for (Player eachPlayer : players) {
+                System.out.println("\n" + eachPlayer.getName() + "'s turn:");
                 double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
                 double angle = getValidatedDouble(promptList[1], minAndMax[1][0], minAndMax[1][1]);
-                currentPlayer.setPower((int) power);
-                currentPlayer.setAngle((int) angle);
+                eachPlayer.setPower((int) power);
+                eachPlayer.setAngle((int) angle);
             }
 
             // .20% wind scrapped for now until I figure out how to build or get tired
