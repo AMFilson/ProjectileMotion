@@ -74,11 +74,11 @@ public class MainWindow extends JFrame {
     private JLabel currentRoundField = new JLabel("0");
 
     // Buttons:
-    // 1. JButton btnSave: "Save to File"
-    private JButton btnSave = new JButton("Save to File");
+    // 1. JButton buttonSave: "Save to File"
+    private JButton buttonSave = new JButton("Save to File");
 
-    // 2. JButton btnOpen: "Open File"
-    private JButton btnOpen = new JButton("Open File");
+    // 2. JButton buttonOpen: "Open File"
+    private JButton buttonOpen = new JButton("Open File");
 
     // Player 1 Directional Buttons
     private JButton player1Up = new JButton("▲");
@@ -104,35 +104,35 @@ public class MainWindow extends JFrame {
         setLayout(new BorderLayout(10, 10));
 
         // Panel for input fields: Split into two columns (Player 1 and Player 2)
-        JPanel p1Panel = new JPanel(new GridLayout(0, 2, 5, 5));
-        p1Panel.setBorder(BorderFactory.createTitledBorder("Player 1"));
+        JPanel player1Panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        player1Panel.setBorder(BorderFactory.createTitledBorder("Player 1"));
 
-        JPanel p2Panel = new JPanel(new GridLayout(0, 2, 5, 5));
-        p2Panel.setBorder(BorderFactory.createTitledBorder("Player 2"));
+        JPanel player2Panel = new JPanel(new GridLayout(0, 2, 5, 5));
+        player2Panel.setBorder(BorderFactory.createTitledBorder("Player 2"));
 
         // Add P1 components
-        p1Panel.add(new JLabel("Name:"));
-        p1Panel.add(player1NameField);
-        p1Panel.add(new JLabel("Position:"));
-        p1Panel.add(player1PositionField);
-        p1Panel.add(new JLabel("Power:"));
-        p1Panel.add(player1PowerField);
-        p1Panel.add(new JLabel("Angle:"));
-        p1Panel.add(player1AngleField);
-        p1Panel.add(new JLabel("Games Won:"));
-        p1Panel.add(player1ScoreField);
+        player1Panel.add(new JLabel("Name:"));
+        player1Panel.add(player1NameField);
+        player1Panel.add(new JLabel("Position:"));
+        player1Panel.add(player1PositionField);
+        player1Panel.add(new JLabel("Power:"));
+        player1Panel.add(player1PowerField);
+        player1Panel.add(new JLabel("Angle:"));
+        player1Panel.add(player1AngleField);
+        player1Panel.add(new JLabel("Games Won:"));
+        player1Panel.add(player1ScoreField);
 
         // Add P2 components
-        p2Panel.add(new JLabel("Name:"));
-        p2Panel.add(player2NameField);
-        p2Panel.add(new JLabel("Position:"));
-        p2Panel.add(player2PositionField);
-        p2Panel.add(new JLabel("Power:"));
-        p2Panel.add(player2PowerField);
-        p2Panel.add(new JLabel("Angle:"));
-        p2Panel.add(player2AngleField);
-        p2Panel.add(new JLabel("Games Won:"));
-        p2Panel.add(player2ScoreField);
+        player2Panel.add(new JLabel("Name:"));
+        player2Panel.add(player2NameField);
+        player2Panel.add(new JLabel("Position:"));
+        player2Panel.add(player2PositionField);
+        player2Panel.add(new JLabel("Power:"));
+        player2Panel.add(player2PowerField);
+        player2Panel.add(new JLabel("Angle:"));
+        player2Panel.add(player2AngleField);
+        player2Panel.add(new JLabel("Games Won:"));
+        player2Panel.add(player2ScoreField);
 
         // Stats Panel for the very bottom
         JPanel statsPanel = new JPanel(new GridLayout(1, 4, 10, 5));
@@ -144,23 +144,23 @@ public class MainWindow extends JFrame {
 
         // Assemble the input panel
         JPanel playersGrid = new JPanel(new GridLayout(1, 2, 10, 10));
-        playersGrid.add(p1Panel);
-        playersGrid.add(p2Panel);
+        playersGrid.add(player1Panel);
+        playersGrid.add(player2Panel);
 
         // Arrow Key Panels for each player
-        JPanel p1ArrowPad = createArrowKeyPanel(player1Up, player1Down, player1Left, player1Right);
-        JPanel p2ArrowPad = createArrowKeyPanel(player2Up, player2Down, player2Left, player2Right);
+        JPanel player1ArrowPad = createArrowKeyPanel(player1Up, player1Down, player1Left, player1Right);
+        JPanel player2ArrowPad = createArrowKeyPanel(player2Up, player2Down, player2Left, player2Right);
 
         // Wrap pads to center them under their respective player columns
-        JPanel p1PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        p1PadWrapper.add(p1ArrowPad);
-        JPanel p2PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        p2PadWrapper.add(p2ArrowPad);
+        JPanel player1PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        player1PadWrapper.add(player1ArrowPad);
+        JPanel player2PadWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        player2PadWrapper.add(player2ArrowPad);
 
         // Grid for the directional pads
         JPanel directionalGrid = new JPanel(new GridLayout(1, 2, 10, 10));
-        directionalGrid.add(p1PadWrapper);
-        directionalGrid.add(p2PadWrapper);
+        directionalGrid.add(player1PadWrapper);
+        directionalGrid.add(player2PadWrapper);
 
         // Combined data and directional controls
         JPanel mainContentPanel = new JPanel(new BorderLayout());
@@ -169,13 +169,13 @@ public class MainWindow extends JFrame {
 
         // Panel for footer buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(btnSave);
-        buttonPanel.add(btnOpen);
+        buttonPanel.add(buttonSave);
+        buttonPanel.add(buttonOpen);
 
         // Lower UI Assembly
         JPanel lowerUI = new JPanel(new BorderLayout());
         lowerUI.add(mainContentPanel, BorderLayout.CENTER);
-        
+
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.add(statsPanel, BorderLayout.NORTH);
         footerPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -187,7 +187,7 @@ public class MainWindow extends JFrame {
         add(lowerUI, BorderLayout.SOUTH); // Controls move to the bottom
 
         // Action Listener for Save button
-        btnSave.addActionListener(new ActionListener() {
+        buttonSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 saveToFile();
@@ -195,7 +195,7 @@ public class MainWindow extends JFrame {
         });
 
         // Action Listener for Open button
-        btnOpen.addActionListener(new ActionListener() {
+        buttonOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openFromFile();
