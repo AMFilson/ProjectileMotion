@@ -21,11 +21,22 @@ public class MainMenu extends JFrame {
     private Color bg = new Color(239, 243, 241); // #eff3f1
     private Color fg = new Color(0, 0, 0); // #000000
 
+    private java.util.List<TankData> tanks = new java.util.ArrayList<>();
+    private int currentTankIndex = 0;
+    
+    private JPanel infoPanel;
+    private CanvasArea canvas;
+
     public MainMenu() {
         setTitle("BIT-REKT");
         setSize(1000, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        
+        tanks.add(new TankData("M8 GREYHOUND", 88.4, 45.9));
+        tanks.add(new TankData("PANZER III"));
+        tanks.add(new TankData("FLAK 88"));
+        tanks.add(new TankData("BLACK CAT"));
 
         // Load the Custom Font
         try {
@@ -87,22 +98,24 @@ public class MainMenu extends JFrame {
         // HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
-        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, fg));
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, fg),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
 
         JPanel titleBlock = new JPanel();
         titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
         titleBlock.setOpaque(false);
         JLabel subTitle = createLabel("HEAVY ARMORED DIVISION", 12f);
         subTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        JLabel title = createLabel("PANZER-BIT", 48f);
+        JLabel title = createLabel("BIT-REKT", 48f);
         // Reduce spacing between lines to match CSS line-height 0.8
         titleBlock.add(subTitle);
         titleBlock.add(Box.createVerticalStrut(-5));
         titleBlock.add(title);
 
         JLabel systemStatus = createLabel(
-                "<html><p align='right' style='line-height:1'>LOC: SECTOR_G4<br>NET: ENCRYPTED<br>VER: 1.0.4-STABLE</p></html>",
-                14f);
+                "<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: 19:04:25</p></html>",
+                16f);
         headerPanel.add(titleBlock, BorderLayout.WEST);
         headerPanel.add(systemStatus, BorderLayout.EAST);
 
@@ -119,7 +132,7 @@ public class MainMenu extends JFrame {
         sidebar.setOpaque(false);
         sidebar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 0, 1, fg),
-                BorderFactory.createEmptyBorder(10, 0, 10, 12)));
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
         String[] navNames = {"NEW GAME", "HOW TO PLAY", "LEADERBOARD", "BONUS", "TERMINATE"};
         String[] navIds = { "01", "02", "03", "04", "05" };
@@ -158,7 +171,7 @@ public class MainMenu extends JFrame {
         mainFrame.add(sidebar, gbc);
 
         // CENTER CANVAS
-        CanvasArea canvas = new CanvasArea();
+        canvas = new CanvasArea();
         canvas.setOpaque(false);
         canvas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 10, 10, 10),
@@ -171,30 +184,14 @@ public class MainMenu extends JFrame {
         mainFrame.add(canvas, gbc);
 
         // RIGHT INFO PANEL
-        JPanel infoPanel = new JPanel();
+        infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 1, 0, 0, fg),
-                BorderFactory.createEmptyBorder(10, 12, 10, 0)));
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
-        infoPanel.add(createStatBox("OFFENSIVE POWER", "88.4", 88, false));
-        infoPanel.add(Box.createVerticalStrut(16));
-        infoPanel.add(createStatBox("ARMOR DENSITY", "62.1", 62, true));
-        infoPanel.add(Box.createVerticalStrut(16));
-        infoPanel.add(createStatBox("MOBILITY INDEX", "45.9", 45, false));
-
-        infoPanel.add(Box.createVerticalGlue());
-
-        JPanel sysLogs = new JPanel(new BorderLayout());
-        sysLogs.setOpaque(false);
-        JLabel sysLogsLabel = createLabel("SYSTEM LOGS", 10f);
-        sysLogsLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        String logText = "<html>&gt; CALIBRATING OPTICS<br>&gt; FUEL CELL: OPTIMAL<br>&gt; RADAR: ACTIVE</html>";
-        JLabel logsContent = createLabel(logText, 10f);
-        sysLogs.add(sysLogsLabel, BorderLayout.NORTH);
-        sysLogs.add(logsContent, BorderLayout.CENTER);
-        infoPanel.add(sysLogs);
+        updateInfoPanel();
 
         gbc.gridx = 2;
         gbc.gridy = 1;
@@ -205,10 +202,12 @@ public class MainMenu extends JFrame {
         // FOOTER
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setOpaque(false);
-        footerPanel.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, fg));
-        footerPanel.add(createLabel("CREATED BY ANDREW FILSON", 14f), BorderLayout.WEST);
+        footerPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(2, 0, 0, 0, fg),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        footerPanel.add(createLabel("CREATED BY ANDREW FILSON", 16f), BorderLayout.WEST);
 
-        JLabel rightFooterLabel = createLabel("PRESS [ENTER] TO INITIALIZE", 14f);
+        JLabel rightFooterLabel = createLabel("PRESS [ENTER] TO INITIALIZE", 16f);
         rightFooterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         footerPanel.add(rightFooterLabel, BorderLayout.EAST);
 
@@ -226,7 +225,7 @@ public class MainMenu extends JFrame {
         Timer t = new Timer(1000, e -> {
             String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
             systemStatus
-                    .setText("<html><p align='right' style='line-height:0.8'>LOC: SECTOR_G4<br>NET: ENCRYPTED<br>TME: "
+                    .setText("<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: "
                             + time + "</p></html>");
         });
         t.start();
@@ -277,7 +276,7 @@ public class MainMenu extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 2),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+                BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
         JLabel leftLbl = createLabel("□ " + title, 24f);
         JLabel rightLbl = createLabel(num, 24f);
@@ -319,10 +318,60 @@ public class MainMenu extends JFrame {
         return panel;
     }
 
+    private void updateInfoPanel() {
+        infoPanel.removeAll();
+
+        TankData currentTank = tanks.get(currentTankIndex);
+
+        String opStr = String.format("%.1f", currentTank.getOffensivePower());
+        JPanel statBox1 = createStatBox("OFFENSIVE POWER", opStr, (int)currentTank.getOffensivePower(), false);
+        infoPanel.add(statBox1);
+        
+        infoPanel.add(Box.createVerticalStrut(16));
+        
+        String miStr = String.format("%.1f", currentTank.getMobilityIndex());
+        JPanel statBox2 = createStatBox("MOBILITY INDEX", miStr, (int)currentTank.getMobilityIndex(), false);
+        infoPanel.add(statBox2);
+
+        infoPanel.add(Box.createVerticalGlue());
+
+        JPanel arrowPanel = new JPanel();
+        arrowPanel.setLayout(new BoxLayout(arrowPanel, BoxLayout.Y_AXIS));
+        arrowPanel.setOpaque(false);
+        arrowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        arrowPanel.add(createArrowButton("^", () -> {
+            currentTankIndex--;
+            if (currentTankIndex < 0) currentTankIndex = tanks.size() - 1;
+            canvas.repaint();
+            updateInfoPanel();
+        }));
+        arrowPanel.add(Box.createVerticalStrut(8));
+        arrowPanel.add(createIconButton(() -> {
+            for (TankData t : tanks) {
+                t.rerollStats();
+            }
+            updateInfoPanel();
+        }));
+        arrowPanel.add(Box.createVerticalStrut(8));
+        arrowPanel.add(createArrowButton("v", () -> {
+            currentTankIndex++;
+            if (currentTankIndex >= tanks.size()) currentTankIndex = 0;
+            canvas.repaint();
+            updateInfoPanel();
+        }));
+        
+        infoPanel.add(arrowPanel);
+        infoPanel.revalidate();
+        infoPanel.repaint();
+    }
+
     private JPanel createStatBox(String labelTxt, String valTxt, int percentage, boolean dithered) {
         JPanel box = new JPanel();
         box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
         box.setOpaque(false);
+        box.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Allow width expansion
         box.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
@@ -339,11 +388,122 @@ public class MainMenu extends JFrame {
         box.add(val);
 
         DitheredBar bar = new DitheredBar(percentage, dithered);
-        bar.setPreferredSize(new Dimension(150, 12));
+        bar.setPreferredSize(new Dimension(160, 12));
+        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
         bar.setAlignmentX(Component.LEFT_ALIGNMENT);
         box.add(bar);
 
         return box;
+    }
+
+    private JPanel createArrowButton(String title, Runnable action) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(fg, 1),
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+
+        JLabel lbl = createLabel(title, 20f);
+        lbl.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(lbl, BorderLayout.CENTER);
+        panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                panel.setOpaque(true);
+                panel.setBackground(fg);
+                lbl.setForeground(bg);
+                panel.repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                panel.setOpaque(false);
+                lbl.setForeground(fg);
+                panel.repaint();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (action != null) {
+                    action.run();
+                }
+            }
+        });
+        return panel;
+    }
+
+    private JPanel createIconButton(Runnable action) {
+        JPanel panel = new JPanel() {
+            private boolean isHovered = false;
+
+            {
+                setOpaque(false);
+                setAlignmentX(Component.LEFT_ALIGNMENT);
+                setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(fg, 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        setOpaque(true);
+                        setBackground(fg);
+                        isHovered = true;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        setOpaque(false);
+                        isHovered = false;
+                        repaint();
+                    }
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (action != null) {
+                            action.run();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+
+                Color drawColor = isHovered ? bg : fg;
+                g2.setColor(drawColor);
+                
+                // Ensure crisp pixel art rendering
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+                int cx = getWidth() / 2;
+                int cy = getHeight() / 2;
+
+                // Center the 16x16 pixel art icon (manually scaled from 32x32)
+                g2.translate(cx - 8, cy - 8);
+
+                // --- Draw SVG shapes (transcribed and scaled 50% to integers) ---
+                int[] x1 = {3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3};
+                int[] y1 = {2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2};
+                g2.fillPolygon(x1, y1, 19);
+
+                int[] x2 = {7, 7, 12, 12, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 13, 13, 7};
+                int[] y2 = {3, 4, 4, 11, 11, 12, 12, 13, 13, 14, 14, 13, 13, 12, 12, 11, 11, 3, 3};
+                g2.fillPolygon(x2, y2, 19);
+
+                g2.dispose();
+            }
+        };
+        return panel;
     }
 
     // A panel replacing the standard outline and corner brackets
@@ -418,78 +578,103 @@ public class MainMenu extends JFrame {
             int cx = getWidth() / 2;
             int cy = getHeight() / 2;
 
-            // -- Draw Shadow --
-            // conic-gradient opacity 0.4
-            int sw = 220;
+            TankData currentTank = tanks.get(currentTankIndex);
+            
+            // -- Draw Tank Name inside shadow --
+            String tankName = currentTank.getName();
+            g2.setFont(vt323_base.deriveFont(32f));
+            FontMetrics sfm = g2.getFontMetrics();
+            int sw = sfm.stringWidth(tankName);
             int sh = 40;
-            int sx = cx - sw / 2;
+
             int sy = getHeight() - 60; // bottom 40px equivalent inside canvas
+            int tx = cx - sw / 2;
+            int ty = sy + (sh + sfm.getAscent()) / 2 - 4;
 
-            BufferedImage shadowDither = new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D sg = shadowDither.createGraphics();
-            sg.setColor(new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 102)); // ~0.4 opacity
-            sg.fillRect(0, 0, 2, 2);
-            sg.fillRect(2, 2, 2, 2);
-            sg.dispose();
-
-            g2.setPaint(new TexturePaint(shadowDither, new Rectangle(0, 0, 4, 4)));
-            g2.fillRect(sx, sy, sw, sh);
+            // Draw solid background for accessibility (high-contrast slab)
+            g2.setColor(fg); // Solid background block
+            g2.fillRect(tx - 10, sy + 5, sfm.stringWidth(tankName) + 20, sh - 10);
+            
+            g2.setColor(bg); // Text color on top of block
+            g2.setPaint(null); 
+            g2.drawString(tankName, tx, ty);
 
             // -- Draw SVG path Tank (Size 300x300, native 64x64 format)
             g2.translate(cx - 150, cy - 150); // Center the 300px tank
             g2.scale(4.6875, 4.6875);
             g2.setColor(fg);
 
-            // Transcribing SVG exact coordinates:
-            g2.fillRect(10, 44, 44, 10);
-            g2.fillRect(12, 42, 40, 2);
-
-            g2.setColor(bg);
-            g2.fillRect(14, 46, 4, 6);
-            g2.fillRect(22, 46, 4, 6);
-            g2.fillRect(30, 46, 4, 6);
-            g2.fillRect(38, 46, 4, 6);
-            g2.fillRect(46, 46, 4, 6);
-
-            g2.setColor(fg);
-            g2.fillRect(14, 34, 36, 10);
-            g2.fillRect(18, 32, 28, 2);
-
-            g2.fillRect(22, 24, 20, 8);
-            g2.fillRect(24, 22, 16, 2);
-
-            g2.fillRect(42, 26, 18, 4);
-            g2.fillRect(58, 25, 2, 6);
-
-            g2.fillRect(26, 20, 8, 2);
-
-            g2.setColor(bg);
-            g2.fillRect(24, 24, 2, 2);
-            g2.fillRect(26, 26, 2, 2);
+            if (currentTankIndex == 0) {
+                // M8 GREYHOUND
+                g2.fillRect(10, 44, 44, 10);
+                g2.fillRect(12, 42, 40, 2);
+                g2.setColor(bg);
+                g2.fillRect(14, 46, 4, 6);
+                g2.fillRect(22, 46, 4, 6);
+                g2.fillRect(30, 46, 4, 6);
+                g2.fillRect(38, 46, 4, 6);
+                g2.fillRect(46, 46, 4, 6);
+                g2.setColor(fg);
+                g2.fillRect(14, 34, 36, 10);
+                g2.fillRect(18, 32, 28, 2);
+                g2.fillRect(22, 24, 20, 8);
+                g2.fillRect(24, 22, 16, 2);
+                g2.fillRect(42, 26, 18, 4);
+                g2.fillRect(58, 25, 2, 6);
+                g2.fillRect(26, 20, 8, 2);
+                g2.setColor(bg);
+                g2.fillRect(24, 24, 2, 2);
+                g2.fillRect(26, 26, 2, 2);
+            } else if (currentTankIndex == 1) {
+                // PANZER III
+                g2.fillRect(8, 44, 48, 10);
+                g2.setColor(bg);
+                g2.fillRect(12, 46, 4, 6);
+                g2.fillRect(20, 46, 4, 6);
+                g2.fillRect(28, 46, 4, 6);
+                g2.fillRect(36, 46, 4, 6);
+                g2.fillRect(44, 46, 4, 6);
+                g2.setColor(fg);
+                g2.fillRect(10, 32, 44, 12);
+                g2.fillRect(12, 30, 40, 2);
+                g2.fillRect(20, 20, 24, 10);
+                g2.fillRect(24, 16, 16, 4);
+                g2.fillRect(44, 22, 16, 4);
+                g2.setColor(bg);
+                g2.fillRect(26, 22, 4, 2);
+            } else if (currentTankIndex == 2) {
+                // FLAK 88
+                g2.fillRect(24, 48, 16, 6);
+                g2.fillRect(18, 46, 28, 2);
+                g2.fillRect(28, 38, 8, 8);
+                g2.fillRect(30, 32, 4, 6);
+                g2.fillRect(32, 20, 4, 16);
+                g2.fillRect(34, 12, 4, 10);
+                g2.fillRect(36, 4, 4, 10);
+                g2.fillRect(38, -4, 2, 8);
+            } else if (currentTankIndex == 3) {
+                // BLACK CAT
+                g2.fillRect(6, 46, 52, 8);
+                g2.setColor(bg);
+                g2.fillRect(10, 48, 6, 4);
+                g2.fillRect(22, 48, 6, 4);
+                g2.fillRect(34, 48, 6, 4);
+                g2.fillRect(46, 48, 6, 4);
+                g2.setColor(fg);
+                g2.fillRect(10, 38, 44, 8);
+                g2.fillRect(14, 34, 34, 4);
+                g2.fillRect(16, 24, 24, 10);
+                g2.fillRect(40, 28, 20, 2);
+                g2.fillRect(58, 27, 4, 4);
+            }
 
             g2.dispose();
 
-            // -- Absolute Element overlays --
-            Graphics2D gText = (Graphics2D) g.create();
-            gText.setColor(fg);
-            gText.setFont(vt323_base.deriveFont(10f));
 
-            // Top Right
-            String sText = "SCANNING...";
-            String idText = "ID: TKN-88";
-            FontMetrics fm = gText.getFontMetrics();
-            int topRy = 20;
-            gText.drawString(sText, getWidth() - 10 - fm.stringWidth(sText), topRy);
-            gText.fillRect(getWidth() - 10 - 40, topRy + 4, 40, 1);
-            gText.drawString(idText, getWidth() - 10 - fm.stringWidth(idText), topRy + 15);
 
-            // Bottom Left
-            int btLx = 20;
-            int btLy = getHeight() - 30; // Equivalent to bottom 20px CSS
-            gText.drawString("ENGINE_CORE", btLx, btLy);
-            gText.fillRect(btLx, btLy + 2, fm.stringWidth("ENGINE_CORE"), 1); // border bottom
-            gText.drawString("[|||||||||||.....]", btLx, btLy + 15);
-            gText.dispose();
+
+
+
         }
     }
 
