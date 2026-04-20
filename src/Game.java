@@ -7,6 +7,10 @@ Author:Andrew Filson
 Date: March Friday the 13th 2026!
 Desc:This class handles the menu system, game sessions, and scoreboard.
 */
+/**
+ * This class handles the core game session logic, menu system, and scoreboard tracking
+ * for the text-based version of Projectile Motion.
+ */
 public class Game {
     // 1. Declare your ArrayList here to store scores between games.
     private ArrayList<String> scoreBoard = new ArrayList<>();
@@ -32,6 +36,12 @@ public class Game {
     // declare currentRound counter
     private int currentRound = 0;
 
+    /**
+     * Constructs a new Game instance.
+     *
+     * @param universalInput A Scanner instance used for reading user input.
+     * @param scoreBoard An ArrayList used to store scoreboard logs and past game results.
+     */
     public Game(Scanner universalInput, ArrayList<String> scoreBoard) {
         // Constructor: Initialize your scanner and lists here.
         /*
@@ -51,6 +61,9 @@ public class Game {
         boolean needInput = true;
         int menuChoice = 0;
 
+        // LEARNING: A while loop runs continuously as long as the condition (needInput) is true.
+        // It's highly useful for game loops or menu systems where we don't know 
+        // ahead of time exactly when the user will decide to quit.
         while (needInput) {
             // TODO: Ask for player names here (only once per program run).
             System.out.println("Welcome to Bloons Piracy and no GUI edition!");
@@ -69,6 +82,9 @@ public class Game {
             /* Ensures I always clear the buffer vs using nextInt */
             String input = universalInput.nextLine(); // takes input as string
 
+            // LEARNING: try-catch blocks prevent the program from crashing. 
+            // If the user types "hello" instead of "1", Integer.parseInt() throws an exception.
+            // Rather than crashing, the code jumps to the 'catch' block below.
             try {
                 menuChoice = Integer.parseInt(input); // converts string input to integer if possible
 
@@ -95,7 +111,7 @@ public class Game {
                 }
 
             } catch (Exception e) {
-                // TODO: handle exception
+                // LEARNING: If an error occurred inside 'try', execution immediately skips to here.
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
 
@@ -125,10 +141,9 @@ public class Game {
             };
             double[][] minAndMax = { { 1, 100 }, { 0, 180 } };
 
-            /*
-             * eachPlayer would be better known as eachPlayer
-             * Appended
-             */
+            // LEARNING: This is an "enhanced for-loop" (or "for-each loop"). 
+            // Instead of dealing with index variables (i=0; i<length), it automatically
+            // goes through every Player in our array one by one, temporarily naming it 'eachPlayer'.
             for (Player eachPlayer : players) {
                 System.out.println("\n" + eachPlayer.getName() + "'s turn:");
                 double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
@@ -188,6 +203,10 @@ public class Game {
 
     // TODO: After a winner is found, add the result to the ArrayList.
 
+    /**
+     * Displays all logged game results in the scoreboard.
+     * If no games have been played, it alerts the user.
+     */
     private void showScoreboard() {
         if (scoreBoard.isEmpty()) {
             System.out.println("There is no scoreboard! Play a game first!");
@@ -214,6 +233,10 @@ public class Game {
 
     }
 
+    /**
+     * Displays the game instructions and tutorial texts to the console 
+     * and waits for user confirmation to continue.
+     */
     private void showTutorial() {
         // TODO: Print the instructions and the physics formulas.
         System.out.println("This is a two player game.");
@@ -227,6 +250,15 @@ public class Game {
         universalInput.nextLine();
     }
 
+    /**
+     * Helper method to prompt the user for a double value and validate that it
+     * falls within standard boundaries.
+     *
+     * @param prompt Text to display when asking the user for input.
+     * @param min The minimum acceptable value.
+     * @param max The maximum acceptable value.
+     * @return A validated double input from the user.
+     */
     private double getValidatedDouble(String prompt, double min, double max) {
         double value = 0;
         boolean isValid = false;

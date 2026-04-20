@@ -3,6 +3,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 
+/**
+ * Creates and manages the main graphical user interface for the Projectile Motion game.
+ * 
+ * Functions as a robust data entry and state-saving form, using components such as
+ * JTextFields to capture player state (names, positions, power, and angles).
+ * It uses JFileChooser to save and load game state configurations to/from files.
+ */
 public class MainWindow extends JFrame {
 
     /*
@@ -101,9 +108,12 @@ public class MainWindow extends JFrame {
         setTitle("Projectile Motion Data Entry");
         setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // LEARNING: LayoutManagers decide how components are arranged inside a container.
+        // BorderLayout uses compass directions (NORTH, SOUTH, EAST, WEST, CENTER).
         setLayout(new BorderLayout(10, 10));
 
-        // Panel for input fields: Split into two columns (Player 1 and Player 2)
+        // LEARNING: GridLayout arranges components in a strict grid of rows and columns.
+        // GridLayout(0, 2) means "as many rows as needed, but exactly 2 columns".
         JPanel player1Panel = new JPanel(new GridLayout(0, 2, 5, 5));
         player1Panel.setBorder(BorderFactory.createTitledBorder("Player 1"));
 
@@ -186,7 +196,9 @@ public class MainWindow extends JFrame {
         add(animationPanel, BorderLayout.CENTER); // Animation takes the top/center space
         add(lowerUI, BorderLayout.SOUTH); // Controls move to the bottom
 
-        // Action Listener for Save button
+        // LEARNING: Button clicks are handled by 'ActionListeners'.
+        // We use an "anonymous inner class" here (new ActionListener() {...}) to quickly
+        // define what should happen (calling saveToFile()) when the user clicks 'Save'.
         buttonSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -5,6 +5,10 @@ Author:Andrew Filson
 Date: March Friday the 13th 2026!
 Desc: A game of shoot at a target
  */
+/**
+ * Main entry point for the ProjectileMotion application.
+ * Launches the BIT-REKT Swing graphical user interface.
+ */
 public class Main {
 
   public static void main(String[] args) {
@@ -17,6 +21,6 @@ public class Main {
      * game.start();
      */
     // Launch the Swing GUI
-    javax.swing.SwingUtilities.invokeLater(() -> new MainWindow());
+    javax.swing.SwingUtilities.invokeLater(() -> new MainMenu().setVisible(true));
   }
 }
