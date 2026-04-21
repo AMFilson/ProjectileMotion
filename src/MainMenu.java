@@ -8,11 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * The initial landing menu of the 'BIT-REKT' application, implemented in a retro,
- * pixel-art style using native Java 2D Graphics and Swing Components.
- * 
- * It manages the primary navigation options (e.g., New Game, How to Play, Leaderboard)
- * and controls transitioning into the main game window state.
+ * The initial landing menu of the 'BIT-REKT' application.
+ * Features 3-tank selection, experience progression, and keyboard navigation.
  */
 public class MainMenu extends JFrame {
 
@@ -23,18 +20,18 @@ public class MainMenu extends JFrame {
 
     private java.util.List<TankData> tanks = new java.util.ArrayList<>();
     private int currentTankIndex = 0;
-    
+
     private JPanel infoPanel;
     private CanvasArea canvas;
+    private int flickerStep = 0;
 
     public MainMenu() {
         setTitle("BIT-REKT");
         setSize(1000, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
+
         tanks.add(new TankData("M8 GREYHOUND", 88.4, 45.9));
-        tanks.add(new TankData("PANZER III"));
         tanks.add(new TankData("FLAK 88"));
         tanks.add(new TankData("BLACK CAT"));
 
@@ -61,17 +58,13 @@ public class MainMenu extends JFrame {
         Cursor customCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(10, 10), "crosshair");
         setCursor(customCursor);
 
-        // Dither Background Overlay Panel
-        // LEARNING: By overriding 'paintComponent', we can draw custom graphics 
-        // directly onto the panel before any standard Swing components are drawn.
-        JPanel rootPanel = new JPanel(new GridBagLayout()) { // Use GridBag to center the mainframe
+        JPanel rootPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.setColor(bg);
                 g.fillRect(0, 0, getWidth(), getHeight());
 
-                // Radial dither bg (opacity 0.05, 4px scale)
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setColor(fg);
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.05f));
@@ -87,13 +80,10 @@ public class MainMenu extends JFrame {
         // --- MAIN FRAME UI ---
         MainFramePanel mainFrame = new MainFramePanel();
         mainFrame.setPreferredSize(new Dimension(900, 600));
-
         mainFrame.setLayout(new GridBagLayout());
-        // LEARNING: GridBagConstraints dictate exactly how a component should behave 
-        // within a GridBagLayout (e.g., should it stretch? anchor left? take up 2 columns?).
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH; // Tell components to fill their available grid space
-        gbc.insets = new Insets(6, 6, 6, 6); // Add a 6-pixel margin around components
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(6, 6, 6, 6);
 
         // HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -105,13 +95,9 @@ public class MainMenu extends JFrame {
         JPanel titleBlock = new JPanel();
         titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
         titleBlock.setOpaque(false);
-        JLabel subTitle = createLabel("HEAVY ARMORED DIVISION", 12f);
-        subTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        JLabel title = createLabel("BIT-REKT", 48f);
-        // Reduce spacing between lines to match CSS line-height 0.8
-        titleBlock.add(subTitle);
+        titleBlock.add(createLabel("HEAVY ARMORED DIVISION", 12f));
         titleBlock.add(Box.createVerticalStrut(-5));
-        titleBlock.add(title);
+        titleBlock.add(createLabel("BIT-REKT", 48f));
 
         JLabel systemStatus = createLabel(
                 "<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: 19:04:25</p></html>",
@@ -134,16 +120,19 @@ public class MainMenu extends JFrame {
                 BorderFactory.createMatteBorder(0, 0, 0, 1, fg),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
-        String[] navNames = {"NEW GAME", "HOW TO PLAY", "LEADERBOARD", "BONUS", "TERMINATE"};
+        String[] navNames = { "NEW GAME", "HOW TO PLAY", "LEADERBOARD", "BONUS", "TERMINATE" };
         String[] navIds = { "01", "02", "03", "04", "05" };
 
         for (int i = 0; i < navNames.length; i++) {
             JPanel navItem = createNavItem(navNames[i], navIds[i]);
+            if (i == 0) {
+                // Request focus for NEW GAME on launch
+                SwingUtilities.invokeLater(() -> navItem.requestFocusInWindow());
+            }
             sidebar.add(navItem);
             sidebar.add(Box.createVerticalStrut(8));
         }
 
-        // Experience block bottom of sidebar
         sidebar.add(Box.createVerticalGlue());
         JPanel expBlock = new JPanel(new BorderLayout());
         expBlock.setOpaque(false);
@@ -156,7 +145,7 @@ public class MainMenu extends JFrame {
         expLabels.add(createLabel("L_12", 12f), BorderLayout.EAST);
         expBlock.add(expLabels, BorderLayout.NORTH);
 
-        DitheredBar expBar = new DitheredBar(65, true); // Increased to 65% for some flair
+        DitheredBar expBar = new DitheredBar(65, true);
         expBar.setPreferredSize(new Dimension(200, 12));
         expBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
         expBlock.add(expBar, BorderLayout.SOUTH);
@@ -167,7 +156,6 @@ public class MainMenu extends JFrame {
         gbc.gridwidth = 1;
         gbc.weightx = 0.0;
         gbc.weighty = 1.0;
-        // Fix grid size to exactly 240px (- offsets)
         sidebar.setPreferredSize(new Dimension(220, 0));
         mainFrame.add(sidebar, gbc);
 
@@ -176,8 +164,7 @@ public class MainMenu extends JFrame {
         canvas.setOpaque(false);
         canvas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                new DashedBorder(fg, 1, 4) // Emulating 1px dashed
-        ));
+                new DashedBorder(fg, 1, 4)));
 
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -222,46 +209,21 @@ public class MainMenu extends JFrame {
         rootPanel.add(mainFrame);
         add(rootPanel);
 
-        // Setup ticking for System Status Time
-        Timer t = new Timer(1000, e -> {
+        Timer timeTaker = new Timer(1000, e -> {
             String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
-            systemStatus
-                    .setText("<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: "
-                            + time + "</p></html>");
+            systemStatus.setText("<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: " + time + "</p></html>");
         });
-        t.start();
+        timeTaker.start();
 
-        Timer flicker = new Timer(4000, null); // 4s animation step
-        flicker.addActionListener(new ActionListener() {
-            int step = 0;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                step = (step + 1) % 4; // Emulate flicker steps
-                float alpha = 1.0f;
-                if (step == 1)
-                    alpha = 0.95f;
-                else if (step == 3)
-                    alpha = 0.9f;
-                mainFrame.setOpacity(alpha);
-                mainFrame.repaint();
-            }
+        Timer flickerAct = new Timer(100, e -> {
+            flickerStep = (flickerStep + 1) % 40;
+            float alpha = 1.0f;
+            if (flickerStep == 5) alpha = 0.95f;
+            if (flickerStep == 7) alpha = 0.98f;
+            mainFrame.setOpacity(alpha);
+            mainFrame.repaint();
         });
-        flicker.start();
-
-        // Add Enter Key Functionality
-        setFocusable(true);
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    setVisible(false);
-                    dispose();
-                    SwingUtilities.invokeLater(() -> new MainWindow());
-                }
-            }
-        });
-
+        flickerAct.start();
     }
 
     private JLabel createLabel(String txt, float fontSize) {
@@ -299,8 +261,6 @@ public class MainMenu extends JFrame {
             panel.setOpaque(false);
             leftLbl.setForeground(fg);
             leftLbl.setText("□ " + title);
-            rightLbl.setForeground(bg); // num stays fg but label is transparent
-            // Wait, rightLbl foreground should be fg normally
             rightLbl.setForeground(fg);
             panel.repaint();
         };
@@ -312,7 +272,6 @@ public class MainMenu extends JFrame {
             public void focusLost(FocusEvent e) { unhighlight.run(); }
         });
 
-        // Use KeyBindings instead of KeyListener for more robust focus handling
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
         panel.getActionMap().put("onEnter", new AbstractAction() {
             @Override
@@ -347,20 +306,17 @@ public class MainMenu extends JFrame {
     }
 
     private void updateInfoPanel() {
+        if (infoPanel == null) return;
         infoPanel.removeAll();
-
-        TankData currentTank = tanks.get(currentTankIndex);
-
-        String opStr = String.format("%.1f", currentTank.getOffensivePower());
-        JPanel statBox1 = createStatBox("OFFENSIVE POWER", opStr, (int)currentTank.getOffensivePower(), false);
-        infoPanel.add(statBox1);
         
+        TankData currentTank = tanks.get(currentTankIndex);
+        
+        String opStr = String.format("%.1f", currentTank.getOffensivePower());
+        infoPanel.add(createStatBox("OFFENSIVE POWER", opStr, (int)currentTank.getOffensivePower(), false));
         infoPanel.add(Box.createVerticalStrut(16));
         
         String miStr = String.format("%.1f", currentTank.getMobilityIndex());
-        JPanel statBox2 = createStatBox("MOBILITY INDEX", miStr, (int)currentTank.getMobilityIndex(), false);
-        infoPanel.add(statBox2);
-
+        infoPanel.add(createStatBox("MOBILITY INDEX", miStr, (int)currentTank.getMobilityIndex(), false));
         infoPanel.add(Box.createVerticalGlue());
 
         JPanel arrowPanel = new JPanel();
@@ -369,22 +325,19 @@ public class MainMenu extends JFrame {
         arrowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         arrowPanel.add(createArrowButton("^", () -> {
-            currentTankIndex--;
-            if (currentTankIndex < 0) currentTankIndex = tanks.size() - 1;
+            currentTankIndex = (currentTankIndex - 1 + tanks.size()) % tanks.size();
             canvas.repaint();
             updateInfoPanel();
         }));
         arrowPanel.add(Box.createVerticalStrut(8));
         arrowPanel.add(createIconButton(() -> {
-            for (TankData t : tanks) {
-                t.rerollStats();
-            }
+            for (TankData t : tanks) t.rerollStats();
             updateInfoPanel();
+            canvas.repaint();
         }));
         arrowPanel.add(Box.createVerticalStrut(8));
         arrowPanel.add(createArrowButton("v", () -> {
-            currentTankIndex++;
-            if (currentTankIndex >= tanks.size()) currentTankIndex = 0;
+            currentTankIndex = (currentTankIndex + 1) % tanks.size();
             canvas.repaint();
             updateInfoPanel();
         }));
@@ -399,20 +352,18 @@ public class MainMenu extends JFrame {
         box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
         box.setOpaque(false);
         box.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100)); // Allow width expansion
         box.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
 
         JLabel lbl = createLabel(labelTxt, 12f);
         lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        // Force left alignment
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         box.add(lbl);
 
         JLabel val = createLabel(valTxt, 24f);
         val.setAlignmentX(Component.LEFT_ALIGNMENT);
-        val.setFont(val.getFont().deriveFont(Font.BOLD)); // CSS font-weight: bold
+        val.setFont(val.getFont().deriveFont(Font.BOLD));
         box.add(val);
 
         DitheredBar bar = new DitheredBar(percentage, dithered);
@@ -439,43 +390,25 @@ public class MainMenu extends JFrame {
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
 
-        Runnable highlight = () -> {
-            panel.setOpaque(true);
-            panel.setBackground(fg);
-            lbl.setForeground(bg);
-            panel.repaint();
-        };
-
-        Runnable unhighlight = () -> {
-            panel.setOpaque(false);
-            lbl.setForeground(fg);
-            panel.repaint();
-        };
+        Runnable hl = () -> { panel.setOpaque(true); panel.setBackground(fg); lbl.setForeground(bg); panel.repaint(); };
+        Runnable uhl = () -> { panel.setOpaque(false); lbl.setForeground(fg); panel.repaint(); };
 
         panel.addFocusListener(new FocusAdapter() {
             @Override
-            public void focusGained(FocusEvent e) { highlight.run(); }
+            public void focusGained(FocusEvent e) { hl.run(); }
             @Override
-            public void focusLost(FocusEvent e) { unhighlight.run(); }
+            public void focusLost(FocusEvent e) { uhl.run(); }
         });
 
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
         panel.getActionMap().put("onEnter", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (action != null) action.run();
-            }
+            @Override public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
         });
 
         panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) { highlight.run(); }
-            @Override
-            public void mouseExited(MouseEvent e) { if (!panel.hasFocus()) unhighlight.run(); }
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (action != null) action.run();
-            }
+            @Override public void mouseEntered(MouseEvent e) { hl.run(); }
+            @Override public void mouseExited(MouseEvent e) { if (!panel.hasFocus()) uhl.run(); }
+            @Override public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
         });
         return panel;
     }
@@ -483,64 +416,28 @@ public class MainMenu extends JFrame {
     private JPanel createIconButton(Runnable action) {
         JPanel panel = new JPanel() {
             private boolean isHovered = false;
-
             {
                 setOpaque(false);
                 setAlignmentX(Component.LEFT_ALIGNMENT);
                 setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-                setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(fg, 1),
-                        BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+                setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(fg, 1), BorderFactory.createEmptyBorder(8, 16, 8, 16)));
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 setFocusable(true);
 
                 addFocusListener(new FocusAdapter() {
-                    @Override
-                    public void focusGained(FocusEvent e) {
-                        setOpaque(true);
-                        setBackground(fg);
-                        isHovered = true;
-                        repaint();
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        setOpaque(false);
-                        isHovered = false;
-                        repaint();
-                    }
+                    @Override public void focusGained(FocusEvent e) { isHovered = true; setOpaque(true); setBackground(fg); repaint(); }
+                    @Override public void focusLost(FocusEvent e) { isHovered = false; setOpaque(false); repaint(); }
                 });
 
                 getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
                 getActionMap().put("onEnter", new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (action != null) action.run();
-                    }
+                    @Override public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
                 });
 
                 addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        setOpaque(true);
-                        setBackground(fg);
-                        isHovered = true;
-                        repaint();
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        setOpaque(false);
-                        isHovered = false;
-                        repaint();
-                    }
-
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        if (action != null) {
-                            action.run();
-                        }
-                    }
+                    @Override public void mouseEntered(MouseEvent e) { isHovered = true; setOpaque(true); setBackground(fg); repaint(); }
+                    @Override public void mouseExited(MouseEvent e) { if (!hasFocus()) { isHovered = false; setOpaque(false); repaint(); } }
+                    @Override public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
                 });
             }
 
@@ -548,93 +445,52 @@ public class MainMenu extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
-
-                Color drawColor = isHovered ? bg : fg;
-                g2.setColor(drawColor);
-                
-                // Ensure crisp pixel art rendering
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-
+                g2.setColor(isHovered ? bg : fg);
                 int cx = getWidth() / 2;
                 int cy = getHeight() / 2;
-
-                // Center the 16x16 pixel art icon (manually scaled from 32x32)
                 g2.translate(cx - 8, cy - 8);
-
-                // --- Draw SVG shapes (transcribed and scaled 50% to integers) ---
+                // Refresh icon shapes
                 int[] x1 = {3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3};
                 int[] y1 = {2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2};
                 g2.fillPolygon(x1, y1, 19);
-
                 int[] x2 = {7, 7, 12, 12, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 13, 13, 7};
                 int[] y2 = {3, 4, 4, 11, 11, 12, 12, 13, 13, 14, 14, 13, 13, 12, 12, 11, 11, 3, 3};
                 g2.fillPolygon(x2, y2, 19);
-
                 g2.dispose();
             }
         };
         return panel;
     }
 
-    // A panel replacing the standard outline and corner brackets
     class MainFramePanel extends JPanel {
         private float opacity = 1.0f;
-
-        public void setOpacity(float o) {
-            this.opacity = o;
-        }
-
+        public void setOpacity(float o) { this.opacity = o; }
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-
             g2.setColor(bg);
             g2.fillRect(0, 0, getWidth(), getHeight());
-
             g2.setColor(fg);
             g2.setStroke(new BasicStroke(4));
-            g2.drawRect(4, 4, getWidth() - 8, getHeight() - 8); // inner border
-
+            g2.drawRect(4, 4, getWidth() - 8, getHeight() - 8);
             g2.setStroke(new BasicStroke(1));
-            g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1); // outline
-
-            // Corner brackets
-            g2.setStroke(new BasicStroke(2));
+            g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             int bSize = 15;
-            // top-left (left and top borders extending inward)
-            g2.drawLine(-10, -10, bSize - 10, -10);
-            g2.drawLine(-10, -10, -10, bSize - 10);
-
-            // Replicating actual HTML offsets strictly
-            // Top-Left: top -10, left -10
             drawBracket(g2, -10, -10, bSize, true, true);
-            // Top-Right: top -10, right -10 => w - bSize + 10
             drawBracket(g2, getWidth() + 10 - bSize, -10, bSize, true, false);
-            // Bottom-Left
             drawBracket(g2, -10, getHeight() + 10 - bSize, bSize, false, true);
-            // Bottom-Right
             drawBracket(g2, getWidth() + 10 - bSize, getHeight() + 10 - bSize, bSize, false, false);
-
             g2.dispose();
         }
-
         private void drawBracket(Graphics2D g, int x, int y, int size, boolean top, boolean left) {
             g.setColor(fg);
-            if (top && left) {
-                g.fillRect(x, y, size, 2);
-                g.fillRect(x, y, 2, size);
-            } else if (top && !left) {
-                g.fillRect(x, y, size, 2);
-                g.fillRect(x + size - 2, y, 2, size);
-            } else if (!top && left) {
-                g.fillRect(x, y + size - 2, size, 2);
-                g.fillRect(x, y, 2, size);
-            } else if (!top && !left) {
-                g.fillRect(x, y + size - 2, size, 2);
-                g.fillRect(x + size - 2, y, 2, size);
-            }
+            if (top && left) { g.fillRect(x, y, size, 2); g.fillRect(x, y, 2, size); }
+            else if (top && !left) { g.fillRect(x, y, size, 2); g.fillRect(x + size - 2, y, 2, size); }
+            else if (!top && left) { g.fillRect(x, y + size - 2, size, 2); g.fillRect(x, y, 2, size); }
+            else if (!top && !left) { g.fillRect(x, y + size - 2, size, 2); g.fillRect(x + size - 2, y, 2, size); }
         }
     }
 
@@ -643,176 +499,81 @@ public class MainMenu extends JFrame {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
-
-            // Center of Canvas
             int cx = getWidth() / 2;
             int cy = getHeight() / 2;
-
             TankData currentTank = tanks.get(currentTankIndex);
-            
-            // -- Draw Tank Name inside shadow --
             String tankName = currentTank.getName();
             g2.setFont(vt323_base.deriveFont(32f));
             FontMetrics sfm = g2.getFontMetrics();
             int sw = sfm.stringWidth(tankName);
             int sh = 40;
-
-            int sy = getHeight() - 60; // bottom 40px equivalent inside canvas
+            int sy = getHeight() - 60;
             int tx = cx - sw / 2;
             int ty = sy + (sh + sfm.getAscent()) / 2 - 4;
-
-            // Draw solid background for accessibility (high-contrast slab)
-            g2.setColor(fg); // Solid background block
-            g2.fillRect(tx - 10, sy + 5, sfm.stringWidth(tankName) + 20, sh - 10);
-            
-            g2.setColor(bg); // Text color on top of block
-            g2.setPaint(null); 
+            g2.setColor(fg);
+            g2.fillRect(tx - 10, sy + 5, sw + 20, sh - 10);
+            g2.setColor(bg);
             g2.drawString(tankName, tx, ty);
-
-            // -- Draw SVG path Tank (Size 300x300, native 64x64 format)
-            g2.translate(cx - 150, cy - 150); // Center the 300px tank
+            g2.translate(cx - 150, cy - 150);
             g2.scale(4.6875, 4.6875);
             g2.setColor(fg);
 
             if (currentTankIndex == 0) {
                 // M8 GREYHOUND
-                g2.fillRect(10, 44, 44, 10);
-                g2.fillRect(12, 42, 40, 2);
+                g2.fillRect(10, 44, 44, 10); g2.fillRect(12, 42, 40, 2);
                 g2.setColor(bg);
-                g2.fillRect(14, 46, 4, 6);
-                g2.fillRect(22, 46, 4, 6);
-                g2.fillRect(30, 46, 4, 6);
-                g2.fillRect(38, 46, 4, 6);
-                g2.fillRect(46, 46, 4, 6);
+                g2.fillRect(14, 46, 4, 6); g2.fillRect(22, 46, 4, 6); g2.fillRect(30, 46, 4, 6); g2.fillRect(38, 46, 4, 6); g2.fillRect(46, 46, 4, 6);
                 g2.setColor(fg);
-                g2.fillRect(14, 34, 36, 10);
-                g2.fillRect(18, 32, 28, 2);
-                g2.fillRect(22, 24, 20, 8);
-                g2.fillRect(24, 22, 16, 2);
-                g2.fillRect(42, 26, 18, 4);
-                g2.fillRect(58, 25, 2, 6);
-                g2.fillRect(26, 20, 8, 2);
-                g2.setColor(bg);
-                g2.fillRect(24, 24, 2, 2);
-                g2.fillRect(26, 26, 2, 2);
+                g2.fillRect(14, 34, 36, 10); g2.fillRect(18, 32, 28, 2); g2.fillRect(22, 24, 20, 8); g2.fillRect(24, 22, 16, 2); g2.fillRect(42, 26, 18, 4); g2.fillRect(58, 25, 2, 6); g2.fillRect(26, 20, 8, 2);
+                g2.setColor(bg); g2.fillRect(24, 24, 2, 2); g2.fillRect(26, 26, 2, 2);
             } else if (currentTankIndex == 1) {
-                // PANZER III
-                g2.fillRect(8, 44, 48, 10);
-                g2.setColor(bg);
-                g2.fillRect(12, 46, 4, 6);
-                g2.fillRect(20, 46, 4, 6);
-                g2.fillRect(28, 46, 4, 6);
-                g2.fillRect(36, 46, 4, 6);
-                g2.fillRect(44, 46, 4, 6);
-                g2.setColor(fg);
-                g2.fillRect(10, 32, 44, 12);
-                g2.fillRect(12, 30, 40, 2);
-                g2.fillRect(20, 20, 24, 10);
-                g2.fillRect(24, 16, 16, 4);
-                g2.fillRect(44, 22, 16, 4);
-                g2.setColor(bg);
-                g2.fillRect(26, 22, 4, 2);
-            } else if (currentTankIndex == 2) {
                 // FLAK 88
-                g2.fillRect(24, 48, 16, 6);
-                g2.fillRect(18, 46, 28, 2);
-                g2.fillRect(28, 38, 8, 8);
-                g2.fillRect(30, 32, 4, 6);
-                g2.fillRect(32, 20, 4, 16);
-                g2.fillRect(34, 12, 4, 10);
-                g2.fillRect(36, 4, 4, 10);
-                g2.fillRect(38, -4, 2, 8);
-            } else if (currentTankIndex == 3) {
+                g2.fillRect(24, 48, 16, 6); g2.fillRect(18, 46, 28, 2); g2.fillRect(28, 38, 8, 8); g2.fillRect(30, 32, 4, 6); g2.fillRect(32, 20, 4, 16); g2.fillRect(34, 12, 4, 10); g2.fillRect(36, 4, 4, 10); g2.fillRect(38, -4, 2, 8);
+            } else if (currentTankIndex == 2) {
                 // BLACK CAT
                 g2.fillRect(6, 46, 52, 8);
                 g2.setColor(bg);
-                g2.fillRect(10, 48, 6, 4);
-                g2.fillRect(22, 48, 6, 4);
-                g2.fillRect(34, 48, 6, 4);
-                g2.fillRect(46, 48, 6, 4);
+                g2.fillRect(10, 48, 6, 4); g2.fillRect(22, 48, 6, 4); g2.fillRect(34, 48, 6, 4); g2.fillRect(46, 48, 6, 4);
                 g2.setColor(fg);
-                g2.fillRect(10, 38, 44, 8);
-                g2.fillRect(14, 34, 34, 4);
-                g2.fillRect(16, 24, 24, 10);
-                g2.fillRect(40, 28, 20, 2);
-                g2.fillRect(58, 27, 4, 4);
+                g2.fillRect(10, 38, 44, 8); g2.fillRect(14, 34, 34, 4); g2.fillRect(16, 24, 24, 10); g2.fillRect(40, 28, 20, 2); g2.fillRect(58, 27, 4, 4);
             }
-
             g2.dispose();
-
-
-
-
-
-
         }
     }
 
     class DitheredBar extends JPanel {
         private int percent;
         private boolean dithered;
-
-        public DitheredBar(int percent, boolean dithered) {
-            this.percent = percent;
-            this.dithered = dithered;
-            setBorder(BorderFactory.createLineBorder(fg, 1));
-            setOpaque(false);
-        }
-
+        public DitheredBar(int percent, boolean dithered) { this.percent = percent; this.dithered = dithered; setBorder(BorderFactory.createLineBorder(fg, 1)); setOpaque(false); }
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             int width = (int) (getWidth() * (percent / 100.0));
             Graphics2D g2 = (Graphics2D) g.create();
-
             if (dithered) {
-                // Repeating linear gradient emulation (45deg lines)
                 BufferedImage fillImg = new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D fG = fillImg.createGraphics();
-                fG.setColor(fg);
-                fG.drawLine(0, 2, 2, 0);
-                fG.drawLine(2, 4, 4, 2);
-                fG.dispose();
+                fG.setColor(fg); fG.drawLine(0, 2, 2, 0); fG.drawLine(2, 4, 4, 2); fG.dispose();
                 g2.setPaint(new TexturePaint(fillImg, new Rectangle(0, 0, 4, 4)));
-            } else {
-                g2.setColor(fg);
-            }
+            } else { g2.setColor(fg); }
             g2.fillRect(0, 0, width, getHeight());
             g2.dispose();
         }
     }
 
-    // Helper border to emulate dashed CSS lines
     class DashedBorder extends javax.swing.border.AbstractBorder {
         private Color color;
         private int thickness;
         private int dashLength;
-
-        public DashedBorder(Color c, int t, int l) {
-            this.color = c;
-            this.thickness = t;
-            this.dashLength = l;
-        }
-
+        public DashedBorder(Color color, int thickness, int dashLength) { this.color = color; this.thickness = thickness; this.dashLength = dashLength; }
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setColor(color);
-            g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
-                    new float[] { dashLength }, 0));
-            g2.drawRect(x, y, width - thickness, height - thickness);
+            float[] dash = {dashLength};
+            g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+            g2.drawRect(x, y, width - 1, height - 1);
             g2.dispose();
-        }
-
-        @Override
-        public Insets getBorderInsets(Component c) {
-            return new Insets(thickness, thickness, thickness, thickness);
-        }
-
-        @Override
-        public Insets getBorderInsets(Component c, Insets insets) {
-            insets.left = insets.top = insets.right = insets.bottom = thickness;
-            return insets;
         }
     }
 }
