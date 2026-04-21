@@ -31,7 +31,7 @@ public class MainMenu extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        tanks.add(new TankData("M8 GREYHOUND", 88.4, 45.9));
+        tanks.add(new TankData("M8 GREYHOUND"));
         tanks.add(new TankData("FLAK 88"));
         tanks.add(new TankData("BLACK CAT"));
 
@@ -139,6 +139,7 @@ public class MainMenu extends JFrame {
         expBlock.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+        expBlock.setToolTipText("Your current level and pilot proficiency");
         JPanel expLabels = new JPanel(new BorderLayout());
         expLabels.setOpaque(false);
         expLabels.add(createLabel("CURRENT LVL", 12f), BorderLayout.WEST);
@@ -236,6 +237,12 @@ public class MainMenu extends JFrame {
 
     private JPanel createNavItem(String title, String num) {
         JPanel panel = new JPanel(new BorderLayout());
+        if (title.equals("NEW GAME")) panel.setToolTipText("Start a new game session");
+        else if (title.equals("HOW TO PLAY")) panel.setToolTipText("View gameplay instructions");
+        else if (title.equals("LEADERBOARD")) panel.setToolTipText("View global high scores");
+        else if (title.equals("BONUS")) panel.setToolTipText("Unlockable content and extras");
+        else if (title.equals("TERMINATE")) panel.setToolTipText("Exit the application");
+
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 2),
@@ -355,6 +362,7 @@ public class MainMenu extends JFrame {
         box.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
+        box.setToolTipText("Detailed stats for the selected unit: " + labelTxt);
 
         JLabel lbl = createLabel(labelTxt, 12f);
         lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
@@ -383,6 +391,7 @@ public class MainMenu extends JFrame {
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+        panel.setToolTipText(title.equals("^") ? "Previous tank unit" : "Next tank unit");
 
         JLabel lbl = createLabel(title, 20f);
         lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -421,6 +430,7 @@ public class MainMenu extends JFrame {
                 setAlignmentX(Component.LEFT_ALIGNMENT);
                 setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
                 setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(fg, 1), BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+                setToolTipText("Randomize tank unit specifications");
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 setFocusable(true);
 

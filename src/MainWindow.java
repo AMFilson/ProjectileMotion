@@ -4,11 +4,14 @@ import java.awt.event.*;
 import java.io.*;
 
 /**
- * Creates and manages the main graphical user interface for the Projectile Motion game.
+ * Creates and manages the main graphical user interface for the Projectile
+ * Motion game.
  * 
- * Functions as a robust data entry and state-saving form, using components such as
+ * Functions as a robust data entry and state-saving form, using components such
+ * as
  * JTextFields to capture player state (names, positions, power, and angles).
- * It uses JFileChooser to save and load game state configurations to/from files.
+ * It uses JFileChooser to save and load game state configurations to/from
+ * files.
  */
 public class MainWindow extends JFrame {
 
@@ -108,11 +111,41 @@ public class MainWindow extends JFrame {
         setTitle("Projectile Motion Data Entry");
         setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // LEARNING: LayoutManagers decide how components are arranged inside a container.
+        // LEARNING: LayoutManagers decide how components are arranged inside a
+        // container.
         // BorderLayout uses compass directions (NORTH, SOUTH, EAST, WEST, CENTER).
         setLayout(new BorderLayout(10, 10));
 
-        // LEARNING: GridLayout arranges components in a strict grid of rows and columns.
+        /*
+         * // Add Tooltips to buttons These tool tips will be unappended when game logic
+         * is recreated
+         * buttonSave.setToolTipText("Save the current game state to a text file");
+         * buttonOpen.setToolTipText("Load a game state from a text file");
+         * 
+         * player1Up.setToolTipText("Increase Player 1 value");
+         * player1Down.setToolTipText("Decrease Player 1 value");
+         * player1Left.setToolTipText("Move Player 1 left / Decrease");
+         * player1Right.setToolTipText("Move Player 1 right / Increase");
+         * 
+         * player2Up.setToolTipText("Increase Player 2 value");
+         * player2Down.setToolTipText("Decrease Player 2 value");
+         * player2Left.setToolTipText("Move Player 2 left / Decrease");
+         * player2Right.setToolTipText("Move Player 2 right / Increase");
+         * 
+         * // Add tooltips to stat fields
+         * player1ScoreField.setToolTipText("Total games won by Player 1");
+         * player2ScoreField.setToolTipText("Total games won by Player 2");
+         * gamesPlayedField.
+         * setToolTipText("Total number of games played in this session");
+         * currentRoundField.setToolTipText("Current round number for this game");
+         * player1PositionField.setToolTipText("Player 1's horizontal starting position"
+         * );
+         * player2PositionField.setToolTipText("Player 2's horizontal starting position"
+         * );
+         */
+
+        // LEARNING: GridLayout arranges components in a strict grid of rows and
+        // columns.
         // GridLayout(0, 2) means "as many rows as needed, but exactly 2 columns".
         JPanel player1Panel = new JPanel(new GridLayout(0, 2, 5, 5));
         player1Panel.setBorder(BorderFactory.createTitledBorder("Player 1"));
@@ -197,7 +230,8 @@ public class MainWindow extends JFrame {
         add(lowerUI, BorderLayout.SOUTH); // Controls move to the bottom
 
         // LEARNING: Button clicks are handled by 'ActionListeners'.
-        // We use an "anonymous inner class" here (new ActionListener() {...}) to quickly
+        // We use an "anonymous inner class" here (new ActionListener() {...}) to
+        // quickly
         // define what should happen (calling saveToFile()) when the user clicks 'Save'.
         buttonSave.addActionListener(new ActionListener() {
             @Override
