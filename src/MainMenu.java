@@ -143,23 +143,24 @@ public class MainMenu extends JFrame {
             sidebar.add(Box.createVerticalStrut(8));
         }
 
-        // CPU block bottom of sidebar
+        // Experience block bottom of sidebar
         sidebar.add(Box.createVerticalGlue());
-        JPanel cpuLoadBlock = new JPanel(new BorderLayout());
-        cpuLoadBlock.setOpaque(false);
-        cpuLoadBlock.setBorder(BorderFactory.createCompoundBorder(
+        JPanel expBlock = new JPanel(new BorderLayout());
+        expBlock.setOpaque(false);
+        expBlock.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(fg, 1),
                 BorderFactory.createEmptyBorder(8, 8, 8, 8)));
-        JPanel cpuLabels = new JPanel(new BorderLayout());
-        cpuLabels.setOpaque(false);
-        cpuLabels.add(createLabel("CPU_LOAD", 12f), BorderLayout.WEST);
-        cpuLabels.add(createLabel("42%", 12f), BorderLayout.EAST);
-        cpuLoadBlock.add(cpuLabels, BorderLayout.NORTH);
+        JPanel expLabels = new JPanel(new BorderLayout());
+        expLabels.setOpaque(false);
+        expLabels.add(createLabel("CURRENT LVL", 12f), BorderLayout.WEST);
+        expLabels.add(createLabel("L_12", 12f), BorderLayout.EAST);
+        expBlock.add(expLabels, BorderLayout.NORTH);
 
-        DitheredBar cpuBar = new DitheredBar(42, true);
-        cpuBar.setPreferredSize(new Dimension(200, 12));
-        cpuLoadBlock.add(cpuBar, BorderLayout.SOUTH);
-        sidebar.add(cpuLoadBlock);
+        DitheredBar expBar = new DitheredBar(65, true); // Increased to 65% for some flair
+        expBar.setPreferredSize(new Dimension(200, 12));
+        expBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
+        expBlock.add(expBar, BorderLayout.SOUTH);
+        sidebar.add(expBlock);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -283,27 +284,54 @@ public class MainMenu extends JFrame {
         panel.add(leftLbl, BorderLayout.WEST);
         panel.add(rightLbl, BorderLayout.EAST);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        panel.setFocusable(true);
+
+        Runnable highlight = () -> {
+            panel.setOpaque(true);
+            panel.setBackground(fg);
+            leftLbl.setForeground(bg);
+            leftLbl.setText("■ " + title);
+            rightLbl.setForeground(bg);
+            panel.repaint();
+        };
+
+        Runnable unhighlight = () -> {
+            panel.setOpaque(false);
+            leftLbl.setForeground(fg);
+            leftLbl.setText("□ " + title);
+            rightLbl.setForeground(bg); // num stays fg but label is transparent
+            // Wait, rightLbl foreground should be fg normally
+            rightLbl.setForeground(fg);
+            panel.repaint();
+        };
+
+        panel.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) { highlight.run(); }
+            @Override
+            public void focusLost(FocusEvent e) { unhighlight.run(); }
+        });
+
+        // Use KeyBindings instead of KeyListener for more robust focus handling
+        panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
+        panel.getActionMap().put("onEnter", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (title.equals("NEW GAME")) {
+                    setVisible(false);
+                    dispose();
+                    SwingUtilities.invokeLater(() -> new MainWindow());
+                } else if (title.equals("TERMINATE")) {
+                    System.exit(0);
+                }
+            }
+        });
 
         panel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                panel.setOpaque(true);
-                panel.setBackground(fg);
-                leftLbl.setForeground(bg);
-                leftLbl.setText("■ " + title);
-                rightLbl.setForeground(bg);
-                panel.repaint();
-            }
-
+            public void mouseEntered(MouseEvent e) { highlight.run(); }
             @Override
-            public void mouseExited(MouseEvent e) {
-                panel.setOpaque(false);
-                leftLbl.setForeground(fg);
-                leftLbl.setText("□ " + title);
-                rightLbl.setForeground(fg);
-                panel.repaint();
-            }
-
+            public void mouseExited(MouseEvent e) { if (!panel.hasFocus()) unhighlight.run(); }
             @Override
             public void mousePressed(MouseEvent e) {
                 if (title.equals("NEW GAME")) {
@@ -409,28 +437,44 @@ public class MainMenu extends JFrame {
         lbl.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(lbl, BorderLayout.CENTER);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        panel.setFocusable(true);
+
+        Runnable highlight = () -> {
+            panel.setOpaque(true);
+            panel.setBackground(fg);
+            lbl.setForeground(bg);
+            panel.repaint();
+        };
+
+        Runnable unhighlight = () -> {
+            panel.setOpaque(false);
+            lbl.setForeground(fg);
+            panel.repaint();
+        };
+
+        panel.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) { highlight.run(); }
+            @Override
+            public void focusLost(FocusEvent e) { unhighlight.run(); }
+        });
+
+        panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
+        panel.getActionMap().put("onEnter", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (action != null) action.run();
+            }
+        });
 
         panel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                panel.setOpaque(true);
-                panel.setBackground(fg);
-                lbl.setForeground(bg);
-                panel.repaint();
-            }
-
+            public void mouseEntered(MouseEvent e) { highlight.run(); }
             @Override
-            public void mouseExited(MouseEvent e) {
-                panel.setOpaque(false);
-                lbl.setForeground(fg);
-                panel.repaint();
-            }
-
+            public void mouseExited(MouseEvent e) { if (!panel.hasFocus()) unhighlight.run(); }
             @Override
             public void mousePressed(MouseEvent e) {
-                if (action != null) {
-                    action.run();
-                }
+                if (action != null) action.run();
             }
         });
         return panel;
@@ -448,6 +492,32 @@ public class MainMenu extends JFrame {
                         BorderFactory.createLineBorder(fg, 1),
                         BorderFactory.createEmptyBorder(8, 16, 8, 16)));
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                setFocusable(true);
+
+                addFocusListener(new FocusAdapter() {
+                    @Override
+                    public void focusGained(FocusEvent e) {
+                        setOpaque(true);
+                        setBackground(fg);
+                        isHovered = true;
+                        repaint();
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent e) {
+                        setOpaque(false);
+                        isHovered = false;
+                        repaint();
+                    }
+                });
+
+                getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
+                getActionMap().put("onEnter", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (action != null) action.run();
+                    }
+                });
 
                 addMouseListener(new MouseAdapter() {
                     @Override
