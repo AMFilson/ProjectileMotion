@@ -20,12 +20,13 @@ import java.util.Map;
  * Extracted to its own file to reduce MainMenu.java's size.
  *
  * Contains one inner class:
- *   - PlayerColumn : handles one player's name entry, tank carousel, and
- *                    status (READY / STANDBY) toggle button.
+ * - PlayerColumn : handles one player's name entry, tank carousel, and
+ * status (READY / STANDBY) toggle button.
  *
  * Constructor parameters (injected from MainMenu):
- *   @param tanks  The shared list of TankData objects (same reference as MainMenu)
- *   @param font   The loaded VT323 font instance
+ * 
+ * @param tanks The shared list of TankData objects (same reference as MainMenu)
+ * @param font  The loaded VT323 font instance
  */
 public class CharacterSelectPanel extends JPanel {
 
@@ -33,13 +34,13 @@ public class CharacterSelectPanel extends JPanel {
     private final Color fg = new Color(0, 0, 0);
 
     private final List<TankData> tanks;
-    private final Font           vt323;
+    private final Font vt323;
 
     private PlayerColumn p1Col;
     private PlayerColumn p2Col;
-    private JLabel       battleStatusLabel;
-    private JPanel       battleBtn;
-    private boolean      blinkOn = true;
+    private JLabel battleStatusLabel;
+    private JPanel battleBtn;
+    private boolean blinkOn = true;
 
     public CharacterSelectPanel(List<TankData> tanks, Font font) {
         this.tanks = tanks;
@@ -61,7 +62,7 @@ public class CharacterSelectPanel extends JPanel {
         columnsPanel.setOpaque(false);
 
         p1Col = new PlayerColumn(1, "MIGGY", true);
-        p2Col = new PlayerColumn(2, "",     false);
+        p2Col = new PlayerColumn(2, "", false);
         columnsPanel.add(p1Col);
         columnsPanel.add(p2Col);
         add(columnsPanel, BorderLayout.CENTER);
@@ -115,8 +116,8 @@ public class CharacterSelectPanel extends JPanel {
      * Updates the BATTLE button's enabled state and the status label text.
      */
     void onStatusChanged() {
-        boolean p1Ready   = p1Col.isReady();
-        boolean p2Ready   = p2Col.isReady();
+        boolean p1Ready = p1Col.isReady();
+        boolean p2Ready = p2Col.isReady();
         boolean bothReady = p1Ready && p2Ready;
 
         battleBtn.setEnabled(bothReady);
@@ -179,13 +180,14 @@ public class CharacterSelectPanel extends JPanel {
         mainBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!mainBtn.isEnabled()) return;
+                if (!mainBtn.isEnabled())
+                    return;
 
                 // Collect selected data from both player columns
-                String p1Name    = p1Col.getPlayerName();
-                int    p1TankIdx = p1Col.getSelectedTankIndex();
-                String p2Name    = p2Col.getPlayerName();
-                int    p2TankIdx = p2Col.getSelectedTankIndex();
+                String p1Name = p1Col.getPlayerName();
+                int p1TankIdx = p1Col.getSelectedTankIndex();
+                String p2Name = p2Col.getPlayerName();
+                int p2TankIdx = p2Col.getSelectedTankIndex();
 
                 // Sync back to the global players list so Leaderboard stays current
                 if (Main.playersList.size() >= 2) {
@@ -244,30 +246,30 @@ public class CharacterSelectPanel extends JPanel {
      * Represents one player's section of the character select screen.
      *
      * Contains:
-     *   - PLAYER 01/02 heading + tank name chip
-     *   - Name entry field + READY/STANDBY status button
-     *   - Tank carousel (< / > navigation with pixel-art preview)
-     *   - Offensive Power and Mobility Index stat rows
+     * - PLAYER 01/02 heading + tank name chip
+     * - Name entry field + READY/STANDBY status button
+     * - Tank carousel (< / > navigation with pixel-art preview)
+     * - Offensive Power and Mobility Index stat rows
      */
     class PlayerColumn extends JPanel {
-        private int        playerNum;
-        private int        selectedTankIndex = 0;
-        private boolean    ready;
+        private int playerNum;
+        private int selectedTankIndex = 0;
+        private boolean ready;
         private JTextField nameField;
-        private JPanel     tankCanvas;
-        private JLabel     tankNameLabel;
+        private JPanel tankCanvas;
+        private JLabel tankNameLabel;
         // Cache loaded images so each PNG is only read from disk once per column
         private final Map<String, BufferedImage> imageCache = new HashMap<>();
-        private JPanel     statsPanel;
-        private JPanel     statusBtnWrapper;
-        private JPanel     statusBtnMain;
-        private JPanel     statusBtnShadow;
-        private JLabel     statusLbl;
-        private JLabel     statusVal;
+        private JPanel statsPanel;
+        private JPanel statusBtnWrapper;
+        private JPanel statusBtnMain;
+        private JPanel statusBtnShadow;
+        private JLabel statusLbl;
+        private JLabel statusVal;
 
         PlayerColumn(int num, String defaultName, boolean startReady) {
             this.playerNum = num;
-            this.ready     = startReady;
+            this.ready = startReady;
             setLayout(new BorderLayout(0, 0));
             setOpaque(false);
 
@@ -334,6 +336,7 @@ public class CharacterSelectPanel extends JPanel {
                     nameField.setForeground(bg);
                     nameField.setCaretColor(bg);
                 }
+
                 public void focusLost(FocusEvent e) {
                     nameField.setOpaque(false);
                     nameField.setBackground(bg);
@@ -381,11 +384,13 @@ public class CharacterSelectPanel extends JPanel {
                     statusBtnShadow.setVisible(false);
                     toggleStatus();
                 }
+
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     // Release animation: return to original position
                     statusBtnMain.setLocation(0, 0);
-                    if (ready) statusBtnShadow.setVisible(true);
+                    if (ready)
+                        statusBtnShadow.setVisible(true);
                 }
             });
 
@@ -394,23 +399,7 @@ public class CharacterSelectPanel extends JPanel {
             inner.add(Box.createVerticalStrut(20));
 
             // --- Tank carousel (< prev | pixel art | next >) ---
-            JPanel carousel = new JPanel(new BorderLayout(0, 0)) {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    // Draw corner bracket accents inside the carousel box
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setColor(fg);
-                    g2.setStroke(new BasicStroke(2));
-                    int s = 12;
-                    g2.drawLine(0, 0, s, 0);           g2.drawLine(0, 0, 0, s);
-                    g2.drawLine(getWidth()-1, 0, getWidth()-1-s, 0); g2.drawLine(getWidth()-1, 0, getWidth()-1, s);
-                    g2.drawLine(0, getHeight()-1, s, getHeight()-1); g2.drawLine(0, getHeight()-1, 0, getHeight()-1-s);
-                    g2.drawLine(getWidth()-1, getHeight()-1, getWidth()-1-s, getHeight()-1);
-                    g2.drawLine(getWidth()-1, getHeight()-1, getWidth()-1, getHeight()-1-s);
-                    g2.dispose();
-                }
-            };
+            JPanel carousel = new JPanel(new BorderLayout(0, 0));
             carousel.setOpaque(false);
             carousel.setBorder(new DashedBorder(fg, 1, 4));
             carousel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
@@ -428,23 +417,26 @@ public class CharacterSelectPanel extends JPanel {
                     Graphics2D g2 = (Graphics2D) g.create();
                     // Use nearest-neighbour so pixel-art edges stay sharp at any scale
                     g2.setRenderingHint(
-                        RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-                    TankData t   = tanks.get(selectedTankIndex);
-                    String   path = t.getImagePath();
+                            RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    TankData t = tanks.get(selectedTankIndex);
+                    String path = t.getImagePath();
                     if (path != null) {
                         BufferedImage img = imageCache.computeIfAbsent(path, p -> {
-                            try { return ImageIO.read(new File(p)); }
-                            catch (Exception ex) { return null; }
+                            try {
+                                return ImageIO.read(new File(p));
+                            } catch (Exception ex) {
+                                return null;
+                            }
                         });
                         if (img != null) {
                             // Scale image to fill 70% of the canvas, then centre it
-                            int maxDim = (int)(Math.min(getWidth(), getHeight()) * 0.70);
-                            double scale = Math.min((double)maxDim / img.getWidth(),
-                                                    (double)maxDim / img.getHeight());
-                            int dw = (int)(img.getWidth()  * scale);
-                            int dh = (int)(img.getHeight() * scale);
-                            int dx = getWidth()  / 2 - dw / 2;
+                            int maxDim = (int) (Math.min(getWidth(), getHeight()) * 0.70);
+                            double scale = Math.min((double) maxDim / img.getWidth(),
+                                    (double) maxDim / img.getHeight());
+                            int dw = (int) (img.getWidth() * scale);
+                            int dh = (int) (img.getHeight() * scale);
+                            int dx = getWidth() / 2 - dw / 2;
                             int dy = getHeight() / 2 - dh / 2;
                             g2.drawImage(img, dx, dy, dw, dh, null);
                         }
@@ -477,7 +469,9 @@ public class CharacterSelectPanel extends JPanel {
 
         // --- State management ---
 
-        /** Re-reads the selected tank and updates the name chip, canvas, and stat rows. */
+        /**
+         * Re-reads the selected tank and updates the name chip, canvas, and stat rows.
+         */
         private void refreshTankView() {
             TankData t = tanks.get(selectedTankIndex);
             tankNameLabel.setText(t.getName());
@@ -485,19 +479,24 @@ public class CharacterSelectPanel extends JPanel {
             statsPanel.removeAll();
             statsPanel.add(buildFidelityStatRow("OFFENSIVE POWER", t.getOffensivePower(), false));
             statsPanel.add(Box.createVerticalStrut(10));
-            statsPanel.add(buildFidelityStatRow("MOBILITY INDEX",  t.getMobilityIndex(),  false));
+            statsPanel.add(buildFidelityStatRow("MOBILITY INDEX", t.getMobilityIndex(), false));
             statsPanel.revalidate();
             statsPanel.repaint();
         }
 
-        /** Flips the ready state and notifies CharacterSelectPanel to update the BATTLE button. */
+        /**
+         * Flips the ready state and notifies CharacterSelectPanel to update the BATTLE
+         * button.
+         */
         private void toggleStatus() {
             ready = !ready;
             applyStatusStyle();
             onStatusChanged(); // Calls the outer CharacterSelectPanel method
         }
 
-        /** Updates the status button's visual style to reflect READY or STANDBY state. */
+        /**
+         * Updates the status button's visual style to reflect READY or STANDBY state.
+         */
         private void applyStatusStyle() {
             statusLbl.setVerticalAlignment(SwingConstants.CENTER);
             statusVal.setVerticalAlignment(SwingConstants.CENTER);
@@ -565,22 +564,43 @@ public class CharacterSelectPanel extends JPanel {
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             btn.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(fg, 1),
-                    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+                    BorderFactory.createEmptyBorder(0, 0, 0, 0)));
             JLabel lbl = createLabel(label, 28f);
             lbl.setHorizontalAlignment(SwingConstants.CENTER);
             btn.add(lbl, BorderLayout.CENTER);
             btn.addMouseListener(new MouseAdapter() {
-                public void mousePressed(MouseEvent e)  { action.run(); }
-                public void mouseEntered(MouseEvent e)  { btn.setOpaque(true); btn.setBackground(fg); lbl.setForeground(bg); btn.repaint(); }
-                public void mouseExited(MouseEvent e)   { btn.setOpaque(false); lbl.setForeground(fg); btn.repaint(); }
+                public void mousePressed(MouseEvent e) {
+                    action.run();
+                }
+
+                public void mouseEntered(MouseEvent e) {
+                    btn.setOpaque(true);
+                    btn.setBackground(fg);
+                    lbl.setForeground(bg);
+                    btn.repaint();
+                }
+
+                public void mouseExited(MouseEvent e) {
+                    btn.setOpaque(false);
+                    lbl.setForeground(fg);
+                    btn.repaint();
+                }
             });
             return btn;
         }
 
         // --- Public accessors used by CharacterSelectPanel ---
 
-        boolean isReady()            { return ready; }
-        String  getPlayerName()      { return nameField.getText().trim().isEmpty() ? "PLAYER_" + playerNum : nameField.getText().trim(); }
-        int     getSelectedTankIndex() { return selectedTankIndex; }
+        boolean isReady() {
+            return ready;
+        }
+
+        String getPlayerName() {
+            return nameField.getText().trim().isEmpty() ? "PLAYER_" + playerNum : nameField.getText().trim();
+        }
+
+        int getSelectedTankIndex() {
+            return selectedTankIndex;
+        }
     }
 }
