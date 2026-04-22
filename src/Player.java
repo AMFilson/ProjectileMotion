@@ -1,135 +1,219 @@
 import java.math.*;
 
-/* 
-Name:Player.java (ProjectileMotion)
-Author:Andrew Filson
-Date: March Friday the 13th 2026!
-Desc: A player  in the game Projectile Motion
+/*
+ * Name:    Player.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    March Friday the 13th 2026!
+ * Desc:    Represents a single player in the Projectile Motion game.
+ *          Stores all player-specific state: name, shot parameters, 
+ *          starting position, tank selection, and running score.
  */
+
 /**
- * Represents a single player in the Projectile Motion game.
- * Stores player-specific data such as name, selected power, angle, 
- * starting position, and total score over multiple sessions.
+ * Represents one human player in the game.
+ *
+ * LEARNING (What is a Class?):
+ *   A class is a BLUEPRINT for creating objects. Once you define Player here,
+ *   you can create as many Player objects as you need anywhere in the program:
+ *       Player p1 = new Player("Ghost");
+ *       Player p2 = new Player("Reaper");
+ *   Each has its OWN copy of name, score, angle, etc. — they're independent.
+ *
+ * LEARNING (Object-Oriented Design):
+ *   The plan is to define a player with the requisite properties, methods,
+ *   getters and setters. There should also be something to track scores 
+ *   between games and potentially a static method to track total games played.
  */
 public class Player {
-  /*
-   * The plan is to define a player with the requisite properties, methods,
-   * getters and setters
-   */
-  /* There should be something to track scores between games too */
-  /* And a static method to track total amount of games played? */
-  // --- FIELD VARIABLES (Encapsulation) ---
-  // LEARNING: We use 'private' fields so that external classes can't randomly change 
-  // these values. They must go through our public 'getter' and 'setter' methods instead.
-  // This concept is known as 'Encapsulation' in Object-Oriented Programming.
-  private String name;
-  private int power;
-  private int angle;
-  private int startingPosition;
-  private int score;
-  private int selectedTankIndex = 0; // Default to first tank
-  /* private double shot; */
 
-  /**
-   * Initializes a new Player with the specified name.
-   *
-   * @param name The display name of the player.
-   */
-  public Player(String name) {
-    this.name = name;
+    // -----------------------------------------------------------------------
+    // LEARNING (Encapsulation — private fields):
+    //   We use 'private' access on all fields so that external classes can't 
+    //   randomly assign invalid values (like a negative power or a name of null).
+    //   All access must go through specific 'getter' and 'setter' methods below,
+    //   which is where you could add validation logic in the future.
+    // -----------------------------------------------------------------------
 
-    /*
-     * this.shot = shot;
+    /** The player's display name, set during character selection. */
+    private String name;
+
+    /**
+     * Shot power entered by the player (1–100, capped by tank's offensivePower).
+     * Used in the projectile physics calculation.
      */
-  }
+    private int power;
 
-  public int getSelectedTankIndex() {
-      return selectedTankIndex;
-  }
+    /**
+     * Launch angle in degrees (0–180).
+     * - 0° = horizontal left
+     * - 90° = straight up
+     * - 180° = horizontal right
+     */
+    private int angle;
 
-  public void setSelectedTankIndex(int index) {
-      this.selectedTankIndex = index;
-  }
+    /**
+     * The player's X-coordinate starting position on the battlefield (0–120).
+     * Assigned randomly at the start of each game by setStartingPosition().
+     */
+    private int startingPosition;
 
-  /**
-   * Retrieves the current name of this player.
-   *
-   * @return Current player name.
-   */
-  public String getName() {
-    return name;
-  }
+    /**
+     * Cumulative wins across multiple rounds in a session.
+     * Displayed on the Leaderboard.
+     */
+    private int score;
 
-  public void setName(String inputName) {
-    name = inputName;
-  }
+    /**
+     * The tank the player has selected from the carousel (0 = M8 Greyhound,
+     * 1 = Flak 88, 2 = Black Cat). Default is index 0.
+     */
+    private int selectedTankIndex = 0;
 
-  public int getPower() {
-    return power;
-  }
+    // -----------------------------------------------------------------------
+    // LEARNING (Constructor):
+    //   A constructor is a special method that runs when you create a new object
+    //   with 'new Player("name")'. It sets up the initial state of the object.
+    //   It has the same name as the class and no return type.
+    // -----------------------------------------------------------------------
 
-  public void setPower(int power) {
-    this.power = power;
-  }
+    /**
+     * Creates a new Player with the given display name.
+     * All other stats start at their default zero values.
+     *
+     * @param name The player's display name (e.g., "GHOST", "REAPER").
+     */
+    public Player(String name) {
+        this.name = name;
+        // 'this.name' → the field on THIS object
+        // 'name'      → the parameter passed in by the caller
+        // The 'this.' prefix distinguishes them when they share the same identifier.
+    }
 
-  public void setAngle(int angle) {
-    this.angle = angle;
-  }
+    // -----------------------------------------------------------------------
+    // LEARNING (Getters and Setters):
+    //   These short methods are the controlled "doorways" into and out of 
+    //   the private fields. The naming convention in Java is:
+    //     - getFieldName() → returns the value
+    //     - setFieldName(value) → assigns a new value
+    //   IDE tools (like VS Code) can generate these for you automatically.
+    // -----------------------------------------------------------------------
 
-  public int getAngle() {
-    return angle;
-  }
+    /** @return The index of the tank selected by this player (0–2). */
+    public int getSelectedTankIndex() {
+        return selectedTankIndex;
+    }
 
-  /* added for score tracking */
-  public int getScore() {
-    return score;
-  }
+    /**
+     * Sets this player's chosen tank by its position in the tanks list.
+     * @param index 0 = M8 Greyhound, 1 = Flak 88, 2 = Black Cat.
+     */
+    public void setSelectedTankIndex(int index) {
+        this.selectedTankIndex = index;
+    }
 
-  /* added for score tracking */
-  public void setScore(int score) {
-    this.score = score;
-  }
+    /** @return This player's current display name. */
+    public String getName() {
+        return name;
+    }
 
-  public int getStartingPosition() {
-    return startingPosition;
-  }
+    /** @param inputName The new name to assign to this player. */
+    public void setName(String inputName) {
+        name = inputName;
+    }
 
-  /**
-   * Calculates the final X-coordinate where the projectile will land based on 
-   * the player's selected power, angle, and starting position using standard projectile 
-   * motion physics (ignoring air resistance).
-   *
-   * @return The final x-coordinate position of the shot's impact.
-   */
-  public double getShot() {
-    // LEARNING: To calculate projectile motion, we need gravity. We declare it as 'final'
-    // because gravity is a constant and shouldn't ever be changed while the game runs.
-    final double GRAVITY = 9.81;
-    
-    // LEARNING: Math.sin() and Math.cos() expect radians, not degrees.
-    // So we first convert the player's angle into radians using Math.toRadians().
-    
-    /* determine the time it takes for a shot to land */
-    double timeToLand = (2 * getPower() * Math.sin(Math.toRadians(getAngle()))) / GRAVITY;
-    
-    /* get the x-coordinate of the shot */
-    // LEARNING: Distance = velocity * time. We find the horizontal velocity (cos(angle) * power) 
-    // and multiply it by the time it spends in the air. Finally, we add their starting position 
-    // so we know exactly where it lands on the screen.
-    return (getPower() * Math.cos(Math.toRadians(getAngle())) * timeToLand) + getStartingPosition();
-  }
+    /** @return This player's currently configured shot power (1–100). */
+    public int getPower() {
+        return power;
+    }
 
-  /**
-   * Randomly assigns and returns a new starting position on the X-axis for this player.
-   * The new position will be randomly generated between 0 and 120 (inclusive).
-   *
-   * @return the assigned starting position.
-   */
-  public int setStartingPosition() {
-    // LEARNING: Math.random() generates a decimal between 0.0 and 0.999...
-    // By multiplying it by 121, we get a range from 0.0 to 120.999...
-    // Casting to '(int)' chops off the decimal, giving us a clean integer between 0 and 120.
-    return startingPosition = (int) (Math.random() * 121);
-  }
+    /** @param power New power value. Should be between 1 and the tank's offensivePower cap. */
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    /** @param angle New launch angle in degrees (0–180). */
+    public void setAngle(int angle) {
+        this.angle = angle;
+    }
+
+    /** @return This player's current launch angle in degrees. */
+    public int getAngle() {
+        return angle;
+    }
+
+    /** @return This player's total cumulative score (number of hits/wins). */
+    public int getScore() {
+        return score;
+    }
+
+    /** @param score The new score to assign (typically incremented by 1 on a win). */
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    /** @return This player's current X-axis starting position (0–120). */
+    public int getStartingPosition() {
+        return startingPosition;
+    }
+
+    // -----------------------------------------------------------------------
+    // LEARNING (Projectile Motion Physics):
+    //   The formula used here is derived from kinematics. In the absence of 
+    //   air resistance, a projectile's trajectory is determined by:
+    //     - Its initial velocity (power)
+    //     - Its launch angle (angle, converted to radians)
+    //     - Gravity (a constant downward acceleration: 9.81 m/s²)
+    //
+    //   TIME IN AIR:  t = (2 * v * sin(θ)) / g
+    //   RANGE (X):    x = v * cos(θ) * t
+    //   FINAL POS:    landX = startingPosition + x
+    // -----------------------------------------------------------------------
+
+    /**
+     * Calculates and returns the X-coordinate where this player's shot will land,
+     * using standard projectile motion physics (no air resistance or wind).
+     *
+     * @return The X-position of the projectile's impact point.
+     */
+    public double getShot() {
+        // Gravity is a constant (it never changes mid-game), so we mark it 'final'.
+        // LEARNING (final keyword): A 'final' local variable can only be assigned once.
+        // This is useful for constants to make your intent clear to other developers.
+        final double GRAVITY = 9.81;
+
+        // LEARNING (Radians vs Degrees):
+        //   Java's Math.sin() and Math.cos() functions expect angles in RADIANS, 
+        //   not degrees. One full circle = 2π radians = 360°.
+        //   Math.toRadians(degrees) performs the conversion for us.
+
+        // Step 1: Calculate how long the projectile stays in the air.
+        //   Formula: time = (2 * initialVelocity * sin(angle)) / gravity
+        double timeToLand = (2 * getPower() * Math.sin(Math.toRadians(getAngle()))) / GRAVITY;
+
+        // Step 2: Calculate the total horizontal distance travelled, then add 
+        //   the player's starting position to get the absolute X-coordinate of impact.
+        //   Formula: distance = velocity * cos(angle) * time
+        //   Then:    landX = startingPosition + distance
+        return (getPower() * Math.cos(Math.toRadians(getAngle())) * timeToLand) + getStartingPosition();
+    }
+
+    /**
+     * Randomly assigns a new starting position between 0 and 120 (inclusive)
+     * to this player, and returns the assigned value.
+     *
+     * LEARNING (Math.random() and casting):
+     *   Math.random() → returns a double in [0.0, 1.0)   (i.e., 0 to 0.999...)
+     *   * 121          → scales it to [0.0, 120.999...)
+     *   (int)          → truncates the decimal (NOT rounding), giving 0 to 120.
+     *   This is a clean, zero-dependency way to get random integers in a range.
+     *
+     * NOTE: This method both SETS and RETURNS the value, which is a bit unusual.
+     * You could separate these responsibilities in a future refactor.
+     *
+     * @return The newly assigned starting position.
+     */
+    public int setStartingPosition() {
+        return startingPosition = (int) (Math.random() * 121);
+    }
 
 }

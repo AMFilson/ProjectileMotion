@@ -1,100 +1,151 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/* 
-Name:Game.java (ProjectileMotion)
-Author:Andrew Filson
-Date: March Friday the 13th 2026!
-Desc:This class handles the menu system, game sessions, and scoreboard.
-*/
+/*
+ * Name:    Game.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    March Friday the 13th 2026!
+ * Desc:    The original TEXT-BASED game engine for Projectile Motion.
+ *          Handles the menu system, individual game sessions, scoreboard,
+ *          and tutorial for the console version of the game.
+ *          NOTE: This class was the original prototype. The game has since
+ *          been ported to a GUI (MainMenu → MainWindow), but this class 
+ *          is preserved for reference and future integration.
+ */
+
 /**
- * This class handles the core game session logic, menu system, and scoreboard tracking
- * for the text-based version of Projectile Motion.
+ * The core text-based game engine.
+ *
+ * LEARNING (Class Responsibilities):
+ *   Notice how this single class handles several distinct things:
+ *     1. The menu loop  (start method)
+ *     2. One game session  (runGame)
+ *     3. Displaying the scoreboard  (showScoreboard)
+ *     4. The tutorial  (showTutorial)
+ *     5. Input validation  (getValidatedDouble)
+ *
+ *   In a larger project, you'd typically split these into separate classes.
+ *   For a small prototype, keeping everything in one class is fine and common.
  */
 public class Game {
-    // 1. Declare your ArrayList here to store scores between games.
+
+    // -----------------------------------------------------------------------
+    // LEARNING (Instance Fields vs Local Variables):
+    //   Instance fields are declared here (inside the class, but outside methods).
+    //   They belong to each Game OBJECT and persist for the entire lifetime of 
+    //   that object. Local variables inside methods are temporary — they only 
+    //   exist while that method is running, then they're discarded.
+    // -----------------------------------------------------------------------
+
+    /**
+     * Stores a log of completed game results (e.g., "Winner: GHOST Game: 2 Round: 4").
+     * This persists between multiple calls to runGame() within one session.
+     */
     private ArrayList<String> scoreBoard = new ArrayList<>();
 
-    // 2. Declare your two Player objects here so they persist.
+    /**
+     * The two persistent player objects. They're created once and reused across 
+     * multiple game rounds so scores and names are preserved.
+     * LEARNING: 'null' means no name yet — names are set during the game loop.
+     */
     Player playerOne = new Player(null);
     Player playerTwo = new Player(null);
 
-    /*
-     * This is actually redundant I could have just set these to
-     * private ArrayList<String> scoreBoard;
-     * private Scanner universalInput;
-     * this is because these variables are overriden with the ones
-     * via the Game Constructor grabbing the variables with the values
-     * from Main
+    /**
+     * A Scanner attached to System.in (the keyboard).
+     * LEARNING (Scanner):
+     *   Scanner is Java's standard way to read text input from the console.
+     *   We declare it as an instance field so every method in this class can 
+     *   use the same Scanner — creating multiple Scanners on System.in can 
+     *   cause conflicts.
      */
-    // 3. Declare a Scanner to be used throughout the class.
     private Scanner universalInput = new Scanner(System.in);
 
-    // declare games played counter
+    /** Tracks how many complete game sessions have been played in this run. */
     private int gamesPlayed = 0;
 
-    // declare currentRound counter
+    /**
+     * Tracks which round within the current game session we're on.
+     * Resets to 0 when a new game starts? (TODO: currently it doesn't reset — future bug)
+     */
     private int currentRound = 0;
 
+    // -----------------------------------------------------------------------
+    // LEARNING (Constructor):
+    //   Even though the fields above already have default values assigned inline,
+    //   the constructor re-assigns them from the parameters passed in by Main.
+    //   This makes the class more flexible — whoever creates a Game can inject 
+    //   their own Scanner and ArrayList into it. This design pattern is called 
+    //   "Dependency Injection" — you inject dependencies from outside rather 
+    //   than creating them internally.
+    // -----------------------------------------------------------------------
+
     /**
-     * Constructs a new Game instance.
+     * Constructs a new Game instance using the provided Scanner and scoreboard.
      *
-     * @param universalInput A Scanner instance used for reading user input.
-     * @param scoreBoard An ArrayList used to store scoreboard logs and past game results.
+     * @param universalInput A Scanner already attached to System.in.
+     * @param scoreBoard     An ArrayList that will collect game result strings.
      */
     public Game(Scanner universalInput, ArrayList<String> scoreBoard) {
-        // Constructor: Initialize your scanner and lists here.
-        /*
-         * Takes the value from the parameter on the right
-         * saves it into the class variable on the left
-         */
+        // 'this.x' = the field on this object.  'x' (no 'this.') = the parameter.
         this.universalInput = universalInput;
-        this.scoreBoard = scoreBoard;
-
+        this.scoreBoard     = scoreBoard;
     }
 
+    // -----------------------------------------------------------------------
+    // MAIN MENU LOOP
+    // -----------------------------------------------------------------------
+
     /**
-     * The main entry point for the game logic.
-     * Should contain a loop for the menu system.
+     * Starts and runs the main menu loop. Presents options to the player,
+     * reads their choice, and dispatches to the appropriate sub-routine.
+     *
+     * LEARNING (while loop for game/menu loops):
+     *   A 'while (condition)' loop keeps running as long as 'condition' is true.
+     *   For menus, we want to keep showing the options until the user chooses 
+     *   to quit (choice 4). The flag 'needInput' would be set to false at that 
+     *   point, but here we use System.exit(0) inside the case instead.
+     *
+     * LEARNING (try-catch for input safety):
+     *   Calling Integer.parseInt("hello") throws a NumberFormatException.
+     *   Wrapping it in try-catch prevents the program from crashing — instead,
+     *   we display a friendly error and loop back to ask again.
      */
     public void start() {
         boolean needInput = true;
-        int menuChoice = 0;
+        int menuChoice    = 0;
 
-        // LEARNING: A while loop runs continuously as long as the condition (needInput) is true.
-        // It's highly useful for game loops or menu systems where we don't know 
-        // ahead of time exactly when the user will decide to quit.
         while (needInput) {
-            // TODO: Ask for player names here (only once per program run).
+            // Display the menu every iteration so the user always sees it
             System.out.println("Welcome to Bloons Piracy and no GUI edition!");
             System.out.println("Select one of the following menu options below:");
             System.out.println("Enter 1,2,3,4 and press enter:");
-
-            // TODO: Main Menu Loop
-            // - Choice 1: Start New Game
             System.out.println("Choice 1: Start New Game");
-            // - Choice 2: Scoreboard
             System.out.println("Choice 2: View Scoreboard");
-            // - Choice 3: Tutorial
             System.out.println("Choice 3: How to Play");
-            // - Choice 4: Exit (Ends program)
             System.out.println("Choice 4: End program and exit");
-            /* Ensures I always clear the buffer vs using nextInt */
-            String input = universalInput.nextLine(); // takes input as string
 
-            // LEARNING: try-catch blocks prevent the program from crashing. 
-            // If the user types "hello" instead of "1", Integer.parseInt() throws an exception.
-            // Rather than crashing, the code jumps to the 'catch' block below.
+            // Read input as a String first to avoid Scanner buffer issues with nextInt()
+            String input = universalInput.nextLine();
+
+            // LEARNING (try-catch block):
+            //   'try' → attempt to execute this block
+            //   'catch (Exception e)' → run this if ANY exception is thrown inside try
             try {
-                menuChoice = Integer.parseInt(input); // converts string input to integer if possible
+                menuChoice = Integer.parseInt(input); // Throws if input isn't a number
 
-                switch (menuChoice) { // attempting a switch case menu
+                // LEARNING (switch statement):
+                //   A clean alternative to long if/else if chains when comparing one
+                //   variable against multiple specific values. Each 'case' handles one 
+                //   option; 'break' exits the switch when done.
+                switch (menuChoice) {
                     case 1:
+                        // Collect player names before running the game
                         System.out.println("Please enter in the name of Player one: ");
-                        playerOne.setName(universalInput.nextLine()); // takes input and changes player one name
+                        playerOne.setName(universalInput.nextLine());
                         System.out.println("Please enter in the name of Player two: ");
-                        playerTwo.setName(universalInput.nextLine()); // takes input and changes player two name
-                        runGame();
+                        playerTwo.setName(universalInput.nextLine());
+                        runGame(); // Start the physics game session
                         break;
                     case 2:
                         showScoreboard();
@@ -104,46 +155,64 @@ public class Game {
                         break;
                     case 4:
                         System.out.println("Ending Program...");
-                        System.exit(0);
+                        System.exit(0); // Terminates the JVM immediately
                         break;
                     default:
+                        // User typed a valid number but not 1-4 — silently loop again
                         break;
                 }
 
             } catch (Exception e) {
-                // LEARNING: If an error occurred inside 'try', execution immediately skips to here.
+                // Runs if parseInt() failed (user typed text instead of a number)
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
-
         }
-
     }
 
+    // -----------------------------------------------------------------------
+    // GAME SESSION LOGIC
+    // -----------------------------------------------------------------------
+
     /**
-     * Logic for a single game session.
+     * Runs a single complete game session between playerOne and playerTwo.
+     * Each "round" both players enter their angle, the physics are simulated,
+     * and the session continues until one player scores a hit (miss < 1 unit).
+     *
+     * LEARNING (do-while vs while):
+     *   This uses 'while (!hit)' — we only enter the loop if nobody has hit yet.
+     *   An alternative would be a do-while loop which always runs at least once.
+     *
+     * LEARNING (for-each loop over arrays):
+     *   Instead of iterating with 'for (int i = 0; i < players.length; i++)',
+     *   the enhanced for-each 'for (Player eachPlayer : players)' is cleaner and 
+     *   less error-prone. It automatically handles the index for you.
      */
     private void runGame() {
-        // TODO: Reset player positions to random (0-120).
+        // Randomize starting positions for this session
         playerOne.setStartingPosition();
         playerTwo.setStartingPosition();
 
         boolean hit = false;
+
         while (!hit) {
             currentRound++;
             System.out.println("\n" + playerOne.getName() + " is at " + playerOne.getStartingPosition());
             System.out.println(playerTwo.getName() + " is at " + playerTwo.getStartingPosition());
             System.out.printf("Round: %d \n", currentRound);
 
+            // Put both players in an array so we can loop over them cleanly
             Player[] players = { playerOne, playerTwo };
-            String[] promptList = {
-                    "Please enter in a power between 1 - 100: ",
-                    "Please enter an angle between 0 and 180: "
+
+            // LEARNING (Parallel arrays):
+            //   We pair prompts[] with minAndMax[][] by index. This is a simpler 
+            //   alternative to a custom class, but can become hard to maintain at scale.
+            String[] promptList  = {
+                "Please enter in a power between 1 - 100: ",
+                "Please enter an angle between 0 and 180: "
             };
             double[][] minAndMax = { { 1, 100 }, { 0, 180 } };
 
-            // LEARNING: This is an "enhanced for-loop" (or "for-each loop"). 
-            // Instead of dealing with index variables (i=0; i<length), it automatically
-            // goes through every Player in our array one by one, temporarily naming it 'eachPlayer'.
+            // Get input for each player using the enhanced for-each loop
             for (Player eachPlayer : players) {
                 System.out.println("\n" + eachPlayer.getName() + "'s turn:");
                 double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
@@ -152,133 +221,179 @@ public class Game {
                 eachPlayer.setAngle((int) angle);
             }
 
-            // .20% wind scrapped for now until I figure out how to build or get tired
-
-            // 3. Calculate shot distance.
+            // Calculate where each shot lands using Player.getShot()
             double shotOne = playerOne.getShot();
             double shotTwo = playerTwo.getShot();
 
-            // 4. Report distance and how far they missed by.
-            /* Absolute to avoid negative numbers and false wins */
+            // LEARNING (Math.abs — Absolute Value):
+            //   Math.abs() removes the negative sign from a number.
+            //   We use it here because a shot could land PAST the target (positive error)
+            //   or SHORT of the target (negative error). We only care about the magnitude.
             double missOne = Math.abs(shotOne - playerTwo.getStartingPosition());
             double missTwo = Math.abs(shotTwo - playerOne.getStartingPosition());
 
+            // Print miss report for each player (only if they didn't hit)
             if (missOne > 1) {
-                System.out.printf("\n%s's shot landed at %.2f (Missed by %.2f)\n", playerOne.getName(), shotOne,
-                        missOne);
+                System.out.printf(
+                    "\n%s's shot landed at %.2f (Missed by %.2f)\n",
+                    playerOne.getName(), shotOne, missOne
+                );
             }
             if (missTwo > 1) {
-                System.out.printf("%s's shot landed at %.2f (Missed by %.2f)\n", playerTwo.getName(), shotTwo, missTwo);
+                System.out.printf(
+                    "%s's shot landed at %.2f (Missed by %.2f)\n",
+                    playerTwo.getName(), shotTwo, missTwo
+                );
             }
-            // 5. Check if distance < 1 (Hit!).
+
+            // Hit threshold: within 1 unit is considered a direct hit
             if (missOne < 1 || missTwo < 1) {
                 hit = true;
-                gamesPlayed++; // Increment for any win or tie
+                gamesPlayed++;
+
+                // LEARNING (Nested if/else for multiple outcomes):
+                //   We check the most specific case first (both hit = tie),
+                //   then fall through to individual win cases.
                 if (missOne < 1 && missTwo < 1) {
+                    // Simultaneous hit — it's a tie!
                     System.out.println("It's a tie! Both hit!");
                     playerOne.setScore(playerOne.getScore() + 1);
                     playerTwo.setScore(playerTwo.getScore() + 1);
                     scoreBoard.add(
-                            "Tie: " + playerOne.getName() + " and " + playerTwo.getName() + " Game: " + gamesPlayed
-                                    + " Round: " + currentRound);
+                        "Tie: " + playerOne.getName() + " and " + playerTwo.getName() +
+                        " Game: " + gamesPlayed + " Round: " + currentRound
+                    );
                 } else if (missOne < 1) {
+                    // Player one's shot connected
                     System.out.println(playerOne.getName() + " wins!");
                     playerOne.setScore(playerOne.getScore() + 1);
                     scoreBoard.add(
-                            "Winner: " + playerOne.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
+                        "Winner: " + playerOne.getName() +
+                        " Game: " + gamesPlayed + " Round: " + currentRound
+                    );
                 } else {
+                    // Player two's shot connected
                     System.out.println(playerTwo.getName() + " wins!");
                     playerTwo.setScore(playerTwo.getScore() + 1);
                     scoreBoard.add(
-                            "Winner: " + playerTwo.getName() + " Game: " + gamesPlayed + " Round: " + currentRound);
+                        "Winner: " + playerTwo.getName() +
+                        " Game: " + gamesPlayed + " Round: " + currentRound
+                    );
                 }
             } else {
-                // 6. "Wait for Enter" before next turn.
+                // Nobody hit — wait for a keypress before starting the next round
                 System.out.println("No hit! Press enter to continue to the next turn.");
                 universalInput.nextLine();
-                /* I want to add an option to return to main Menu for GUI version */
             }
         }
     }
 
-    // TODO: After a winner is found, add the result to the ArrayList.
+    // -----------------------------------------------------------------------
+    // SCOREBOARD DISPLAY
+    // -----------------------------------------------------------------------
 
     /**
-     * Displays all logged game results in the scoreboard.
-     * If no games have been played, it alerts the user.
+     * Prints all past game results stored in the scoreBoard ArrayList.
+     * If no games have been played, prompts the user to play first.
+     *
+     * LEARNING (ArrayList):
+     *   ArrayList is a resizable array. Unlike a regular 'int[]', it can grow 
+     *   and shrink dynamically. We use it here because we don't know in advance 
+     *   how many rounds will be played.
+     *   - 'isEmpty()' → true if the list has no elements
+     *   - for-each loop → iterates over every element
      */
     private void showScoreboard() {
         if (scoreBoard.isEmpty()) {
             System.out.println("There is no scoreboard! Play a game first!");
             System.out.println("Press enter to go back to main menu");
             universalInput.nextLine();
-
         } else {
-            // TODO: Iterate through ArrayList and print all past results.
-            for (String eachsScore : scoreBoard) {
-                System.out.println(eachsScore);
+            // Print every logged result one line at a time
+            for (String eachScore : scoreBoard) {
+                System.out.println(eachScore);
             }
+
             /*
-             * Ammended this for now, no idea how to sort the arraylist based on
-             * a specific parameter from the scoreboard string
+             * TODO: Sorting the scoreboard by round count or score is still pending.
+             * The challenge is that the result is one compound String (e.g., 
+             * "Winner: GHOST Game: 3 Round: 2"), not a structured object.
+             * A cleaner approach would be to store a custom Result class instead.
+             *
+             *   ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
+             *   bestScore.sort(null); // Alphabetical sort — not useful here
              */
-            // TODO: Find and print the best score (closest hit or most wins).
-            // ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
-            // bestScore.sort(null);
-            // System.out.println("Top Score: " + bestScore.get(0));
 
             System.out.println("Press enter to go back to main menu");
             universalInput.nextLine();
         }
-
     }
 
+    // -----------------------------------------------------------------------
+    // TUTORIAL
+    // -----------------------------------------------------------------------
+
     /**
-     * Displays the game instructions and tutorial texts to the console 
-     * and waits for user confirmation to continue.
+     * Displays the game rules and physics explanation to the console.
      */
     private void showTutorial() {
-        // TODO: Print the instructions and the physics formulas.
         System.out.println("This is a two player game.");
         System.out.println("To play simply enter in the usernames for your players.");
         System.out.println("The objective of the game is to hit the other player with your shot");
         System.out.println("Each player is placed at a random spot between 0 and 120");
-        System.out.println(
-                "Then each player sets the power and angle of their shot and attempts to hit the other player");
+        System.out.println("Then each player sets the power and angle of their shot and attempts to hit the other player");
         System.out.println("First person to strike the other player wins");
         System.out.println("Press enter to go back to main menu");
         universalInput.nextLine();
     }
 
+    // -----------------------------------------------------------------------
+    // INPUT VALIDATION
+    // -----------------------------------------------------------------------
+
     /**
-     * Helper method to prompt the user for a double value and validate that it
-     * falls within standard boundaries.
+     * Prompts the user for a decimal number and keeps asking until a valid 
+     * value within the specified range is entered.
      *
-     * @param prompt Text to display when asking the user for input.
-     * @param min The minimum acceptable value.
-     * @param max The maximum acceptable value.
-     * @return A validated double input from the user.
+     * @param prompt The message to display to the player.
+     * @param min    The minimum allowed value (inclusive).
+     * @param max    The maximum allowed value (inclusive).
+     * @return       A validated double value within [min, max].
+     *
+     * LEARNING (Input Validation Pattern):
+     *   This "ask → parse → validate → loop" pattern appears in almost every 
+     *   console application. Key ideas:
+     *   1. Always read input as a String (avoids Scanner buffer bugs with nextInt/nextDouble).
+     *   2. Attempt to parse it with try-catch to handle non-numeric input gracefully.
+     *   3. After parsing, range-check the actual value.
+     *   4. Only exit the loop once the value passes ALL checks.
+     *
+     * LEARNING (boolean flag pattern):
+     *   'isValid = false' at the start, then we loop until 'isValid' becomes true.
+     *   This is a common, readable pattern for "keep trying until it works".
      */
     private double getValidatedDouble(String prompt, double min, double max) {
-        double value = 0;
+        double  value   = 0;
         boolean isValid = false;
+
         while (!isValid) {
             System.out.println(prompt + " (" + min + "-" + max + "): ");
-            String input = universalInput.nextLine(); // Always read as a string first
+            String input = universalInput.nextLine(); // Always read as String first
+
             try {
-                value = Double.parseDouble(input); // Try to convert string to number
-                // Check if it's within the required range
+                value = Double.parseDouble(input); // Convert String → double (throws if it fails)
+
                 if (value >= min && value <= max) {
-                    isValid = true;
+                    isValid = true; // Passes both requirements — exit the loop
                 } else {
                     System.out.println("Error: Please enter a number between " + min + " and " + max + ".");
                 }
             } catch (NumberFormatException e) {
-                // This runs if parseDouble() fails (e.g. user typed "abc")
+                // User typed letters or symbols — parse failed; loop asks again
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
-
         }
+
         return value;
     }
 
