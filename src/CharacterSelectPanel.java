@@ -399,9 +399,21 @@ public class CharacterSelectPanel extends JPanel {
             inner.add(Box.createVerticalStrut(20));
 
             // --- Tank carousel (< prev | pixel art | next >) ---
-            JPanel carousel = new JPanel(new BorderLayout(0, 0));
+            JPanel carousel = new JPanel(new BorderLayout(0, 0)) {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(fg);
+                    float[] dash = { 4f };
+                    g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+                    // Draw only top and bottom dashed lines
+                    g2.drawLine(0, 0, getWidth() - 1, 0);
+                    g2.drawLine(0, getHeight() - 1, getWidth() - 1, getHeight() - 1);
+                    g2.dispose();
+                }
+            };
             carousel.setOpaque(false);
-            carousel.setBorder(new DashedBorder(fg, 1, 4));
             carousel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
             carousel.setPreferredSize(new Dimension(260, 260));
 
@@ -430,8 +442,8 @@ public class CharacterSelectPanel extends JPanel {
                             }
                         });
                         if (img != null) {
-                            // Scale image to fill 70% of the canvas, then centre it
-                            int maxDim = (int) (Math.min(getWidth(), getHeight()) * 0.70);
+                            // Scale image to fill 90% of the canvas, then centre it
+                            int maxDim = (int) (Math.min(getWidth(), getHeight()) * 0.90);
                             double scale = Math.min((double) maxDim / img.getWidth(),
                                     (double) maxDim / img.getHeight());
                             int dw = (int) (img.getWidth() * scale);
