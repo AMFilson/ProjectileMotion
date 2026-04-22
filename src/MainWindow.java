@@ -212,8 +212,7 @@ public class MainWindow extends JFrame {
 
         // Panel for footer buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(buttonSave);
-        buttonPanel.add(buttonOpen);
+        // buttonSave and buttonOpen removed from here and moved to Main Menu
 
         // Lower UI Assembly
         JPanel lowerUI = new JPanel(new BorderLayout());
@@ -229,24 +228,7 @@ public class MainWindow extends JFrame {
         add(animationPanel, BorderLayout.CENTER); // Animation takes the top/center space
         add(lowerUI, BorderLayout.SOUTH); // Controls move to the bottom
 
-        // LEARNING: Button clicks are handled by 'ActionListeners'.
-        // We use an "anonymous inner class" here (new ActionListener() {...}) to
-        // quickly
-        // define what should happen (calling saveToFile()) when the user clicks 'Save'.
-        buttonSave.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveToFile();
-            }
-        });
-
-        // Action Listener for Open button
-        buttonOpen.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openFromFile();
-            }
-        });
+        // Button listeners removed as Save/Load moved to Main Menu
 
         // Display the frame
         setLocationRelativeTo(null);

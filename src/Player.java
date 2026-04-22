@@ -27,6 +27,7 @@ public class Player {
   private int angle;
   private int startingPosition;
   private int score;
+  private int selectedTankIndex = 0; // Default to first tank
   /* private double shot; */
 
   /**
@@ -40,6 +41,14 @@ public class Player {
     /*
      * this.shot = shot;
      */
+  }
+
+  public int getSelectedTankIndex() {
+      return selectedTankIndex;
+  }
+
+  public void setSelectedTankIndex(int index) {
+      this.selectedTankIndex = index;
   }
 
   /**
