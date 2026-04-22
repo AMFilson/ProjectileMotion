@@ -542,7 +542,6 @@ public class MainWindow extends JFrame {
         // Identify the active player's data for this turn
         String   currentName = p1Turn ? p1Name     : p2Name;
         TankData tank        = p1Turn ? p1Tank      : p2Tank;
-        int      currentPos  = p1Turn ? p1Position  : p2Position;
         int      targetPos   = p1Turn ? p2Position  : p1Position;
 
         // --- Validate angle input ---
@@ -747,110 +746,8 @@ public class MainWindow extends JFrame {
     }
 
     // -----------------------------------------------------------------------
-    // INNER CLASSES
-    // LEARNING (Inner classes):
-    //   A class defined INSIDE another class. The inner class has access to the 
-    //   outer class's private fields (like 'fg' and 'bg'). 
-    //   These are used here so MainWindow can have its own private versions of 
-    //   reusable drawing components without sharing them globally.
+    // NOTE: DashedBorder and MainFramePanel have been removed from here.
+    // They are now shared top-level classes in UIComponents.java, used by
+    // both MainWindow and MainMenu to avoid code duplication.
     // -----------------------------------------------------------------------
-
-    /**
-     * Custom JPanel that draws BIT-REKT's decorative rectangular frame with 
-     * corner bracket accents. This provides the visual "terminal UI" look.
-     *
-     * LEARNING (Overriding paintComponent):
-     *   In Swing, to draw custom graphics on a JPanel, you override 'paintComponent'.
-     *   ALWAYS call 'super.paintComponent(g)' first — this clears the panel and 
-     *   lets the component system do its standard rendering before we add on top.
-     *
-     * LEARNING (Graphics2D):
-     *   Graphics2D extends Graphics and gives us more control over drawing:
-     *     - setStroke(new BasicStroke(n)) → sets pen width to n pixels
-     *     - drawRect(x, y, width, height) → draws an unfilled rectangle
-     *     - fillRect(x, y, width, height) → draws a filled rectangle
-     */
-    class MainFramePanel extends JPanel {
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g); // Always call first
-
-            Graphics2D g2 = (Graphics2D) g.create(); // Create a copy so we don't affect the original
-
-            // Fill the background colour
-            g2.setColor(bg);
-            g2.fillRect(0, 0, getWidth(), getHeight());
-
-            // Draw the outer decorative rectangle (4px thick)
-            g2.setColor(fg);
-            g2.setStroke(new BasicStroke(4));
-            g2.drawRect(4, 4, getWidth() - 8, getHeight() - 8);
-
-            // Draw an inner thin rectangle (1px) just inside the frame boundary
-            g2.setStroke(new BasicStroke(1));
-            g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
-
-            // Draw corner bracket decorations at all four corners
-            int b = 15; // Bracket arm length
-            drawBracket(g2, -10, -10,                       b, true,  true);  // Top-left
-            drawBracket(g2, getWidth() + 10 - b, -10,       b, true,  false); // Top-right
-            drawBracket(g2, -10, getHeight() + 10 - b,      b, false, true);  // Bottom-left
-            drawBracket(g2, getWidth() + 10 - b, getHeight() + 10 - b, b, false, false); // Bottom-right
-
-            g2.dispose(); // Release the Graphics2D copy's resources
-        }
-
-        /**
-         * Draws one L-shaped bracket at position (x, y).
-         *
-         * @param g    The Graphics2D context.
-         * @param x    Left X of the bracket bounding box.
-         * @param y    Top Y of the bracket bounding box.
-         * @param s    Length of each arm.
-         * @param top  true = horizontal arm at top; false = at bottom.
-         * @param left true = vertical arm at left; false = at right.
-         */
-        private void drawBracket(Graphics2D g, int x, int y, int s, boolean top, boolean left) {
-            g.setColor(fg);
-            if      (top  && left)  { g.fillRect(x, y, s, 2); g.fillRect(x, y, 2, s); }
-            else if (top)           { g.fillRect(x, y, s, 2); g.fillRect(x + s - 2, y, 2, s); }
-            else if (left)          { g.fillRect(x, y + s - 2, s, 2); g.fillRect(x, y, 2, s); }
-            else                    { g.fillRect(x, y + s - 2, s, 2); g.fillRect(x + s - 2, y, 2, s); }
-        }
-    }
-
-    /**
-     * A custom Swing border that draws a dashed/dotted rectangle.
-     * Used on the animation panel and input fields to match the BIT-REKT UI theme.
-     *
-     * LEARNING (AbstractBorder — custom borders):
-     *   Java's border system is extensible. By extending AbstractBorder and 
-     *   overriding 'paintBorder', you can define any custom visual border.
-     *
-     * LEARNING (BasicStroke dash pattern):
-     *   new BasicStroke(thickness, CAP, JOIN, miterLimit, dash[], dashPhase)
-     *     - dash[] = {4f} means: 4 pixels on, 4 pixels off (the array repeats)
-     *     - dashPhase = 0f means: start from the beginning of the pattern
-     */
-    class DashedBorder extends javax.swing.border.AbstractBorder {
-        private Color color;
-        private int   thickness;
-        private int   dashLen;
-
-        DashedBorder(Color c, int t, int d) {
-            color     = c;
-            thickness = t;
-            dashLen   = d;
-        }
-
-        @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
-            Graphics2D g2   = (Graphics2D) g.create();
-            g2.setColor(color);
-            float[] dash    = { dashLen }; // Dash/gap pattern array
-            g2.setStroke(new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dash, 0f));
-            g2.drawRect(x, y, w - 1, h - 1); // Subtract 1 to stay inside the component boundary
-            g2.dispose();
-        }
-    }
 }
