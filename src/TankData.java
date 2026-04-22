@@ -124,4 +124,26 @@ public class TankData {
     public double getMobilityIndex() {
         return mobilityIndex;
     }
+
+    /**
+     * Returns the relative file path to this tank's pixel-art PNG sprite.
+     * All three tanks have matching PNGs in the images/ directory.
+     * Using a centralised mapping here ensures every UI panel (CanvasArea,
+     * CharacterSelectPanel, LeaderboardPanel etc.) loads the SAME image file,
+     * so the sprites are always visually consistent.
+     *
+     * LEARNING (switch expression):
+     *   The '->' syntax is a Java 14+ switch expression. Unlike the old switch
+     *   statement it is an expression (produces a value) and doesn't fall through.
+     *
+     * @return Relative path to the PNG, e.g. "images/m8_greyhound.png"
+     */
+    public String getImagePath() {
+        return switch (name) {
+            case "M8 GREYHOUND" -> "images/m8_greyhound.png";
+            case "FLAK 88"      -> "images/flak_88.png";
+            case "BLACK CAT"    -> "images/black_cat.png";
+            default             -> null;
+        };
+    }
 }

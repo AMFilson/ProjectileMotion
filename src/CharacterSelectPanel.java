@@ -1,8 +1,12 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CharacterSelectPanel.java
@@ -252,6 +256,8 @@ public class CharacterSelectPanel extends JPanel {
         private JTextField nameField;
         private JPanel     tankCanvas;
         private JLabel     tankNameLabel;
+        // Cache loaded images so each PNG is only read from disk once per column
+        private final Map<String, BufferedImage> imageCache = new HashMap<>();
         private JPanel     statsPanel;
         private JPanel     statusBtnWrapper;
         private JPanel     statusBtnMain;
@@ -420,9 +426,29 @@ public class CharacterSelectPanel extends JPanel {
                 protected void paintComponent(Graphics g) {
                     super.paintComponent(g);
                     Graphics2D g2 = (Graphics2D) g.create();
-                    g2.translate(getWidth() / 2 - 40, getHeight() / 2 - 26);
-                    g2.scale(2.0, 2.0);
-                    drawTankPixelArt(g2, selectedTankIndex, fg, bg);
+                    // Use nearest-neighbour so pixel-art edges stay sharp at any scale
+                    g2.setRenderingHint(
+                        RenderingHints.KEY_INTERPOLATION,
+                        RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    TankData t   = tanks.get(selectedTankIndex);
+                    String   path = t.getImagePath();
+                    if (path != null) {
+                        BufferedImage img = imageCache.computeIfAbsent(path, p -> {
+                            try { return ImageIO.read(new File(p)); }
+                            catch (Exception ex) { return null; }
+                        });
+                        if (img != null) {
+                            // Scale image to fill 70% of the canvas, then centre it
+                            int maxDim = (int)(Math.min(getWidth(), getHeight()) * 0.70);
+                            double scale = Math.min((double)maxDim / img.getWidth(),
+                                                    (double)maxDim / img.getHeight());
+                            int dw = (int)(img.getWidth()  * scale);
+                            int dh = (int)(img.getHeight() * scale);
+                            int dx = getWidth()  / 2 - dw / 2;
+                            int dy = getHeight() / 2 - dh / 2;
+                            g2.drawImage(img, dx, dy, dw, dh, null);
+                        }
+                    }
                     g2.dispose();
                 }
             };
@@ -549,38 +575,6 @@ public class CharacterSelectPanel extends JPanel {
                 public void mouseExited(MouseEvent e)   { btn.setOpaque(false); lbl.setForeground(fg); btn.repaint(); }
             });
             return btn;
-        }
-
-        /** Draws the pixel-art tank sprite for the given index at 2x scale. */
-        private void drawTankPixelArt(Graphics2D g2, int idx, Color fgC, Color bgC) {
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-            g2.setColor(fgC);
-            if (idx == 0) { // M8 GREYHOUND
-                g2.fillRect(16, 8, 8, 2);  g2.fillRect(14, 10, 10, 4);
-                g2.setColor(bgC); g2.fillRect(15, 11, 2, 2);
-                g2.setColor(fgC);
-                g2.fillRect(24, 11, 12, 2); g2.fillRect(34, 10, 2, 4);
-                g2.fillRect(11, 14, 16, 2); g2.fillRect(9, 16, 20, 2);
-                g2.fillRect(7, 18, 24, 2);  g2.fillRect(5, 20, 28, 6);
-                g2.setColor(bgC);
-                for (int x : new int[]{7, 11, 15, 19, 23, 27}) g2.fillRect(x, 22, 2, 4);
-            } else if (idx == 1) { // FLAK 88
-                g2.fillRect(12, 6, 12, 6);
-                g2.setColor(bgC); g2.fillRect(14, 8, 3, 2);
-                g2.setColor(fgC);
-                g2.fillRect(24, 8, 14, 3); g2.fillRect(36, 7, 2, 5);
-                g2.fillRect(8, 12, 20, 4); g2.fillRect(4, 16, 28, 4);
-                g2.fillRect(2, 20, 34, 6);
-                g2.setColor(bgC);
-                for (int x : new int[]{4, 10, 16, 22, 28}) g2.fillRect(x, 22, 4, 4);
-                g2.fillRect(34, 22, 1, 4);
-            } else { // BLACK CAT
-                g2.fillRect(6, 10, 28, 4);  g2.fillRect(4, 14, 32, 6);
-                g2.fillRect(14, 4, 12, 6);  g2.fillRect(26, 6, 10, 2);
-                g2.fillRect(2, 20, 36, 6);
-                g2.setColor(bgC);
-                for (int x : new int[]{4, 12, 20, 28}) g2.fillRect(x, 22, 6, 4);
-            }
         }
 
         // --- Public accessors used by CharacterSelectPanel ---

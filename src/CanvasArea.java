@@ -1,23 +1,30 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.IntSupplier;
 
 /**
  * CanvasArea.java
  *
- * The animated tank preview canvas shown on BIT-REKT's Home screen.
- * Draws the currently selected tank as large pixel art, along with its
- * name in an inverted label box at the bottom of the canvas.
+ * The large tank preview canvas shown on BIT-REKT's Home screen.
+ * Loads each tank's PNG sprite from the images/ directory and renders it
+ * centred in the panel, scaled up with nearest-neighbour interpolation to
+ * preserve the pixel-art look.
  *
- * Previously an inner class of MainMenu. Extracted to keep each screen
- * component in its own file.
+ * Previously used hand-coded fillRect() calls to draw the tank, which meant
+ * the sprite in this panel and the one in CharacterSelectPanel could drift
+ * apart over time. By loading the shared PNG files from TankData.getImagePath(),
+ * both panels are guaranteed to always show exactly the same image.
  *
  * Dependencies:
  *   - tanks          : the shared list of TankData objects from MainMenu
- *   - tankIndexGetter: a lambda/supplier that always returns the current index
- *                      (avoids needing a direct reference back to MainMenu)
- *   - vt323          : the loaded VT323 font for consistent typography
+ *   - tankIndexGetter: a lambda that returns the currently selected index
+ *   - vt323          : the loaded VT323 font for the tank name label
  */
 public class CanvasArea extends JPanel {
 
@@ -29,11 +36,19 @@ public class CanvasArea extends JPanel {
     private final Font            vt323;
 
     /**
+     * Cache of loaded BufferedImages so we don't re-read the PNG file on
+     * every repaint. The map key is the image path string from TankData.getImagePath().
+     *
+     * LEARNING (HashMap as a cache):
+     *   HashMap.computeIfAbsent(key, loader) checks if the key already has a value.
+     *   If it does, it returns it. If not, it calls the loader function to create
+     *   one, stores it, and returns it. This means each PNG is loaded exactly once.
+     */
+    private final Map<String, BufferedImage> imageCache = new HashMap<>();
+
+    /**
      * @param tanks           The shared list of all available TankData objects.
      * @param tankIndexGetter A supplier that returns the currently selected tank index.
-     *                        Using an IntSupplier (a lambda like '() -> currentTankIndex')
-     *                        allows this panel to always read the latest value from
-     *                        MainMenu without holding a direct reference to it.
      * @param font            The VT323 font instance shared from MainMenu.
      */
     public CanvasArea(List<TankData> tanks, IntSupplier tankIndexGetter, Font font) {
@@ -42,20 +57,34 @@ public class CanvasArea extends JPanel {
         this.vt323           = font;
     }
 
+    /**
+     * Loads a PNG from disk, caching it after the first load.
+     * Returns null if the file doesn't exist or can't be read.
+     */
+    private BufferedImage loadImage(String path) {
+        if (path == null) return null;
+        return imageCache.computeIfAbsent(path, p -> {
+            try {
+                return ImageIO.read(new File(p));
+            } catch (Exception e) {
+                System.err.println("CanvasArea: could not load image: " + p);
+                return null;
+            }
+        });
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
 
-        int cx = getWidth()  / 2;
-        int cy = getHeight() / 2;
+        int cx = getWidth() / 2;
 
-        // Fetch the current tank using the supplier — always reflects latest selection
         int      idx         = tankIndexGetter.getAsInt();
         TankData currentTank = tanks.get(idx);
         String   tankName    = currentTank.getName();
 
-        // Draw tank name label (inverted chip at bottom of canvas)
+        // --- Draw tank name label (inverted chip at bottom of canvas) ---
         g2.setFont(vt323.deriveFont(32f));
         FontMetrics sfm = g2.getFontMetrics();
         int sw = sfm.stringWidth(tankName);
@@ -64,43 +93,32 @@ public class CanvasArea extends JPanel {
         int tx = cx - sw / 2;
         int ty = sy + (sh + sfm.getAscent()) / 2 - 4;
         g2.setColor(fg);
-        g2.fillRect(tx - 10, sy + 5, sw + 20, sh - 10); // Black filled rectangle
+        g2.fillRect(tx - 10, sy + 5, sw + 20, sh - 10);
         g2.setColor(bg);
-        g2.drawString(tankName, tx, ty); // White text on top
+        g2.drawString(tankName, tx, ty);
 
-        // Translate and scale to paint the large centreed tank sprite
-        g2.translate(cx - 150, cy - 150);
-        g2.scale(4.6875, 4.6875);
-        g2.setColor(fg);
+        // --- Load and draw the PNG sprite ---
+        BufferedImage img = loadImage(currentTank.getImagePath());
+        if (img != null) {
+            // Use nearest-neighbour interpolation so the pixel art stays crisp
+            // when scaled up (no blurring of the hard edges).
+            g2.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        // Draw the appropriate sprite based on the selected tank index
-        if (idx == 0) {
-            // M8 GREYHOUND
-            g2.fillRect(10, 44, 44, 10); g2.fillRect(12, 42, 40, 2);
-            g2.setColor(bg);
-            g2.fillRect(14, 46, 4, 6); g2.fillRect(22, 46, 4, 6);
-            g2.fillRect(30, 46, 4, 6); g2.fillRect(38, 46, 4, 6); g2.fillRect(46, 46, 4, 6);
-            g2.setColor(fg);
-            g2.fillRect(14, 34, 36, 10); g2.fillRect(18, 32, 28, 2);
-            g2.fillRect(22, 24, 20, 8);  g2.fillRect(24, 22, 16, 2);
-            g2.fillRect(42, 26, 18, 4);  g2.fillRect(58, 25, 2, 6);  g2.fillRect(26, 20, 8, 2);
-            g2.setColor(bg);
-            g2.fillRect(24, 24, 2, 2);   g2.fillRect(26, 26, 2, 2);
-        } else if (idx == 1) {
-            // FLAK 88
-            g2.fillRect(24, 48, 16, 6); g2.fillRect(18, 46, 28, 2);
-            g2.fillRect(28, 38, 8, 8);  g2.fillRect(30, 32, 4, 6);
-            g2.fillRect(32, 20, 4, 16); g2.fillRect(34, 12, 4, 10);
-            g2.fillRect(36, 4, 4, 10);  g2.fillRect(38, -4, 2, 8);
-        } else {
-            // BLACK CAT
-            g2.fillRect(6, 46, 52, 8);
-            g2.setColor(bg);
-            g2.fillRect(10, 48, 6, 4); g2.fillRect(22, 48, 6, 4);
-            g2.fillRect(34, 48, 6, 4); g2.fillRect(46, 48, 6, 4);
-            g2.setColor(fg);
-            g2.fillRect(10, 38, 44, 8); g2.fillRect(14, 34, 34, 4);
-            g2.fillRect(16, 24, 24, 10); g2.fillRect(40, 28, 20, 2); g2.fillRect(58, 27, 4, 4);
+            // Scale the image to fill roughly 55% of the shorter panel dimension,
+            // then centre it in the canvas area.
+            int maxDim   = (int) (Math.min(getWidth(), getHeight()) * 0.55);
+            int imgW     = img.getWidth();
+            int imgH     = img.getHeight();
+            double scale = Math.min((double) maxDim / imgW, (double) maxDim / imgH);
+            int drawW    = (int) (imgW * scale);
+            int drawH    = (int) (imgH * scale);
+            int drawX    = cx - drawW / 2;
+            // Centre vertically in the space above the name label
+            int drawY    = (sy - drawH) / 2;
+
+            g2.drawImage(img, drawX, drawY, drawW, drawH, null);
         }
 
         g2.dispose();
