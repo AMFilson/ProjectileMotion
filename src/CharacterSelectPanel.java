@@ -564,7 +564,7 @@ public class CharacterSelectPanel extends JPanel {
             btn.setPreferredSize(new Dimension(40, Integer.MAX_VALUE));
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, left ? 0 : 1, 0, left ? 1 : 0, fg),
+                    BorderFactory.createLineBorder(fg, 1),
                     BorderFactory.createEmptyBorder(10, 10, 10, 10)));
             JLabel lbl = createLabel(label, 28f);
             lbl.setHorizontalAlignment(SwingConstants.CENTER);
