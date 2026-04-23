@@ -27,11 +27,11 @@ import java.awt.*;
  *   JPanel:
  *
  *       @Override
- *       protected void paintComponent(Graphics g) {
- *           super.paintComponent(g);  // ALWAYS call this first to clear the panel
- *           Graphics2D g2 = (Graphics2D) g;
- *           g2.setColor(Color.RED);
- *           g2.drawArc(x, y, width, height, startAngle, arcAngle); // draws a curve
+ *       protected void paintComponent(Graphics graphics) {
+ *           super.paintComponent(graphics);  // ALWAYS call this first to clear the panel
+ *           Graphics2D graphics2d = (Graphics2D) graphics;
+ *           graphics2d.setColor(Color.RED);
+ *           graphics2d.drawArc(x, y, width, height, startAngle, arcAngle); // draws a curve
  *       }
  *
  *   Call 'animationPanel.repaint()' from your game logic whenever the visual

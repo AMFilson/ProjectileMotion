@@ -116,9 +116,9 @@ public class Player {
         return name;
     }
 
-    /** @param inputName The new name to assign to this player. */
-    public void setName(String inputName) {
-        name = inputName;
+    /** @param newName The new name to assign to this player. */
+    public void setName(String newName) {
+        name = newName;
     }
 
     /** @return This player's currently configured shot power (1–100). */

@@ -69,10 +69,10 @@ public class TankData {
      * @param op   Offensive Power value (0–100).
      * @param mi   Mobility Index value (0–100).
      */
-    public TankData(String name, double op, double mi) {
+    public TankData(String name, double offensivePower, double mobilityIndex) {
         this.name           = name;
-        this.offensivePower = op;
-        this.mobilityIndex  = mi;
+        this.offensivePower = offensivePower;
+        this.mobilityIndex  = mobilityIndex;
         this.random         = new Random();
     }
 

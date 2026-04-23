@@ -34,13 +34,13 @@ public class MainWindow extends JFrame {
     // -----------------------------------------------------------------------
 
     /** Background colour — matches MainMenu's light grey (#eff3f1). */
-    private final Color bg = new Color(239, 243, 241);
+    private final Color background = new Color(239, 243, 241);
 
     /** Foreground colour — pure black for all text and borders. */
-    private final Color fg = new Color(0, 0, 0);
+    private final Color foreground = new Color(0, 0, 0);
 
     /** The VT323 monospace font loaded from disk (fallback: Monospaced system font). */
-    private Font vt323;
+    private Font pixelFont;
 
     // -----------------------------------------------------------------------
     // LEARNING (Storing player data from another screen):
@@ -189,13 +189,13 @@ public class MainWindow extends JFrame {
      */
     private void loadFont() {
         try {
-            File f = new File("src/fonts/VT323-Regular.ttf");
-            vt323 = f.exists()
-                    ? Font.createFont(Font.TRUETYPE_FONT, f)    // Custom pixel font
-                    : new Font("Monospaced", Font.PLAIN, 16);   // Fallback
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(vt323);
+            File fontFile = new File("src/fonts/VT323-Regular.ttf");
+            pixelFont = fontFile.exists()
+                    ? Font.createFont(Font.TRUETYPE_FONT, fontFile)  // Custom pixel font
+                    : new Font("Monospaced", Font.PLAIN, 16);         // Fallback
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(pixelFont);
         } catch (Exception e) {
-            vt323 = new Font("Monospaced", Font.PLAIN, 16); // Catch-all fallback
+            pixelFont = new Font("Monospaced", Font.PLAIN, 16); // Catch-all fallback
         }
     }
 
@@ -222,7 +222,7 @@ public class MainWindow extends JFrame {
     private void buildUI() {
         // Root panel centred inside the JFrame using GridBagLayout
         JPanel root = new JPanel(new GridBagLayout());
-        root.setBackground(bg);
+        root.setBackground(background);
         add(root); // Add the root to the JFrame's default content pane
 
         // MainFramePanel draws the decorative border around the game area
@@ -237,7 +237,7 @@ public class MainWindow extends JFrame {
 
         // Bottom border + internal padding for the header bar
         header.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, fg), // 2px bottom line only
+                BorderFactory.createMatteBorder(0, 0, 2, 0, foreground), // 2px bottom line only
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));   // Internal padding
 
         // Title block: two stacked labels (subtitle + main title)
@@ -259,11 +259,9 @@ public class MainWindow extends JFrame {
         //   Here: every 1000ms (1 second) we update the clock in the header.
         //   The ActionEvent 'e' is the parameter in the lambda — we don't use it here.
         Timer clock = new Timer(1000, e -> {
-            String t = new SimpleDateFormat("HH:mm:ss").format(new Date());
-            // HTML in JLabel: Swing supports a subset of HTML inside labels.
-            // This allows multi-line text and 'align' attributes.
+            String timeString = new SimpleDateFormat("HH:mm:ss").format(new Date());
             systemStatus.setText("<html><p align='right' style='line-height:0.8'>" +
-                    "LOCATION: CAMP 30<br>MODE: VERSUS_2P<br>TIME: " + t + "</p></html>");
+                    "LOCATION: CAMP 30<br>MODE: VERSUS_2P<br>TIME: " + timeString + "</p></html>");
         });
         clock.setInitialDelay(0); // Fire immediately (don't wait 1 second for the first tick)
         clock.start();
@@ -278,7 +276,7 @@ public class MainWindow extends JFrame {
         animationPanel = new AnimationPanel();
         animationPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(8, 0, 8, 0),
-                new DashedBorder(fg, 1, 4)));
+                new DashedBorder(foreground, 1, 4)));
         centre.add(animationPanel, BorderLayout.CENTER);
 
         centre.add(buildPlayerStrip(2), BorderLayout.EAST);  // Player 2 side panel
@@ -289,7 +287,7 @@ public class MainWindow extends JFrame {
         JPanel bottom = new JPanel(new BorderLayout(0, 0));
         bottom.setOpaque(false);
         bottom.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, fg), // Top border only
+                BorderFactory.createMatteBorder(2, 0, 0, 0, foreground), // Top border only
                 BorderFactory.createEmptyBorder(10, 16, 10, 16)));
 
         // Round number + status message row
@@ -326,18 +324,15 @@ public class MainWindow extends JFrame {
         footerRow.add(lbl("CREATED BY ANDREW FILSON", 14f), BorderLayout.WEST);
 
         // Clickable "[ MAIN MENU ]" label — acts like a hyperlink
-        JLabel backLbl = lbl("[ MAIN MENU ]", 14f);
-        backLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        backLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-        backLbl.addMouseListener(new MouseAdapter() {
-            // LEARNING (MouseAdapter):
-            //   MouseAdapter implements MouseListener with empty methods for all events.
-            //   We override only the ones we care about, keeping the code concise.
+        JLabel mainMenuLink = lbl("[ MAIN MENU ]", 14f);
+        mainMenuLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        mainMenuLink.setHorizontalAlignment(SwingConstants.RIGHT);
+        mainMenuLink.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e)  { goToMainMenu(); }
-            public void mouseEntered(MouseEvent e)  { backLbl.setForeground(new Color(80, 80, 80)); }
-            public void mouseExited(MouseEvent e)   { backLbl.setForeground(fg); }
+            public void mouseEntered(MouseEvent e)  { mainMenuLink.setForeground(new Color(80, 80, 80)); }
+            public void mouseExited(MouseEvent e)   { mainMenuLink.setForeground(foreground); }
         });
-        footerRow.add(backLbl, BorderLayout.EAST);
+        footerRow.add(mainMenuLink, BorderLayout.EAST);
         bottom.add(footerRow, BorderLayout.SOUTH);
 
         frame.add(bottom, BorderLayout.SOUTH);
@@ -372,43 +367,43 @@ public class MainWindow extends JFrame {
         //   MatteBorder(top, left, bottom, right, color) draws a border only on 
         //   the specified sides. Here P1 gets a right border, P2 gets a left border,
         //   creating the visual divider between the strip and the animation panel.
-        int border = (num == 1) ? 0 : 1;
+        int leftBorderWidth = (num == 1) ? 0 : 1;
         strip.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, border, 0, 1 - border, fg),
+                BorderFactory.createMatteBorder(0, leftBorderWidth, 0, 1 - leftBorderWidth, foreground),
                 BorderFactory.createEmptyBorder(12, 10, 12, 10)));
 
         // --- Player heading chip (inverted for P1, outlined for P2) ---
-        JLabel heading = lbl(String.format("PLAYER %02d", num), 28f);
+        JLabel playerHeadingLabel = lbl(String.format("PLAYER %02d", num), 28f);
         if (num == 1) {
             // Player 1 chip: solid black background with white text
-            heading.setOpaque(true);
-            heading.setBackground(fg);
-            heading.setForeground(bg);
-            heading.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+            playerHeadingLabel.setOpaque(true);
+            playerHeadingLabel.setBackground(foreground);
+            playerHeadingLabel.setForeground(background);
+            playerHeadingLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
         } else {
             // Player 2 chip: black outline with normal text
-            heading.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(fg, 2),
+            playerHeadingLabel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(foreground, 2),
                     BorderFactory.createEmptyBorder(2, 6, 2, 4)));
         }
-        heading.setAlignmentX(Component.LEFT_ALIGNMENT); // Left-align within BoxLayout
-        strip.add(heading);
+        playerHeadingLabel.setAlignmentX(Component.LEFT_ALIGNMENT); // Left-align within BoxLayout
+        strip.add(playerHeadingLabel);
         strip.add(Box.createVerticalStrut(6)); // 6px vertical gap
 
         // Player name
-        JLabel nameLbl = lbl(name, 20f);
-        nameLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(nameLbl);
+        JLabel playerNameLabel = lbl(name, 20f);
+        playerNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(playerNameLabel);
         strip.add(Box.createVerticalStrut(10));
 
         // Tank name displayed as a small inverted chip
-        JLabel tankLbl = lbl(tank.getName(), 14f);
-        tankLbl.setOpaque(true);
-        tankLbl.setBackground(fg);
-        tankLbl.setForeground(bg);
-        tankLbl.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
-        tankLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(tankLbl);
+        JLabel tankNameLabel = lbl(tank.getName(), 14f);
+        tankNameLabel.setOpaque(true);
+        tankNameLabel.setBackground(foreground);
+        tankNameLabel.setForeground(background);
+        tankNameLabel.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+        tankNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(tankNameLabel);
         strip.add(Box.createVerticalStrut(10));
 
         // Tank stat display boxes (Offensive Power, Mobility Index)
@@ -418,33 +413,33 @@ public class MainWindow extends JFrame {
         strip.add(Box.createVerticalStrut(10));
 
         // Score section — labelled with a bottom rule
-        JLabel scoreHead = lbl("SCORE", 13f);
-        scoreHead.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        scoreHead.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(scoreHead);
+        JLabel scoreHeadingLabel = lbl("SCORE", 13f);
+        scoreHeadingLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        scoreHeadingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(scoreHeadingLabel);
 
         // Large numeric score value — stored as field so handleFire() can update it
-        JLabel scoreVal = lbl("0", 30f);
-        scoreVal.setFont(scoreVal.getFont().deriveFont(Font.BOLD));
-        scoreVal.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(scoreVal);
+        JLabel scoreValueLabel = lbl("0", 30f);
+        scoreValueLabel.setFont(scoreValueLabel.getFont().deriveFont(Font.BOLD));
+        scoreValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(scoreValueLabel);
 
         // Assign to the correct field based on player number
-        if (num == 1) p1ScoreLabel = scoreVal; else p2ScoreLabel = scoreVal;
+        if (num == 1) p1ScoreLabel = scoreValueLabel; else p2ScoreLabel = scoreValueLabel;
 
         strip.add(Box.createVerticalStrut(8));
 
         // Position section — updated every round by refreshTurnUI()
-        JLabel posHead = lbl("POSITION", 13f);
-        posHead.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        posHead.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(posHead);
+        JLabel positionHeadingLabel = lbl("POSITION", 13f);
+        positionHeadingLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        positionHeadingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(positionHeadingLabel);
 
-        JLabel posVal = lbl("---", 24f);
-        posVal.setAlignmentX(Component.LEFT_ALIGNMENT);
-        strip.add(posVal);
+        JLabel positionValueLabel = lbl("---", 24f);
+        positionValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        strip.add(positionValueLabel);
 
-        if (num == 1) p1PosLabel = posVal; else p2PosLabel = posVal;
+        if (num == 1) p1PosLabel = positionValueLabel; else p2PosLabel = positionValueLabel;
 
         // Vertical 'glue' pushes everything above it upwards — keeps items top-aligned
         strip.add(Box.createVerticalGlue());
@@ -459,27 +454,27 @@ public class MainWindow extends JFrame {
      * @return      A styled JPanel containing the label and value.
      */
     private JPanel buildMiniStat(String label, int value) {
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        box.setOpaque(false);
-        box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1),
+        JPanel statBox = new JPanel();
+        statBox.setLayout(new BoxLayout(statBox, BoxLayout.Y_AXIS));
+        statBox.setOpaque(false);
+        statBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(3, 5, 3, 5)));
-        box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
-        box.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+        statBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Stat label with a bottom underline
-        JLabel lbl = lbl(label, 12f);
-        lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.add(lbl);
+        JLabel statLabel = lbl(label, 12f);
+        statLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        statLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statBox.add(statLabel);
 
         // Large bold numeric value
-        JLabel val = lbl(String.valueOf(value), 22f);
-        val.setFont(val.getFont().deriveFont(Font.BOLD));
-        val.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.add(val);
-        return box;
+        JLabel statValueLabel = lbl(String.valueOf(value), 22f);
+        statValueLabel.setFont(statValueLabel.getFont().deriveFont(Font.BOLD));
+        statValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statBox.add(statValueLabel);
+        return statBox;
     }
 
     // -----------------------------------------------------------------------
@@ -500,11 +495,11 @@ public class MainWindow extends JFrame {
         roundLabel.setText(String.format("ROUND %02d", roundNum)); // %02d = zero-padded 2 digits
 
         // Determine whose data to show based on the p1Turn flag
-        String   current = p1Turn ? p1Name : p2Name;
-        TankData tank    = p1Turn ? p1Tank  : p2Tank;
+        String   activePlayerName = p1Turn ? p1Name : p2Name;
+        TankData tank             = p1Turn ? p1Tank  : p2Tank;
 
         // Status bar: shows active player's name + their tank's stat caps
-        statusLabel.setText(current + "'s TURN  |  MAX PWR: " +
+        statusLabel.setText(activePlayerName + "'s TURN  |  MAX PWR: " +
                 String.format("%.0f", tank.getOffensivePower()) +  // %.0f = no decimal places
                 "  MOB: " + String.format("%.0f", tank.getMobilityIndex()));
 
@@ -540,9 +535,9 @@ public class MainWindow extends JFrame {
      */
     private void handleFire() {
         // Identify the active player's data for this turn
-        String   currentName = p1Turn ? p1Name     : p2Name;
-        TankData tank        = p1Turn ? p1Tank      : p2Tank;
-        int      targetPos   = p1Turn ? p2Position  : p1Position;
+        String   activePlayerName = p1Turn ? p1Name     : p2Name;
+        TankData tank             = p1Turn ? p1Tank      : p2Tank;
+        int      targetPos        = p1Turn ? p2Position  : p1Position;
 
         // --- Validate angle input ---
         double angle;
@@ -555,18 +550,15 @@ public class MainWindow extends JFrame {
         }
 
         // --- Validate optional position shift input ---
-        int shift = 0; // Default: no repositioning
-        String shiftTxt = posShiftField.getText().trim();
-        if (!shiftTxt.isEmpty()) {
+        int positionShift = 0; // Default: no repositioning
+        String positionShiftText = posShiftField.getText().trim();
+        if (!positionShiftText.isEmpty()) {
             try {
-                shift = Integer.parseInt(shiftTxt);
-                int maxShift = (int) tank.getMobilityIndex(); // Tank stat caps the max shift
+                positionShift = Integer.parseInt(positionShiftText);
+                int maxPositionShift = (int) tank.getMobilityIndex(); // Tank stat caps the max shift
 
-                // LEARNING (Math.abs for absolute deviation):
-                //   Math.abs(shift) handles both +10 and -10 (moving left or right) 
-                //   equally. We only care if the MAGNITUDE exceeds the cap.
-                if (Math.abs(shift) > maxShift) {
-                    flash("POSITION SHIFT exceeds MOB. INDEX cap of " + maxShift);
+                if (Math.abs(positionShift) > maxPositionShift) {
+                    flash("POSITION SHIFT exceeds MOB. INDEX cap of " + maxPositionShift);
                     return;
                 }
             } catch (NumberFormatException ex) {
@@ -576,24 +568,24 @@ public class MainWindow extends JFrame {
         }
 
         // --- Apply position shift ---
-        if (p1Turn) p1Position += shift;
-        else        p2Position += shift;
+        if (p1Turn) p1Position += positionShift;
+        else        p2Position += positionShift;
 
         // --- Physics calculation ---
-        final double GRAVITY  = 9.81;
-        double maxPower = tank.getOffensivePower(); // Full power used (could be user input later)
-        double rad      = Math.toRadians(angle);
-        double tof      = (2 * maxPower * Math.sin(rad)) / GRAVITY; // Time of flight
-        double landX    = (p1Turn ? p1Position : p2Position) + maxPower * Math.cos(rad) * tof;
+        final double GRAVITY     = 9.81;
+        double tankMaxPower          = tank.getOffensivePower(); // Full power used (could be user input later)
+        double launchAngleRadians    = Math.toRadians(angle);
+        double timeOfFlight          = (2 * tankMaxPower * Math.sin(launchAngleRadians)) / GRAVITY; // Time of flight
+        double shotLandingX          = (p1Turn ? p1Position : p2Position) + tankMaxPower * Math.cos(launchAngleRadians) * timeOfFlight;
 
         // --- Hit detection ---
-        double  miss = Math.abs(landX - targetPos);
-        boolean hit  = miss < 1.0; // Within 1 unit = direct hit
+        double  distanceFromTarget = Math.abs(shotLandingX - targetPos);
+        boolean isDirectHit        = distanceFromTarget < 1.0; // Within 1 unit = direct hit
 
         // --- Resolve outcome ---
-        String result;
-        if (hit) {
-            result = currentName + " HIT! ROUND OVER.";
+        String shotResultMessage;
+        if (isDirectHit) {
+            shotResultMessage = activePlayerName + " HIT! ROUND OVER.";
 
             // Update the correct score label for the hitting player
             if (p1Turn) {
@@ -605,12 +597,9 @@ public class MainWindow extends JFrame {
             }
             Main.gamesPlayed++;
 
-            // LEARNING (JOptionPane.showOptionDialog — custom modal dialogue):
-            //   showOptionDialog lets you define exactly which buttons appear.
-            //   The return value tells you which button the user clicked (0 = first, 1 = second).
-            int choice = JOptionPane.showOptionDialog(this,
+            int postHitDialogChoice = JOptionPane.showOptionDialog(this,
                     String.format("%s lands at %.1f — DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
-                            currentName, landX, p1Name, p1Score, p2Name, p2Score),
+                            activePlayerName, shotLandingX, p1Name, p1Score, p2Name, p2Score),
                     "HIT!",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.INFORMATION_MESSAGE,
@@ -618,7 +607,7 @@ public class MainWindow extends JFrame {
                     new Object[]{"BATTLE AGAIN", "MAIN MENU"},
                     "BATTLE AGAIN");
 
-            if (choice == JOptionPane.YES_OPTION) {
+            if (postHitDialogChoice == JOptionPane.YES_OPTION) {
                 // Reset for a fresh round — new random positions, reset round counter
                 p1Position = (int) (Math.random() * 100);
                 p2Position = 100 + (int) (Math.random() * 100);
@@ -629,13 +618,13 @@ public class MainWindow extends JFrame {
             }
         } else {
             // Nobody hit — log the miss and switch turns
-            result = String.format("%s: landed %.1f  (missed by %.1f)", currentName, landX, miss);
+            shotResultMessage = String.format("%s: landed %.1f  (missed by %.1f)", activePlayerName, shotLandingX, distanceFromTarget);
             p1Turn = !p1Turn; // Flip between true and false — alternates whose turn it is
             refreshTurnUI();
         }
 
         // Update status bar with the result of this shot
-        statusLabel.setText(result);
+        statusLabel.setText(shotResultMessage);
     }
 
     /**
@@ -676,12 +665,12 @@ public class MainWindow extends JFrame {
      * @param size Font size in points (e.g., 24f).
      * @return     A configured JLabel.
      */
-    private JLabel lbl(String txt, float size) {
-        JLabel l = new JLabel(txt);
-        l.setFont(vt323.deriveFont(size)); // deriveFont creates a sized variant of the loaded font
-        l.setForeground(fg);
-        l.setOpaque(false);
-        return l;
+    private JLabel lbl(String text, float size) {
+        JLabel label = new JLabel(text);
+        label.setFont(pixelFont.deriveFont(size)); // deriveFont creates a sized variant of the loaded font
+        label.setForeground(foreground);
+        label.setOpaque(false);
+        return label;
     }
 
     /**
@@ -691,15 +680,15 @@ public class MainWindow extends JFrame {
      * @return     A configured JTextField.
      */
     private JTextField styledField(int cols) {
-        JTextField f = new JTextField(cols);
-        f.setFont(vt323.deriveFont(22f));
-        f.setForeground(fg);
-        f.setBackground(bg);
-        f.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1),       // Outer solid border
+        JTextField textField = new JTextField(cols);
+        textField.setFont(pixelFont.deriveFont(22f));
+        textField.setForeground(foreground);
+        textField.setBackground(background);
+        textField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 1),       // Outer solid border
                 BorderFactory.createEmptyBorder(3, 6, 3, 6))); // Inner padding
-        f.setCaretColor(fg); // The blinking cursor colour
-        return f;
+        textField.setCaretColor(foreground); // The blinking cursor colour
+        return textField;
     }
 
     /**
@@ -718,31 +707,31 @@ public class MainWindow extends JFrame {
      * @return       A styled, interactive JPanel acting as a button.
      */
     private JPanel createButton(String label, Runnable action) {
-        JPanel btn = new JPanel(new BorderLayout());
-        btn.setOpaque(true);
-        btn.setBackground(fg); // Start with solid black background
-        btn.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 2),
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setOpaque(true);
+        buttonPanel.setBackground(foreground); // Start with solid black background
+        buttonPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 2),
                 BorderFactory.createEmptyBorder(6, 20, 6, 20)));
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buttonPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        JLabel lbl = lbl(label, 24f);
-        lbl.setForeground(bg);                              // White text on black background
-        lbl.setHorizontalAlignment(SwingConstants.CENTER);
-        btn.add(lbl, BorderLayout.CENTER);
+        JLabel buttonLabel = lbl(label, 24f);
+        buttonLabel.setForeground(background);                              // White text on black background
+        buttonLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        buttonPanel.add(buttonLabel, BorderLayout.CENTER);
 
-        btn.addMouseListener(new MouseAdapter() {
+        buttonPanel.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e)  { action.run(); }  // Execute the callback
             public void mouseEntered(MouseEvent e)  {
                 // Hover effect: invert colours (white bg, black text)
-                btn.setBackground(bg); lbl.setForeground(fg); btn.repaint();
+                buttonPanel.setBackground(background); buttonLabel.setForeground(foreground); buttonPanel.repaint();
             }
             public void mouseExited(MouseEvent e) {
                 // Restore: back to black bg, white text
-                btn.setBackground(fg); lbl.setForeground(bg); btn.repaint();
+                buttonPanel.setBackground(foreground); buttonLabel.setForeground(background); buttonPanel.repaint();
             }
         });
-        return btn;
+        return buttonPanel;
     }
 
     // -----------------------------------------------------------------------

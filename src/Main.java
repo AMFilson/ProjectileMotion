@@ -46,24 +46,24 @@ public class Main {
     // -----------------------------------------------------------------------
     static {
         // Mock leaderboard entry #1
-        Player p1 = new Player("VON_NEUMANN");
-        p1.setScore(999999);
-        p1.setSelectedTankIndex(1); // Index 1 = FLAK 88
+        Player topRankedPlayer = new Player("VON_NEUMANN");
+        topRankedPlayer.setScore(999999);
+        topRankedPlayer.setSelectedTankIndex(1); // Index 1 = FLAK 88
 
         // Mock leaderboard entry #2
-        Player p2 = new Player("CYBER_PUNK_88");
-        p2.setScore(842550);
-        p2.setSelectedTankIndex(0); // Index 0 = M8 GREYHOUND
+        Player secondRankedPlayer = new Player("CYBER_PUNK_88");
+        secondRankedPlayer.setScore(842550);
+        secondRankedPlayer.setSelectedTankIndex(0); // Index 0 = M8 GREYHOUND
 
         // Mock leaderboard entry #3
-        Player p3 = new Player("YOU // USER_772");
-        p3.setScore(760042);
-        p3.setSelectedTankIndex(2); // Index 2 = BLACK CAT
+        Player thirdRankedPlayer = new Player("YOU // USER_772");
+        thirdRankedPlayer.setScore(760042);
+        thirdRankedPlayer.setSelectedTankIndex(2); // Index 2 = BLACK CAT
 
         // Add them all to the shared roster
-        playersList.add(p1);
-        playersList.add(p2);
-        playersList.add(p3);
+        playersList.add(topRankedPlayer);
+        playersList.add(secondRankedPlayer);
+        playersList.add(thirdRankedPlayer);
     }
 
     /**

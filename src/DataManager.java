@@ -69,10 +69,10 @@ public class DataManager {
                     writer.write(line + "\n"); // '\n' = newline character
                 }
                 JOptionPane.showMessageDialog(parent, "Game state saved successfully!");
-            } catch (IOException ex) {
+            } catch (IOException ioException) {
                 // Something went wrong (e.g., permission denied) — inform the user
                 JOptionPane.showMessageDialog(parent,
-                        "Error saving to file: " + ex.getMessage(),
+                        "Error saving to file: " + ioException.getMessage(),
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
@@ -116,9 +116,9 @@ public class DataManager {
                 // Convert the dynamically-sized List to a fixed-size String array
                 return lines.toArray(new String[0]);
 
-            } catch (IOException ex) {
+            } catch (IOException ioException) {
                 JOptionPane.showMessageDialog(parent,
-                        "Error opening file: " + ex.getMessage(),
+                        "Error opening file: " + ioException.getMessage(),
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }

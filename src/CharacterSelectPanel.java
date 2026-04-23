@@ -30,21 +30,21 @@ import java.util.Map;
  */
 public class CharacterSelectPanel extends JPanel {
 
-    private final Color bg = new Color(239, 243, 241);
-    private final Color fg = new Color(0, 0, 0);
+    private final Color foreground = new Color(0, 0, 0);
+    private final Color background = new Color(239, 243, 241);
 
     private final List<TankData> tanks;
-    private final Font vt323;
+    private final Font pixelFont;
 
     private PlayerColumn p1Col;
     private PlayerColumn p2Col;
     private JLabel battleStatusLabel;
     private JPanel battleBtn;
-    private boolean blinkOn = true;
+    private boolean isBlinkVisible = true;
 
     public CharacterSelectPanel(List<TankData> tanks, Font font) {
-        this.tanks = tanks;
-        this.vt323 = font;
+        this.tanks     = tanks;
+        this.pixelFont = font;
 
         setLayout(new BorderLayout(0, 0));
         setOpaque(false);
@@ -52,11 +52,11 @@ public class CharacterSelectPanel extends JPanel {
         // --- Two player columns with a centre dividing line ---
         JPanel columnsPanel = new JPanel(new GridLayout(1, 2, 0, 0)) {
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
+            protected void paintComponent(Graphics graphics) {
+                super.paintComponent(graphics);
                 // Draw a faint vertical divider between the two player columns
-                g.setColor(new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 50));
-                g.drawLine(getWidth() / 2, 20, getWidth() / 2, getHeight() - 20);
+                graphics.setColor(new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue(), 50));
+                graphics.drawLine(getWidth() / 2, 20, getWidth() / 2, getHeight() - 20);
             }
         };
         columnsPanel.setOpaque(false);
@@ -79,15 +79,15 @@ public class CharacterSelectPanel extends JPanel {
         // Status label blinks when players aren't ready
         battleStatusLabel = new JLabel("AWAITING P2...") {
             @Override
-            protected void paintComponent(Graphics g) {
-                blinkOn = (System.currentTimeMillis() / 600) % 2 == 0;
-                if (blinkOn || (p1Col.isReady() && p2Col.isReady())) {
-                    super.paintComponent(g);
+            protected void paintComponent(Graphics graphics) {
+                isBlinkVisible = (System.currentTimeMillis() / 600) % 2 == 0;
+                if (isBlinkVisible || (p1Col.isReady() && p2Col.isReady())) {
+                    super.paintComponent(graphics);
                 }
             }
         };
-        battleStatusLabel.setFont(vt323.deriveFont(20f));
-        battleStatusLabel.setForeground(fg);
+        battleStatusLabel.setFont(pixelFont.deriveFont(20f));
+        battleStatusLabel.setForeground(foreground);
         battleStatusLabel.setPreferredSize(new Dimension(200, 40));
         battleStatusLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
@@ -116,8 +116,8 @@ public class CharacterSelectPanel extends JPanel {
      * Updates the BATTLE button's enabled state and the status label text.
      */
     void onStatusChanged() {
-        boolean p1Ready = p1Col.isReady();
-        boolean p2Ready = p2Col.isReady();
+        boolean p1Ready   = p1Col.isReady();
+        boolean p2Ready   = p2Col.isReady();
         boolean bothReady = p1Ready && p2Ready;
 
         battleBtn.setEnabled(bothReady);
@@ -140,54 +140,54 @@ public class CharacterSelectPanel extends JPanel {
     // -------------------------------------------------------------------------
 
     private JPanel createBattleButton() {
-        JPanel mainBtn = new JPanel(new BorderLayout()) {
+        JPanel battleButtonPanel = new JPanel(new BorderLayout()) {
             // Pre-render dither pattern for the disabled/greyed-out state
-            private BufferedImage ditherPattern;
+            private BufferedImage disabledDitherPattern;
             {
-                ditherPattern = new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2 = ditherPattern.createGraphics();
-                g2.setColor(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 80));
-                g2.drawLine(0, 2, 2, 0);
-                g2.drawLine(2, 4, 4, 2);
-                g2.dispose();
+                disabledDitherPattern = new BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D graphics2d = disabledDitherPattern.createGraphics();
+                graphics2d.setColor(new Color(background.getRed(), background.getGreen(), background.getBlue(), 80));
+                graphics2d.drawLine(0, 2, 2, 0);
+                graphics2d.drawLine(2, 4, 4, 2);
+                graphics2d.dispose();
             }
 
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
+            protected void paintComponent(Graphics graphics) {
+                super.paintComponent(graphics);
                 // When disabled, overlay a dithered pattern to signal inactivity
                 if (!isEnabled()) {
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setPaint(new TexturePaint(ditherPattern, new Rectangle(0, 0, 4, 4)));
-                    g2.fillRect(0, 0, getWidth(), getHeight());
-                    g2.dispose();
+                    Graphics2D graphics2d = (Graphics2D) graphics.create();
+                    graphics2d.setPaint(new TexturePaint(disabledDitherPattern, new Rectangle(0, 0, 4, 4)));
+                    graphics2d.fillRect(0, 0, getWidth(), getHeight());
+                    graphics2d.dispose();
                 }
             }
         };
-        mainBtn.setOpaque(false);
-        mainBtn.setPreferredSize(new Dimension(220, 54));
-        mainBtn.setMaximumSize(new Dimension(220, 54));
-        mainBtn.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 2),
+        battleButtonPanel.setOpaque(false);
+        battleButtonPanel.setPreferredSize(new Dimension(220, 54));
+        battleButtonPanel.setMaximumSize(new Dimension(220, 54));
+        battleButtonPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 2),
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
-        JLabel lbl = createLabel("BATTLE", 24f);
-        lbl.setForeground(fg);
-        lbl.setHorizontalAlignment(SwingConstants.CENTER);
-        mainBtn.add(lbl, BorderLayout.CENTER);
-        mainBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JLabel battleLabel = createLabel("BATTLE", 24f);
+        battleLabel.setForeground(foreground);
+        battleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        battleButtonPanel.add(battleLabel, BorderLayout.CENTER);
+        battleButtonPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        mainBtn.addMouseListener(new MouseAdapter() {
+        battleButtonPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!mainBtn.isEnabled())
+                if (!battleButtonPanel.isEnabled())
                     return;
 
                 // Collect selected data from both player columns
-                String p1Name = p1Col.getPlayerName();
-                int p1TankIdx = p1Col.getSelectedTankIndex();
-                String p2Name = p2Col.getPlayerName();
-                int p2TankIdx = p2Col.getSelectedTankIndex();
+                String p1Name   = p1Col.getPlayerName();
+                int    p1TankIdx = p1Col.getSelectedTankIndex();
+                String p2Name   = p2Col.getPlayerName();
+                int    p2TankIdx = p2Col.getSelectedTankIndex();
 
                 // Sync back to the global players list so Leaderboard stays current
                 if (Main.playersList.size() >= 2) {
@@ -208,32 +208,32 @@ public class CharacterSelectPanel extends JPanel {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (mainBtn.isEnabled()) {
-                    mainBtn.setOpaque(true);
-                    mainBtn.setBackground(fg);
-                    lbl.setForeground(bg);
+                if (battleButtonPanel.isEnabled()) {
+                    battleButtonPanel.setOpaque(true);
+                    battleButtonPanel.setBackground(foreground);
+                    battleLabel.setForeground(background);
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                mainBtn.setOpaque(false);
-                lbl.setForeground(fg);
-                lbl.setText("BATTLE");
+                battleButtonPanel.setOpaque(false);
+                battleLabel.setForeground(foreground);
+                battleLabel.setText("BATTLE");
             }
         });
 
-        return mainBtn;
+        return battleButtonPanel;
     }
 
     // -------------------------------------------------------------------------
     // SHARED LABEL HELPER
     // -------------------------------------------------------------------------
 
-    private JLabel createLabel(String txt, float fontSize) {
-        JLabel label = new JLabel(txt);
-        label.setFont(vt323.deriveFont(fontSize));
-        label.setForeground(fg);
+    private JLabel createLabel(String text, float fontSize) {
+        JLabel label = new JLabel(text);
+        label.setFont(pixelFont.deriveFont(fontSize));
+        label.setForeground(foreground);
         label.setOpaque(false);
         return label;
     }
@@ -252,7 +252,7 @@ public class CharacterSelectPanel extends JPanel {
      * - Offensive Power and Mobility Index stat rows
      */
     class PlayerColumn extends JPanel {
-        private int playerNum;
+        private int playerNumber;
         private int selectedTankIndex = 0;
         private boolean ready;
         private JTextField nameField;
@@ -260,92 +260,92 @@ public class CharacterSelectPanel extends JPanel {
         private JLabel tankNameLabel;
         // Cache loaded images so each PNG is only read from disk once per column
         private final Map<String, BufferedImage> imageCache = new HashMap<>();
-        private JPanel statsPanel;
+        private JPanel statRowsPanel;
         private JPanel statusBtnWrapper;
         private JPanel statusBtnMain;
         private JPanel statusBtnShadow;
         private JLabel statusLbl;
         private JLabel statusVal;
 
-        PlayerColumn(int num, String defaultName, boolean startReady) {
-            this.playerNum = num;
-            this.ready = startReady;
+        PlayerColumn(int playerNumber, String defaultName, boolean startReady) {
+            this.playerNumber = playerNumber;
+            this.ready        = startReady;
             setLayout(new BorderLayout(0, 0));
             setOpaque(false);
 
-            JPanel inner = new JPanel();
-            inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
-            inner.setOpaque(false);
-            inner.setBorder(BorderFactory.createEmptyBorder(14, 20, 14, 20));
+            JPanel columnContentPanel = new JPanel();
+            columnContentPanel.setLayout(new BoxLayout(columnContentPanel, BoxLayout.Y_AXIS));
+            columnContentPanel.setOpaque(false);
+            columnContentPanel.setBorder(BorderFactory.createEmptyBorder(14, 20, 14, 20));
 
             // --- Header row: PLAYER label + tank name chip ---
-            JPanel headerRow = new JPanel(new BorderLayout());
-            headerRow.setOpaque(false);
-            headerRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
+            JPanel playerHeaderRow = new JPanel(new BorderLayout());
+            playerHeaderRow.setOpaque(false);
+            playerHeaderRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
 
-            JLabel playerLabel = createLabel(String.format("PLAYER %02d", num), 36f);
-            if (num == 1) {
+            JLabel playerLabel = createLabel(String.format("PLAYER %02d", playerNumber), 36f);
+            if (playerNumber == 1) {
                 // P1: inverted (white text on black background)
                 playerLabel.setOpaque(true);
-                playerLabel.setBackground(fg);
-                playerLabel.setForeground(bg);
+                playerLabel.setBackground(foreground);
+                playerLabel.setForeground(background);
                 playerLabel.setBorder(BorderFactory.createEmptyBorder(2, 10, 2, 10));
             } else {
                 // P2: outlined
                 playerLabel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(fg, 2),
+                        BorderFactory.createLineBorder(foreground, 2),
                         BorderFactory.createEmptyBorder(2, 10, 2, 10)));
             }
-            headerRow.add(playerLabel, BorderLayout.WEST);
+            playerHeaderRow.add(playerLabel, BorderLayout.WEST);
 
             tankNameLabel = createLabel(tanks.get(0).getName(), 24f);
             tankNameLabel.setOpaque(true);
-            tankNameLabel.setBackground(fg);
-            tankNameLabel.setForeground(bg);
+            tankNameLabel.setBackground(foreground);
+            tankNameLabel.setForeground(background);
             tankNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
             tankNameLabel.setBorder(BorderFactory.createEmptyBorder(2, 10, 2, 10));
-            headerRow.add(tankNameLabel, BorderLayout.EAST);
+            playerHeaderRow.add(tankNameLabel, BorderLayout.EAST);
 
-            headerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
-            inner.add(headerRow);
-            inner.add(Box.createVerticalStrut(20));
+            playerHeaderRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+            columnContentPanel.add(playerHeaderRow);
+            columnContentPanel.add(Box.createVerticalStrut(20));
 
             // --- Identification row: NAME label + text field + STATUS button ---
-            JPanel identRow = new JPanel();
-            identRow.setLayout(new BoxLayout(identRow, BoxLayout.X_AXIS));
-            identRow.setOpaque(false);
-            identRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-            identRow.setPreferredSize(new Dimension(0, 50));
-            identRow.add(createLabel("NAME:", 24f));
-            identRow.add(Box.createHorizontalStrut(5));
+            JPanel nameAndStatusRow = new JPanel();
+            nameAndStatusRow.setLayout(new BoxLayout(nameAndStatusRow, BoxLayout.X_AXIS));
+            nameAndStatusRow.setOpaque(false);
+            nameAndStatusRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+            nameAndStatusRow.setPreferredSize(new Dimension(0, 50));
+            nameAndStatusRow.add(createLabel("NAME:", 24f));
+            nameAndStatusRow.add(Box.createHorizontalStrut(5));
 
             // Name input field (styled with DashedBorder)
             nameField = new JTextField(defaultName, 8);
-            nameField.setFont(vt323.deriveFont(24f));
-            nameField.setForeground(fg);
-            nameField.setBackground(bg);
+            nameField.setFont(pixelFont.deriveFont(24f));
+            nameField.setForeground(foreground);
+            nameField.setBackground(background);
             nameField.setOpaque(false);
-            nameField.setBorder(new DashedBorder(fg, 1, 4));
-            nameField.setCaretColor(fg);
+            nameField.setBorder(new DashedBorder(foreground, 1, 4));
+            nameField.setCaretColor(foreground);
             nameField.setMaximumSize(new Dimension(140, 44));
             nameField.setPreferredSize(new Dimension(140, 44));
             nameField.addFocusListener(new FocusAdapter() {
                 public void focusGained(FocusEvent e) {
                     nameField.setOpaque(true);
-                    nameField.setBackground(fg);
-                    nameField.setForeground(bg);
-                    nameField.setCaretColor(bg);
+                    nameField.setBackground(foreground);
+                    nameField.setForeground(background);
+                    nameField.setCaretColor(background);
                 }
 
                 public void focusLost(FocusEvent e) {
                     nameField.setOpaque(false);
-                    nameField.setBackground(bg);
-                    nameField.setForeground(fg);
-                    nameField.setCaretColor(fg);
+                    nameField.setBackground(background);
+                    nameField.setForeground(foreground);
+                    nameField.setCaretColor(foreground);
                 }
             });
-            identRow.add(nameField);
-            identRow.add(Box.createHorizontalStrut(5));
+            nameAndStatusRow.add(nameField);
+            nameAndStatusRow.add(Box.createHorizontalStrut(5));
 
             // --- READY/STANDBY status button (shadow-offset button style) ---
             statusBtnWrapper = new JPanel(null); // null layout for absolute positioning
@@ -355,12 +355,12 @@ public class CharacterSelectPanel extends JPanel {
 
             // Shadow panel sits behind and offset from the main button
             statusBtnShadow = new JPanel();
-            statusBtnShadow.setBackground(fg);
+            statusBtnShadow.setBackground(foreground);
             statusBtnShadow.setBounds(4, 4, 140, 40);
 
             // Main button surface — slightly wider to cover shadow's top-right corner
             statusBtnMain = new JPanel(new BorderLayout());
-            statusBtnMain.setBorder(BorderFactory.createLineBorder(fg, 2));
+            statusBtnMain.setBorder(BorderFactory.createLineBorder(foreground, 2));
             statusBtnMain.setBounds(0, 0, 144, 40);
 
             statusLbl = createLabel("STATUS", 14f);
@@ -394,89 +394,89 @@ public class CharacterSelectPanel extends JPanel {
                 }
             });
 
-            identRow.add(statusBtnWrapper);
-            inner.add(identRow);
-            inner.add(Box.createVerticalStrut(20));
+            nameAndStatusRow.add(statusBtnWrapper);
+            columnContentPanel.add(nameAndStatusRow);
+            columnContentPanel.add(Box.createVerticalStrut(20));
 
             // --- Tank carousel (< prev | pixel art | next >) ---
-            JPanel carousel = new JPanel(new BorderLayout(0, 0)) {
+            JPanel tankCarousel = new JPanel(new BorderLayout(0, 0)) {
                 @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setColor(fg);
-                    float[] dash = { 4f };
-                    g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+                protected void paintComponent(Graphics graphics) {
+                    super.paintComponent(graphics);
+                    Graphics2D graphics2d = (Graphics2D) graphics.create();
+                    graphics2d.setColor(foreground);
+                    float[] dashPattern = { 4f };
+                    graphics2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
                     // Draw only top and bottom dashed lines
-                    g2.drawLine(0, 0, getWidth() - 1, 0);
-                    g2.drawLine(0, getHeight() - 1, getWidth() - 1, getHeight() - 1);
-                    g2.dispose();
+                    graphics2d.drawLine(0, 0, getWidth() - 1, 0);
+                    graphics2d.drawLine(0, getHeight() - 1, getWidth() - 1, getHeight() - 1);
+                    graphics2d.dispose();
                 }
             };
-            carousel.setOpaque(false);
-            carousel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
-            carousel.setPreferredSize(new Dimension(260, 260));
+            tankCarousel.setOpaque(false);
+            tankCarousel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
+            tankCarousel.setPreferredSize(new Dimension(260, 260));
 
-            carousel.add(createCarouselBtn("<", () -> {
+            tankCarousel.add(createCarouselBtn("<", () -> {
                 selectedTankIndex = (selectedTankIndex - 1 + tanks.size()) % tanks.size();
                 refreshTankView();
             }, true), BorderLayout.WEST);
 
             tankCanvas = new JPanel() {
                 @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    Graphics2D g2 = (Graphics2D) g.create();
+                protected void paintComponent(Graphics graphics) {
+                    super.paintComponent(graphics);
+                    Graphics2D graphics2d = (Graphics2D) graphics.create();
                     // Use nearest-neighbour so pixel-art edges stay sharp at any scale
-                    g2.setRenderingHint(
+                    graphics2d.setRenderingHint(
                             RenderingHints.KEY_INTERPOLATION,
                             RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-                    TankData t = tanks.get(selectedTankIndex);
-                    String path = t.getImagePath();
-                    if (path != null) {
-                        BufferedImage img = imageCache.computeIfAbsent(path, p -> {
+                    TankData selectedTank = tanks.get(selectedTankIndex);
+                    String   imagePath    = selectedTank.getImagePath();
+                    if (imagePath != null) {
+                        BufferedImage tankImage = imageCache.computeIfAbsent(imagePath, path -> {
                             try {
-                                return ImageIO.read(new File(p));
+                                return ImageIO.read(new File(path));
                             } catch (Exception ex) {
                                 return null;
                             }
                         });
-                        if (img != null) {
+                        if (tankImage != null) {
                             // Scale image to fill 90% of the canvas, then centre it
-                            int maxDim = (int) (Math.min(getWidth(), getHeight()) * 0.90);
-                            double scale = Math.min((double) maxDim / img.getWidth(),
-                                    (double) maxDim / img.getHeight());
-                            int dw = (int) (img.getWidth() * scale);
-                            int dh = (int) (img.getHeight() * scale);
-                            int dx = getWidth() / 2 - dw / 2;
-                            int dy = getHeight() / 2 - dh / 2;
-                            g2.drawImage(img, dx, dy, dw, dh, null);
+                            int    maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.90);
+                            double imageScale        = Math.min((double) maxImageDimension / tankImage.getWidth(),
+                                    (double) maxImageDimension / tankImage.getHeight());
+                            int    drawWidth         = (int) (tankImage.getWidth()  * imageScale);
+                            int    drawHeight        = (int) (tankImage.getHeight() * imageScale);
+                            int    centeredDrawX     = getWidth()  / 2 - drawWidth  / 2;
+                            int    centeredDrawY     = getHeight() / 2 - drawHeight / 2;
+                            graphics2d.drawImage(tankImage, centeredDrawX, centeredDrawY, drawWidth, drawHeight, null);
                         }
                     }
-                    g2.dispose();
+                    graphics2d.dispose();
                 }
             };
             tankCanvas.setOpaque(false);
-            carousel.add(tankCanvas, BorderLayout.CENTER);
+            tankCarousel.add(tankCanvas, BorderLayout.CENTER);
 
-            carousel.add(createCarouselBtn(">", () -> {
+            tankCarousel.add(createCarouselBtn(">", () -> {
                 selectedTankIndex = (selectedTankIndex + 1) % tanks.size();
                 refreshTankView();
             }, false), BorderLayout.EAST);
 
-            inner.add(carousel);
-            inner.add(Box.createVerticalStrut(20));
+            columnContentPanel.add(tankCarousel);
+            columnContentPanel.add(Box.createVerticalStrut(20));
 
             // --- Stats panel (populated by refreshTankView) ---
-            statsPanel = new JPanel();
-            statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
-            statsPanel.setOpaque(false);
-            inner.add(statsPanel);
+            statRowsPanel = new JPanel();
+            statRowsPanel.setLayout(new BoxLayout(statRowsPanel, BoxLayout.Y_AXIS));
+            statRowsPanel.setOpaque(false);
+            columnContentPanel.add(statRowsPanel);
             refreshTankView();
 
-            inner.add(Box.createVerticalStrut(20));
+            columnContentPanel.add(Box.createVerticalStrut(20));
             applyStatusStyle();
-            add(inner, BorderLayout.CENTER);
+            add(columnContentPanel, BorderLayout.CENTER);
         }
 
         // --- State management ---
@@ -485,15 +485,15 @@ public class CharacterSelectPanel extends JPanel {
          * Re-reads the selected tank and updates the name chip, canvas, and stat rows.
          */
         private void refreshTankView() {
-            TankData t = tanks.get(selectedTankIndex);
-            tankNameLabel.setText(t.getName());
+            TankData selectedTank = tanks.get(selectedTankIndex);
+            tankNameLabel.setText(selectedTank.getName());
             tankCanvas.repaint();
-            statsPanel.removeAll();
-            statsPanel.add(buildFidelityStatRow("OFFENSIVE POWER", t.getOffensivePower(), false));
-            statsPanel.add(Box.createVerticalStrut(10));
-            statsPanel.add(buildFidelityStatRow("MOBILITY INDEX", t.getMobilityIndex(), false));
-            statsPanel.revalidate();
-            statsPanel.repaint();
+            statRowsPanel.removeAll();
+            statRowsPanel.add(buildFidelityStatRow("OFFENSIVE POWER", selectedTank.getOffensivePower(), false));
+            statRowsPanel.add(Box.createVerticalStrut(10));
+            statRowsPanel.add(buildFidelityStatRow("MOBILITY INDEX", selectedTank.getMobilityIndex(), false));
+            statRowsPanel.revalidate();
+            statRowsPanel.repaint();
         }
 
         /**
@@ -515,23 +515,23 @@ public class CharacterSelectPanel extends JPanel {
             if (ready) {
                 // READY: solid black background, white text, visible shadow
                 statusBtnMain.setOpaque(true);
-                statusBtnMain.setBackground(fg);
-                statusLbl.setForeground(bg);
-                statusVal.setForeground(bg);
+                statusBtnMain.setBackground(foreground);
+                statusLbl.setForeground(background);
+                statusVal.setForeground(background);
                 statusVal.setText("[ READY ]");
                 statusBtnMain.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(fg, 2),
+                        BorderFactory.createLineBorder(foreground, 2),
                         BorderFactory.createEmptyBorder(0, 4, 0, 4)));
                 statusBtnShadow.setVisible(true);
             } else {
                 // STANDBY: transparent background, dashed border, hidden shadow
                 statusBtnMain.setOpaque(false);
-                statusBtnMain.setBackground(bg);
-                statusLbl.setForeground(fg);
-                statusVal.setForeground(fg);
+                statusBtnMain.setBackground(background);
+                statusLbl.setForeground(foreground);
+                statusVal.setForeground(foreground);
                 statusVal.setText("[ STANDBY ]");
                 statusBtnMain.setBorder(BorderFactory.createCompoundBorder(
-                        new DashedBorder(fg, 1, 4),
+                        new DashedBorder(foreground, 1, 4),
                         BorderFactory.createEmptyBorder(0, 4, 0, 4)));
                 statusBtnShadow.setVisible(false);
             }
@@ -540,65 +540,65 @@ public class CharacterSelectPanel extends JPanel {
         // --- Component builders ---
 
         /** Creates one stat row (label + numeric value + progress bar). */
-        private JPanel buildFidelityStatRow(String label, double val, boolean dithered) {
-            JPanel p = new JPanel();
-            p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-            p.setOpaque(true);
-            p.setBackground(bg);
-            p.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(fg, 1),
+        private JPanel buildFidelityStatRow(String labelText, double value, boolean dithered) {
+            JPanel statPanel = new JPanel();
+            statPanel.setLayout(new BoxLayout(statPanel, BoxLayout.Y_AXIS));
+            statPanel.setOpaque(true);
+            statPanel.setBackground(background);
+            statPanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(foreground, 1),
                     BorderFactory.createEmptyBorder(6, 8, 6, 8)));
-            p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
+            statPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
 
-            JPanel top = new JPanel(new BorderLayout());
-            top.setOpaque(false);
-            top.add(createLabel(label, 16f), BorderLayout.WEST);
-            top.add(createLabel(String.format("%.1f", val), 16f), BorderLayout.EAST);
-            p.add(top);
-            p.add(Box.createVerticalStrut(4));
+            JPanel statHeaderRow = new JPanel(new BorderLayout());
+            statHeaderRow.setOpaque(false);
+            statHeaderRow.add(createLabel(labelText, 16f), BorderLayout.WEST);
+            statHeaderRow.add(createLabel(String.format("%.1f", value), 16f), BorderLayout.EAST);
+            statPanel.add(statHeaderRow);
+            statPanel.add(Box.createVerticalStrut(4));
 
-            JPanel barContainer = new JPanel(new BorderLayout());
-            barContainer.setOpaque(false);
-            barContainer.setPreferredSize(new Dimension(0, 18));
-            barContainer.setBorder(BorderFactory.createLineBorder(fg, 1));
-            DitheredBar bar = new DitheredBar((int) val, dithered);
-            bar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-            barContainer.add(bar);
-            p.add(barContainer);
-            return p;
+            JPanel progressBarContainer = new JPanel(new BorderLayout());
+            progressBarContainer.setOpaque(false);
+            progressBarContainer.setPreferredSize(new Dimension(0, 18));
+            progressBarContainer.setBorder(BorderFactory.createLineBorder(foreground, 1));
+            DitheredBar progressBar = new DitheredBar((int) value, dithered);
+            progressBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            progressBarContainer.add(progressBar);
+            statPanel.add(progressBarContainer);
+            return statPanel;
         }
 
         /** Creates a < or > navigation button for the tank carousel. */
         private JPanel createCarouselBtn(String label, Runnable action, boolean left) {
-            JPanel btn = new JPanel(new BorderLayout());
-            btn.setOpaque(false);
-            btn.setPreferredSize(new Dimension(40, Integer.MAX_VALUE));
-            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            btn.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(fg, 1),
+            JPanel carouselButtonPanel = new JPanel(new BorderLayout());
+            carouselButtonPanel.setOpaque(false);
+            carouselButtonPanel.setPreferredSize(new Dimension(40, Integer.MAX_VALUE));
+            carouselButtonPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            carouselButtonPanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(foreground, 1),
                     BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-            JLabel lbl = createLabel(label, 28f);
-            lbl.setHorizontalAlignment(SwingConstants.CENTER);
-            btn.add(lbl, BorderLayout.CENTER);
-            btn.addMouseListener(new MouseAdapter() {
+            JLabel carouselArrowLabel = createLabel(label, 28f);
+            carouselArrowLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            carouselButtonPanel.add(carouselArrowLabel, BorderLayout.CENTER);
+            carouselButtonPanel.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
                     action.run();
                 }
 
                 public void mouseEntered(MouseEvent e) {
-                    btn.setOpaque(true);
-                    btn.setBackground(fg);
-                    lbl.setForeground(bg);
-                    btn.repaint();
+                    carouselButtonPanel.setOpaque(true);
+                    carouselButtonPanel.setBackground(foreground);
+                    carouselArrowLabel.setForeground(background);
+                    carouselButtonPanel.repaint();
                 }
 
                 public void mouseExited(MouseEvent e) {
-                    btn.setOpaque(false);
-                    lbl.setForeground(fg);
-                    btn.repaint();
+                    carouselButtonPanel.setOpaque(false);
+                    carouselArrowLabel.setForeground(foreground);
+                    carouselButtonPanel.repaint();
                 }
             });
-            return btn;
+            return carouselButtonPanel;
         }
 
         // --- Public accessors used by CharacterSelectPanel ---
@@ -608,7 +608,7 @@ public class CharacterSelectPanel extends JPanel {
         }
 
         String getPlayerName() {
-            return nameField.getText().trim().isEmpty() ? "PLAYER_" + playerNum : nameField.getText().trim();
+            return nameField.getText().trim().isEmpty() ? "PLAYER_" + playerNumber : nameField.getText().trim();
         }
 
         int getSelectedTankIndex() {

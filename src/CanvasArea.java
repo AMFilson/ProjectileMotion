@@ -28,16 +28,16 @@ import java.util.function.IntSupplier;
  */
 public class CanvasArea extends JPanel {
 
-    private final Color bg = new Color(239, 243, 241);
-    private final Color fg = new Color(0, 0, 0);
+    private final Color foreground = new Color(0, 0, 0);
+    private final Color background = new Color(239, 243, 241);
 
     private final List<TankData>  tanks;
     private final IntSupplier     tankIndexGetter;
-    private final Font            vt323;
+    private final Font            pixelFont;
 
     /**
      * Cache of loaded BufferedImages so we don't re-read the PNG file on
-     * every repaint. The map key is the image path string from TankData.getImagePath().
+     * every repaint. The map key is the image path string from TankData.getImagePath().\
      *
      * LEARNING (HashMap as a cache):
      *   HashMap.computeIfAbsent(key, loader) checks if the key already has a value.
@@ -54,73 +54,74 @@ public class CanvasArea extends JPanel {
     public CanvasArea(List<TankData> tanks, IntSupplier tankIndexGetter, Font font) {
         this.tanks           = tanks;
         this.tankIndexGetter = tankIndexGetter;
-        this.vt323           = font;
+        this.pixelFont       = font;
     }
 
     /**
      * Loads a PNG from disk, caching it after the first load.
      * Returns null if the file doesn't exist or can't be read.
      */
-    private BufferedImage loadImage(String path) {
-        if (path == null) return null;
-        return imageCache.computeIfAbsent(path, p -> {
+    private BufferedImage loadImage(String imagePath) {
+        if (imagePath == null) return null;
+        return imageCache.computeIfAbsent(imagePath, path -> {
             try {
-                return ImageIO.read(new File(p));
+                return ImageIO.read(new File(path));
             } catch (Exception e) {
-                System.err.println("CanvasArea: could not load image: " + p);
+                System.err.println("CanvasArea: could not load image: " + path);
                 return null;
             }
         });
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g.create();
+    protected void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
+        Graphics2D graphics2d = (Graphics2D) graphics.create();
 
-        int cx = getWidth() / 2;
+        // Horizontal centre of the canvas — used to position text and image
+        int canvasCenterX = getWidth() / 2;
 
-        int      idx         = tankIndexGetter.getAsInt();
-        TankData currentTank = tanks.get(idx);
-        String   tankName    = currentTank.getName();
+        int      selectedTankIndex = tankIndexGetter.getAsInt();
+        TankData currentTank       = tanks.get(selectedTankIndex);
+        String   tankName          = currentTank.getName();
 
         // --- Draw tank name label (inverted chip at bottom of canvas) ---
-        g2.setFont(vt323.deriveFont(32f));
-        FontMetrics sfm = g2.getFontMetrics();
-        int sw = sfm.stringWidth(tankName);
-        int sh = 40;
-        int sy = getHeight() - 60;
-        int tx = cx - sw / 2;
-        int ty = sy + (sh + sfm.getAscent()) / 2 - 4;
-        g2.setColor(fg);
-        g2.fillRect(tx - 10, sy + 5, sw + 20, sh - 10);
-        g2.setColor(bg);
-        g2.drawString(tankName, tx, ty);
+        graphics2d.setFont(pixelFont.deriveFont(32f));
+        FontMetrics fontMetrics     = graphics2d.getFontMetrics();
+        int tankNameTextWidth       = fontMetrics.stringWidth(tankName);
+        int labelBoxHeight          = 40;
+        int labelBoxY               = getHeight() - 60;
+        int tankNameTextX           = canvasCenterX - tankNameTextWidth / 2;
+        int tankNameTextY           = labelBoxY + (labelBoxHeight + fontMetrics.getAscent()) / 2 - 4;
+        graphics2d.setColor(foreground);
+        graphics2d.fillRect(tankNameTextX - 10, labelBoxY + 5, tankNameTextWidth + 20, labelBoxHeight - 10);
+        graphics2d.setColor(background);
+        graphics2d.drawString(tankName, tankNameTextX, tankNameTextY);
 
         // --- Load and draw the PNG sprite ---
-        BufferedImage img = loadImage(currentTank.getImagePath());
-        if (img != null) {
+        BufferedImage tankImage = loadImage(currentTank.getImagePath());
+        if (tankImage != null) {
             // Use nearest-neighbour interpolation so the pixel art stays crisp
             // when scaled up (no blurring of the hard edges).
-            g2.setRenderingHint(
+            graphics2d.setRenderingHint(
                 RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
             // Scale the image to fill roughly 55% of the shorter panel dimension,
             // then centre it in the canvas area.
-            int maxDim   = (int) (Math.min(getWidth(), getHeight()) * 0.55);
-            int imgW     = img.getWidth();
-            int imgH     = img.getHeight();
-            double scale = Math.min((double) maxDim / imgW, (double) maxDim / imgH);
-            int drawW    = (int) (imgW * scale);
-            int drawH    = (int) (imgH * scale);
-            int drawX    = cx - drawW / 2;
+            int    maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.55);
+            int    imageWidth        = tankImage.getWidth();
+            int    imageHeight       = tankImage.getHeight();
+            double imageScale        = Math.min((double) maxImageDimension / imageWidth, (double) maxImageDimension / imageHeight);
+            int    drawWidth         = (int) (imageWidth  * imageScale);
+            int    drawHeight        = (int) (imageHeight * imageScale);
+            int    centeredDrawX     = canvasCenterX - drawWidth / 2;
             // Centre vertically in the space above the name label
-            int drawY    = (sy - drawH) / 2;
+            int    centeredDrawY     = (labelBoxY - drawHeight) / 2;
 
-            g2.drawImage(img, drawX, drawY, drawW, drawH, null);
+            graphics2d.drawImage(tankImage, centeredDrawX, centeredDrawY, drawWidth, drawHeight, null);
         }
 
-        g2.dispose();
+        graphics2d.dispose();
     }
 }

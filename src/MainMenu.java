@@ -25,9 +25,9 @@ import java.util.Date;
  */
 public class MainMenu extends JFrame {
 
-    private Font  vt323_base;
-    private Color bg = new Color(239, 243, 241);
-    private Color fg = new Color(0, 0, 0);
+    private Font  pixelFont;
+    private Color background = new Color(239, 243, 241);
+    private Color foreground = new Color(0, 0, 0);
 
     // Shared tank roster — passed by reference to CanvasArea and CharacterSelectPanel
     private java.util.List<TankData> tanks = new java.util.ArrayList<>();
@@ -69,13 +69,13 @@ public class MainMenu extends JFrame {
         try {
             File fontFile = new File("src/fonts/VT323-Regular.ttf");
             if (fontFile.exists()) {
-                vt323_base = Font.createFont(Font.TRUETYPE_FONT, fontFile);
-                GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(vt323_base);
+                pixelFont = Font.createFont(Font.TRUETYPE_FONT, fontFile);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(pixelFont);
             } else {
-                vt323_base = new Font("Monospaced", Font.PLAIN, 16);
+                pixelFont = new Font("Monospaced", Font.PLAIN, 16);
             }
         } catch (Exception e) {
-            vt323_base = new Font("Monospaced", Font.PLAIN, 16);
+            pixelFont = new Font("Monospaced", Font.PLAIN, 16);
         }
 
         // Custom crosshair cursor
@@ -90,17 +90,17 @@ public class MainMenu extends JFrame {
         // Root panel with dot-matrix scanline background
         JPanel rootPanel = new JPanel(new GridBagLayout()) {
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(bg);
-                g.fillRect(0, 0, getWidth(), getHeight());
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setColor(fg);
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.05f));
+            protected void paintComponent(Graphics graphics) {
+                super.paintComponent(graphics);
+                graphics.setColor(background);
+                graphics.fillRect(0, 0, getWidth(), getHeight());
+                Graphics2D graphics2d = (Graphics2D) graphics.create();
+                graphics2d.setColor(foreground);
+                graphics2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.05f));
                 for (int y = 0; y < getHeight(); y += 4)
                     for (int x = 0; x < getWidth(); x += 4)
-                        g2.fillRect(x, y, 1, 1);
-                g2.dispose();
+                        graphics2d.fillRect(x, y, 1, 1);
+                graphics2d.dispose();
             }
         };
 
@@ -108,9 +108,9 @@ public class MainMenu extends JFrame {
         MainFramePanel mainFrame = new MainFramePanel();
         mainFrame.setPreferredSize(new Dimension(900, 600));
         mainFrame.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(6, 6, 6, 6);
+        GridBagConstraints layoutConstraints = new GridBagConstraints();
+        layoutConstraints.fill = GridBagConstraints.BOTH;
+        layoutConstraints.insets = new Insets(6, 6, 6, 6);
 
         // =====================================================================
         // HEADER
@@ -118,7 +118,7 @@ public class MainMenu extends JFrame {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
         headerPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, fg),
+                BorderFactory.createMatteBorder(0, 0, 2, 0, foreground),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
 
         JPanel titleBlock = new JPanel();
@@ -133,9 +133,9 @@ public class MainMenu extends JFrame {
         headerPanel.add(titleBlock, BorderLayout.WEST);
         headerPanel.add(systemStatus, BorderLayout.EAST);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 3;
-        gbc.weightx = 1.0; gbc.weighty = 0.0;
-        mainFrame.add(headerPanel, gbc);
+        layoutConstraints.gridx = 0; layoutConstraints.gridy = 0; layoutConstraints.gridwidth = 3;
+        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 0.0;
+        mainFrame.add(headerPanel, layoutConstraints);
 
         // =====================================================================
         // LEFT SIDEBAR NAV
@@ -144,7 +144,7 @@ public class MainMenu extends JFrame {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setOpaque(false);
         sidebar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, fg),
+                BorderFactory.createMatteBorder(0, 0, 0, 1, foreground),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
         String[] navNames = { "NEW GAME", "HOW TO PLAY", "LEADERBOARD", "SAVE/LOAD", "TERMINATE" };
@@ -166,37 +166,37 @@ public class MainMenu extends JFrame {
         navItemsList.add(homeBtn);
         sidebar.add(homeBtn);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
-        gbc.weightx = 0.0; gbc.weighty = 1.0;
+        layoutConstraints.gridx = 0; layoutConstraints.gridy = 1; layoutConstraints.gridwidth = 1;
+        layoutConstraints.weightx = 0.0; layoutConstraints.weighty = 1.0;
         sidebar.setPreferredSize(new Dimension(220, 0));
-        mainFrame.add(sidebar, gbc);
+        mainFrame.add(sidebar, layoutConstraints);
 
         // =====================================================================
         // HOME PANEL (canvas + info sidebar) — first card in CardLayout
         // =====================================================================
-        canvas = new CanvasArea(tanks, () -> currentTankIndex, vt323_base);
+        canvas = new CanvasArea(tanks, () -> currentTankIndex, pixelFont);
         canvas.setOpaque(false);
         canvas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                new DashedBorder(fg, 1, 4)));
+                new DashedBorder(foreground, 1, 4)));
 
         infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 1, 0, 0, fg),
+                BorderFactory.createMatteBorder(0, 1, 0, 0, foreground),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
         updateInfoPanel();
         infoPanel.setPreferredSize(new Dimension(185, 0));
 
         JPanel homePanel = new JPanel(new GridBagLayout());
         homePanel.setOpaque(false);
-        GridBagConstraints hgbc = new GridBagConstraints();
-        hgbc.fill = GridBagConstraints.BOTH;
-        hgbc.gridx = 0; hgbc.gridy = 0; hgbc.weightx = 1.0; hgbc.weighty = 1.0;
-        homePanel.add(canvas, hgbc);
-        hgbc.gridx = 1; hgbc.weightx = 0.0;
-        homePanel.add(infoPanel, hgbc);
+        GridBagConstraints homeLayoutConstraints = new GridBagConstraints();
+        homeLayoutConstraints.fill = GridBagConstraints.BOTH;
+        homeLayoutConstraints.gridx = 0; homeLayoutConstraints.gridy = 0; homeLayoutConstraints.weightx = 1.0; homeLayoutConstraints.weighty = 1.0;
+        homePanel.add(canvas, homeLayoutConstraints);
+        homeLayoutConstraints.gridx = 1; homeLayoutConstraints.weightx = 0.0;
+        homePanel.add(infoPanel, homeLayoutConstraints);
 
         // =====================================================================
         // CARD LAYOUT (HOME / LEADERBOARD / NEW_GAME)
@@ -205,13 +205,13 @@ public class MainMenu extends JFrame {
         cardContentPanel = new JPanel(cardLayout);
         cardContentPanel.setOpaque(false);
 
-        cardContentPanel.add(homePanel,                                    "HOME");
-        cardContentPanel.add(new LeaderboardPanel(vt323_base),             "LEADERBOARD");
-        cardContentPanel.add(new CharacterSelectPanel(tanks, vt323_base),  "NEW_GAME");
+        cardContentPanel.add(homePanel,                                      "HOME");
+        cardContentPanel.add(new LeaderboardPanel(pixelFont),                "LEADERBOARD");
+        cardContentPanel.add(new CharacterSelectPanel(tanks, pixelFont),     "NEW_GAME");
 
-        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 2;
-        gbc.weightx = 1.0; gbc.weighty = 1.0;
-        mainFrame.add(cardContentPanel, gbc);
+        layoutConstraints.gridx = 1; layoutConstraints.gridy = 1; layoutConstraints.gridwidth = 2;
+        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 1.0;
+        mainFrame.add(cardContentPanel, layoutConstraints);
 
         // =====================================================================
         // FOOTER
@@ -219,7 +219,7 @@ public class MainMenu extends JFrame {
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setOpaque(false);
         footerPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, fg),
+                BorderFactory.createMatteBorder(2, 0, 0, 0, foreground),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         footerPanel.add(createLabel("CREATED BY ANDREW FILSON", 16f), BorderLayout.WEST);
 
@@ -227,9 +227,9 @@ public class MainMenu extends JFrame {
         rightFooterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         footerPanel.add(rightFooterLabel, BorderLayout.EAST);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 3;
-        gbc.weightx = 1.0; gbc.weighty = 0.0;
-        mainFrame.add(footerPanel, gbc);
+        layoutConstraints.gridx = 0; layoutConstraints.gridy = 2; layoutConstraints.gridwidth = 3;
+        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 0.0;
+        mainFrame.add(footerPanel, layoutConstraints);
 
         rootPanel.add(mainFrame);
         add(rootPanel);
@@ -245,10 +245,10 @@ public class MainMenu extends JFrame {
         // Subtle opacity flicker animation on the main frame
         Timer flickerAct = new Timer(100, e -> {
             flickerStep = (flickerStep + 1) % 40;
-            float alpha = 1.0f;
-            if (flickerStep == 5)  alpha = 0.95f;
-            if (flickerStep == 7)  alpha = 0.98f;
-            mainFrame.setOpacity(alpha);
+            float frameOpacity = 1.0f;
+            if (flickerStep == 5)  frameOpacity = 0.95f;
+            if (flickerStep == 7)  frameOpacity = 0.98f;
+            mainFrame.setOpacity(frameOpacity);
             mainFrame.repaint();
         });
         flickerAct.start();
@@ -258,12 +258,12 @@ public class MainMenu extends JFrame {
     // LABEL FACTORY
     // =========================================================================
 
-    private JLabel createLabel(String txt, float fontSize) {
-        JLabel lbl = new JLabel(txt);
-        lbl.setFont(vt323_base.deriveFont(fontSize));
-        lbl.setForeground(fg);
-        lbl.setOpaque(false);
-        return lbl;
+    private JLabel createLabel(String text, float fontSize) {
+        JLabel label = new JLabel(text);
+        label.setFont(pixelFont.deriveFont(fontSize));
+        label.setForeground(foreground);
+        label.setOpaque(false);
+        return label;
     }
 
     // =========================================================================
@@ -282,37 +282,37 @@ public class MainMenu extends JFrame {
 
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 2),
+                BorderFactory.createLineBorder(foreground, 2),
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
-        JLabel leftLbl  = createLabel("□ " + title, 24f);
-        JLabel rightLbl = createLabel(num, 24f);
-        panel.add(leftLbl,  BorderLayout.WEST);
-        panel.add(rightLbl, BorderLayout.EAST);
+        JLabel navTitleLabel  = createLabel("□ " + title, 24f);
+        JLabel navNumberLabel = createLabel(num, 24f);
+        panel.add(navTitleLabel,  BorderLayout.WEST);
+        panel.add(navNumberLabel, BorderLayout.EAST);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
 
-        Runnable highlight = () -> {
+        Runnable onHover = () -> {
             panel.setOpaque(true);
-            panel.setBackground(fg);
-            leftLbl.setForeground(bg);
-            leftLbl.setText("■ " + title);
-            rightLbl.setForeground(bg);
+            panel.setBackground(foreground);
+            navTitleLabel.setForeground(background);
+            navTitleLabel.setText("■ " + title);
+            navNumberLabel.setForeground(background);
             panel.repaint();
         };
-        Runnable unhighlight = () -> {
+        Runnable onUnhover = () -> {
             panel.setOpaque(false);
-            leftLbl.setForeground(fg);
-            leftLbl.setText("□ " + title);
-            rightLbl.setForeground(fg);
+            navTitleLabel.setForeground(foreground);
+            navTitleLabel.setText("□ " + title);
+            navNumberLabel.setForeground(foreground);
             panel.repaint();
         };
 
-        navHighlightResetters.add(unhighlight);
+        navHighlightResetters.add(onUnhover);
 
         panel.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { highlight.run(); }
-            public void focusLost(FocusEvent e)   { unhighlight.run(); }
+            public void focusGained(FocusEvent e) { onHover.run(); }
+            public void focusLost(FocusEvent e)   { onUnhover.run(); }
         });
 
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
@@ -321,8 +321,8 @@ public class MainMenu extends JFrame {
         });
 
         panel.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { highlight.run(); }
-            public void mouseExited(MouseEvent e)  { if (!isNavActive(title)) unhighlight.run(); }
+            public void mouseEntered(MouseEvent e) { onHover.run(); }
+            public void mouseExited(MouseEvent e)  { if (!isNavActive(title)) onUnhover.run(); }
             public void mousePressed(MouseEvent e) { handleNavClick(title); }
         });
 
@@ -338,7 +338,7 @@ public class MainMenu extends JFrame {
     // =========================================================================
 
     private void handleNavClick(String title) {
-        for (Runnable r : navHighlightResetters) r.run();
+        for (Runnable resetHighlight : navHighlightResetters) resetHighlight.run();
 
         if      (title.equals("NEW GAME"))    cardLayout.show(cardContentPanel, "NEW_GAME");
         else if (title.equals("LEADERBOARD")) cardLayout.show(cardContentPanel, "LEADERBOARD");
@@ -349,16 +349,16 @@ public class MainMenu extends JFrame {
 
     private void handleSaveLoad() {
         Object[] options = { "Save", "Load", "Cancel" };
-        int n = JOptionPane.showOptionDialog(this,
+        int dialogChoice = JOptionPane.showOptionDialog(this,
                 "Would you like to Save or Load a game file?",
                 "SAVE/LOAD",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null, options, options[2]);
 
-        if (n == JOptionPane.YES_OPTION) {
+        if (dialogChoice == JOptionPane.YES_OPTION) {
             DataManager.saveGame(this, new String[]{ "No actual game data to save from menu yet" });
-        } else if (n == JOptionPane.NO_OPTION) {
+        } else if (dialogChoice == JOptionPane.NO_OPTION) {
             DataManager.loadGame(this);
         }
     }
@@ -374,7 +374,7 @@ public class MainMenu extends JFrame {
         TankData currentTank = tanks.get(currentTankIndex);
         infoPanel.add(createStatBox("OFFENSIVE POWER", String.format("%.1f", currentTank.getOffensivePower()), (int) currentTank.getOffensivePower(), false));
         infoPanel.add(Box.createVerticalStrut(16));
-        infoPanel.add(createStatBox("MOBILITY INDEX",  String.format("%.1f", currentTank.getMobilityIndex()),  (int) currentTank.getMobilityIndex(),  false));
+        infoPanel.add(createStatBox("MOBILITY INDEX", String.format("%.1f", currentTank.getMobilityIndex()), (int) currentTank.getMobilityIndex(), false));
         infoPanel.add(Box.createVerticalStrut(16));
         infoPanel.add(createExpBlock());
         infoPanel.add(Box.createVerticalGlue());
@@ -391,7 +391,7 @@ public class MainMenu extends JFrame {
         }));
         arrowPanel.add(Box.createVerticalStrut(8));
         arrowPanel.add(createIconButton(() -> {
-            for (TankData t : tanks) t.rerollStats();
+            for (TankData tank : tanks) tank.rerollStats();
             updateInfoPanel();
             canvas.repaint();
         }));
@@ -407,68 +407,68 @@ public class MainMenu extends JFrame {
         infoPanel.repaint();
     }
 
-    private JPanel createStatBox(String labelTxt, String valTxt, int percentage, boolean dithered) {
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        box.setOpaque(false);
-        box.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1),
+    private JPanel createStatBox(String labelText, String valueText, int percentage, boolean dithered) {
+        JPanel statBox = new JPanel();
+        statBox.setLayout(new BoxLayout(statBox, BoxLayout.Y_AXIS));
+        statBox.setOpaque(false);
+        statBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
-        box.setToolTipText("Detailed stats for the selected unit: " + labelTxt);
+        statBox.setToolTipText("Detailed stats for the selected unit: " + labelText);
 
-        JLabel lbl = createLabel(labelTxt, 12f);
-        lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lbl.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-        box.add(lbl);
+        JLabel statLabel = createLabel(labelText, 12f);
+        statLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        statLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        statBox.add(statLabel);
 
-        JLabel val = createLabel(valTxt, 24f);
-        val.setAlignmentX(Component.LEFT_ALIGNMENT);
-        val.setFont(val.getFont().deriveFont(Font.BOLD));
-        val.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        box.add(val);
+        JLabel statValueLabel = createLabel(valueText, 24f);
+        statValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statValueLabel.setFont(statValueLabel.getFont().deriveFont(Font.BOLD));
+        statValueLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        statBox.add(statValueLabel);
 
-        DitheredBar bar = new DitheredBar(percentage, dithered);
-        bar.setPreferredSize(new Dimension(160, 12));
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
-        bar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.add(bar);
-        box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
-        return box;
+        DitheredBar progressBar = new DitheredBar(percentage, dithered);
+        progressBar.setPreferredSize(new Dimension(160, 12));
+        progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
+        progressBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statBox.add(progressBar);
+        statBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
+        return statBox;
     }
 
     private JPanel createExpBlock() {
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        box.setOpaque(false);
-        box.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1),
+        JPanel expBox = new JPanel();
+        expBox.setLayout(new BoxLayout(expBox, BoxLayout.Y_AXIS));
+        expBox.setOpaque(false);
+        expBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        expBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
-        box.setToolTipText("Your current level and pilot proficiency");
+        expBox.setToolTipText("Your current level and pilot proficiency");
 
-        JPanel topRow = new JPanel(new BorderLayout());
-        topRow.setOpaque(false);
-        topRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        topRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-        topRow.add(createLabel("CURRENT LVL", 12f), BorderLayout.WEST);
-        topRow.add(createLabel("L_12", 12f), BorderLayout.EAST);
-        topRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, fg));
-        box.add(topRow);
+        JPanel levelHeaderRow = new JPanel(new BorderLayout());
+        levelHeaderRow.setOpaque(false);
+        levelHeaderRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        levelHeaderRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        levelHeaderRow.add(createLabel("CURRENT LVL", 12f), BorderLayout.WEST);
+        levelHeaderRow.add(createLabel("L_12", 12f), BorderLayout.EAST);
+        levelHeaderRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        expBox.add(levelHeaderRow);
 
-        JLabel val = createLabel(" ", 24f);
-        val.setAlignmentX(Component.LEFT_ALIGNMENT);
-        val.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        box.add(val);
+        JLabel expValueLabel = createLabel(" ", 24f);
+        expValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        expValueLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        expBox.add(expValueLabel);
 
-        DitheredBar bar = new DitheredBar(65, true);
-        bar.setPreferredSize(new Dimension(160, 12));
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
-        bar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        box.add(bar);
-        box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
-        return box;
+        DitheredBar progressBar = new DitheredBar(65, true);
+        progressBar.setPreferredSize(new Dimension(160, 12));
+        progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
+        progressBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        expBox.add(progressBar);
+        expBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
+        return expBox;
     }
 
     private JPanel createArrowButton(String title, Runnable action) {
@@ -477,30 +477,30 @@ public class MainMenu extends JFrame {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1),
+                BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(8, 16, 8, 16)));
         panel.setToolTipText(title.equals("^") ? "Previous tank unit" : "Next tank unit");
 
-        JLabel lbl = createLabel(title, 20f);
-        lbl.setHorizontalAlignment(SwingConstants.CENTER);
-        panel.add(lbl, BorderLayout.CENTER);
+        JLabel arrowLabel = createLabel(title, 20f);
+        arrowLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(arrowLabel, BorderLayout.CENTER);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
 
-        Runnable hl  = () -> { panel.setOpaque(true); panel.setBackground(fg); lbl.setForeground(bg); panel.repaint(); };
-        Runnable uhl = () -> { panel.setOpaque(false); lbl.setForeground(fg); panel.repaint(); };
+        Runnable onHover   = () -> { panel.setOpaque(true); panel.setBackground(foreground); arrowLabel.setForeground(background); panel.repaint(); };
+        Runnable onUnhover = () -> { panel.setOpaque(false); arrowLabel.setForeground(foreground); panel.repaint(); };
 
         panel.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { hl.run(); }
-            public void focusLost(FocusEvent e)   { uhl.run(); }
+            public void focusGained(FocusEvent e) { onHover.run(); }
+            public void focusLost(FocusEvent e)   { onUnhover.run(); }
         });
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
         panel.getActionMap().put("onEnter", new AbstractAction() {
             public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
         });
         panel.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { hl.run(); }
-            public void mouseExited(MouseEvent e)  { if (!panel.hasFocus()) uhl.run(); }
+            public void mouseEntered(MouseEvent e) { onHover.run(); }
+            public void mouseExited(MouseEvent e)  { if (!panel.hasFocus()) onUnhover.run(); }
             public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
         });
         return panel;
@@ -514,14 +514,14 @@ public class MainMenu extends JFrame {
                 setAlignmentX(Component.LEFT_ALIGNMENT);
                 setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
                 setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(fg, 1),
+                        BorderFactory.createLineBorder(foreground, 1),
                         BorderFactory.createEmptyBorder(8, 16, 8, 16)));
                 setToolTipText("Randomize tank unit specifications");
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 setFocusable(true);
 
                 addFocusListener(new FocusAdapter() {
-                    public void focusGained(FocusEvent e) { isHovered = true; setOpaque(true); setBackground(fg); repaint(); }
+                    public void focusGained(FocusEvent e) { isHovered = true; setOpaque(true); setBackground(foreground); repaint(); }
                     public void focusLost(FocusEvent e)   { isHovered = false; setOpaque(false); repaint(); }
                 });
                 getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
@@ -529,29 +529,29 @@ public class MainMenu extends JFrame {
                     public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
                 });
                 addMouseListener(new MouseAdapter() {
-                    public void mouseEntered(MouseEvent e) { isHovered = true; setOpaque(true); setBackground(fg); repaint(); }
+                    public void mouseEntered(MouseEvent e) { isHovered = true; setOpaque(true); setBackground(foreground); repaint(); }
                     public void mouseExited(MouseEvent e)  { if (!hasFocus()) { isHovered = false; setOpaque(false); repaint(); } }
                     public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
                 });
             }
 
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-                g2.setColor(isHovered ? bg : fg);
-                int cx = getWidth() / 2;
-                int cy = getHeight() / 2;
-                g2.translate(cx - 8, cy - 8);
+            protected void paintComponent(Graphics graphics) {
+                super.paintComponent(graphics);
+                Graphics2D graphics2d = (Graphics2D) graphics.create();
+                graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                graphics2d.setColor(isHovered ? background : foreground);
+                int centerX = getWidth()  / 2;
+                int centerY = getHeight() / 2;
+                graphics2d.translate(centerX - 8, centerY - 8);
                 // Refresh icon (two curved arrow shapes)
-                int[] x1 = { 3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3 };
-                int[] y1 = { 2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2 };
-                g2.fillPolygon(x1, y1, 19);
-                int[] x2 = { 7, 7, 12, 12, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 13, 13, 7 };
-                int[] y2 = { 3, 4, 4, 11, 11, 12, 12, 13, 13, 14, 14, 13, 13, 12, 12, 11, 11, 3, 3 };
-                g2.fillPolygon(x2, y2, 19);
-                g2.dispose();
+                int[] arrowLeftXPoints  = { 3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3 };
+                int[] arrowLeftYPoints  = { 2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2 };
+                graphics2d.fillPolygon(arrowLeftXPoints, arrowLeftYPoints, 19);
+                int[] arrowRightXPoints = { 7, 7, 12, 12, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 13, 13, 7 };
+                int[] arrowRightYPoints = { 3, 4, 4, 11, 11, 12, 12, 13, 13, 14, 14, 13, 13, 12, 12, 11, 11, 3, 3 };
+                graphics2d.fillPolygon(arrowRightXPoints, arrowRightYPoints, 19);
+                graphics2d.dispose();
             }
         };
         return panel;

@@ -134,18 +134,13 @@ public class Game {
             try {
                 menuChoice = Integer.parseInt(input); // Throws if input isn't a number
 
-                // LEARNING (switch statement):
-                //   A clean alternative to long if/else if chains when comparing one
-                //   variable against multiple specific values. Each 'case' handles one 
-                //   option; 'break' exits the switch when done.
                 switch (menuChoice) {
                     case 1:
-                        // Collect player names before running the game
                         System.out.println("Please enter in the name of Player one: ");
                         playerOne.setName(universalInput.nextLine());
                         System.out.println("Please enter in the name of Player two: ");
                         playerTwo.setName(universalInput.nextLine());
-                        runGame(); // Start the physics game session
+                        runGame();
                         break;
                     case 2:
                         showScoreboard();
@@ -155,15 +150,13 @@ public class Game {
                         break;
                     case 4:
                         System.out.println("Ending Program...");
-                        System.exit(0); // Terminates the JVM immediately
+                        System.exit(0);
                         break;
                     default:
-                        // User typed a valid number but not 1-4 — silently loop again
                         break;
                 }
 
-            } catch (Exception e) {
-                // Runs if parseInt() failed (user typed text instead of a number)
+            } catch (Exception menuParseException) {
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
         }
@@ -206,56 +199,48 @@ public class Game {
             // LEARNING (Parallel arrays):
             //   We pair prompts[] with minAndMax[][] by index. This is a simpler 
             //   alternative to a custom class, but can become hard to maintain at scale.
-            String[] promptList  = {
+            String[] inputPrompts = {
                 "Please enter in a power between 1 - 100: ",
                 "Please enter an angle between 0 and 180: "
             };
-            double[][] minAndMax = { { 1, 100 }, { 0, 180 } };
+            double[][] inputRanges = { { 1, 100 }, { 0, 180 } };
 
             // Get input for each player using the enhanced for-each loop
-            for (Player eachPlayer : players) {
-                System.out.println("\n" + eachPlayer.getName() + "'s turn:");
-                double power = getValidatedDouble(promptList[0], minAndMax[0][0], minAndMax[0][1]);
-                double angle = getValidatedDouble(promptList[1], minAndMax[1][0], minAndMax[1][1]);
-                eachPlayer.setPower((int) power);
-                eachPlayer.setAngle((int) angle);
+            for (Player currentPlayer : players) {
+                System.out.println("\n" + currentPlayer.getName() + "'s turn:");
+                double power = getValidatedDouble(inputPrompts[0], inputRanges[0][0], inputRanges[0][1]);
+                double angle = getValidatedDouble(inputPrompts[1], inputRanges[1][0], inputRanges[1][1]);
+                currentPlayer.setPower((int) power);
+                currentPlayer.setAngle((int) angle);
             }
 
             // Calculate where each shot lands using Player.getShot()
-            double shotOne = playerOne.getShot();
-            double shotTwo = playerTwo.getShot();
+            double playerOneShotX = playerOne.getShot();
+            double playerTwoShotX = playerTwo.getShot();
 
-            // LEARNING (Math.abs — Absolute Value):
-            //   Math.abs() removes the negative sign from a number.
-            //   We use it here because a shot could land PAST the target (positive error)
-            //   or SHORT of the target (negative error). We only care about the magnitude.
-            double missOne = Math.abs(shotOne - playerTwo.getStartingPosition());
-            double missTwo = Math.abs(shotTwo - playerOne.getStartingPosition());
+            double playerOneMissDistance = Math.abs(playerOneShotX - playerTwo.getStartingPosition());
+            double playerTwoMissDistance = Math.abs(playerTwoShotX - playerOne.getStartingPosition());
 
             // Print miss report for each player (only if they didn't hit)
-            if (missOne > 1) {
+            if (playerOneMissDistance > 1) {
                 System.out.printf(
                     "\n%s's shot landed at %.2f (Missed by %.2f)\n",
-                    playerOne.getName(), shotOne, missOne
+                    playerOne.getName(), playerOneShotX, playerOneMissDistance
                 );
             }
-            if (missTwo > 1) {
+            if (playerTwoMissDistance > 1) {
                 System.out.printf(
                     "%s's shot landed at %.2f (Missed by %.2f)\n",
-                    playerTwo.getName(), shotTwo, missTwo
+                    playerTwo.getName(), playerTwoShotX, playerTwoMissDistance
                 );
             }
 
             // Hit threshold: within 1 unit is considered a direct hit
-            if (missOne < 1 || missTwo < 1) {
+            if (playerOneMissDistance < 1 || playerTwoMissDistance < 1) {
                 hit = true;
                 gamesPlayed++;
 
-                // LEARNING (Nested if/else for multiple outcomes):
-                //   We check the most specific case first (both hit = tie),
-                //   then fall through to individual win cases.
-                if (missOne < 1 && missTwo < 1) {
-                    // Simultaneous hit — it's a tie!
+                if (playerOneMissDistance < 1 && playerTwoMissDistance < 1) {
                     System.out.println("It's a tie! Both hit!");
                     playerOne.setScore(playerOne.getScore() + 1);
                     playerTwo.setScore(playerTwo.getScore() + 1);
@@ -263,7 +248,7 @@ public class Game {
                         "Tie: " + playerOne.getName() + " and " + playerTwo.getName() +
                         " Game: " + gamesPlayed + " Round: " + currentRound
                     );
-                } else if (missOne < 1) {
+                } else if (playerOneMissDistance < 1) {
                     // Player one's shot connected
                     System.out.println(playerOne.getName() + " wins!");
                     playerOne.setScore(playerOne.getScore() + 1);
@@ -310,8 +295,8 @@ public class Game {
             universalInput.nextLine();
         } else {
             // Print every logged result one line at a time
-            for (String eachScore : scoreBoard) {
-                System.out.println(eachScore);
+            for (String scoreEntry : scoreBoard) {
+                System.out.println(scoreEntry);
             }
 
             /*
@@ -373,28 +358,28 @@ public class Game {
      *   This is a common, readable pattern for "keep trying until it works".
      */
     private double getValidatedDouble(String prompt, double min, double max) {
-        double  value   = 0;
-        boolean isValid = false;
+        double  parsedValue = 0;
+        boolean isValid     = false;
 
         while (!isValid) {
             System.out.println(prompt + " (" + min + "-" + max + "): ");
-            String input = universalInput.nextLine(); // Always read as String first
+            String rawInput = universalInput.nextLine(); // Always read as String first
 
             try {
-                value = Double.parseDouble(input); // Convert String → double (throws if it fails)
+                parsedValue = Double.parseDouble(rawInput); // Convert String → double
 
-                if (value >= min && value <= max) {
+                if (parsedValue >= min && parsedValue <= max) {
                     isValid = true; // Passes both requirements — exit the loop
                 } else {
                     System.out.println("Error: Please enter a number between " + min + " and " + max + ".");
                 }
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException parseException) {
                 // User typed letters or symbols — parse failed; loop asks again
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
         }
 
-        return value;
+        return parsedValue;
     }
 
 }
