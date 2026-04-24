@@ -2,8 +2,6 @@
 
 **BIT-REKT** is a tactical artillery combat simulator built in Java. It blends classic pixel-art aesthetics with a high-fidelity physics engine to create a competitive "scorched earth" style experience for two players.
 
-![BIT-REKT Logo](https://via.placeholder.com/800x200?text=BIT-REKT+ARTILLERY+COMBAT)
-
 ## Key Features
 
 - **Tactical Versus Combat**: Two players compete head-to-head, adjusting angles and velocity to land the killing blow.
@@ -39,5 +37,5 @@
 ## Author
 
 **Andrew Filson**  
-*Heavy Armored Division - Camp 30*  
-*March 2026*
+_A projectile motion project for CS1200_
+_March - April 2026_
