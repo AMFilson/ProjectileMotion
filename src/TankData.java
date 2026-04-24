@@ -3,7 +3,8 @@ import java.util.Random;
 /*
  * Name:    TankData.java (ProjectileMotion / BIT-REKT)
  * Author:  Andrew Filson
- * Desc:    A simple data class (sometimes called a "model" or "POJO") that 
+ * Date:    April 22nd 2026
+ * Desc:    A simple data class that 
  *          stores the name and statistics for a tank unit in the game.
  */
 
@@ -11,23 +12,23 @@ import java.util.Random;
  * Represents a tank unit with randomized or fixed combat statistics.
  *
  * LEARNING (Data / Model Classes):
- *   In Object-Oriented Programming it's good practice to separate your DATA from 
- *   your LOGIC from your DISPLAY. TankData is a pure data class — it just holds 
- *   values and lets you read them. It knows nothing about drawing itself or 
- *   making game decisions. This separation of concerns makes code easier to 
- *   maintain and test.
+ * In Object-Oriented Programming it's good practice to separate your DATA from
+ * your LOGIC from your DISPLAY. TankData is a pure data class — it just holds
+ * values and lets you read them. It knows nothing about drawing itself or
+ * making game decisions. This separation of concerns makes code easier to
+ * maintain and test.
  *
  * How stats are used in-game:
- *   - offensivePower: Sets the maximum shot power a player can use per turn.
- *   - mobilityIndex:  Sets how far a player can reposition their tank each round.
+ * - offensivePower: Sets the maximum shot power a player can use per turn.
+ * - mobilityIndex: Sets how far a player can reposition their tank each round.
  */
 public class TankData {
 
     // -----------------------------------------------------------------------
     // LEARNING (private fields):
-    //   By marking fields 'private', we prevent other classes from reaching in
-    //   and changing them directly. All access goes through our public methods
-    //   (getters). This is called "Encapsulation" — one of the four pillars of OOP.
+    // By marking fields 'private', we prevent other classes from reaching in
+    // and changing them directly. All access goes through our public methods
+    // (getters). This is called "Encapsulation" — one of the four pillars of OOP.
     // -----------------------------------------------------------------------
 
     /** The display name of this tank unit (e.g., "M8 GREYHOUND"). */
@@ -55,9 +56,9 @@ public class TankData {
 
     // -----------------------------------------------------------------------
     // LEARNING (Constructor Overloading):
-    //   Java allows multiple constructors on the same class as long as they have
-    //   different parameter lists. This is called "overloading". It lets the caller 
-    //   choose how much information to provide when creating an object.
+    // Java allows multiple constructors on the same class as long as they have
+    // different parameter lists. This is called "overloading". It lets the caller
+    // choose how much information to provide when creating an object.
     // -----------------------------------------------------------------------
 
     /**
@@ -70,21 +71,22 @@ public class TankData {
      * @param mi   Mobility Index value (0–100).
      */
     public TankData(String name, double offensivePower, double mobilityIndex) {
-        this.name           = name;
+        this.name = name;
         this.offensivePower = offensivePower;
-        this.mobilityIndex  = mobilityIndex;
-        this.random         = new Random();
+        this.mobilityIndex = mobilityIndex;
+        this.random = new Random();
     }
 
     /**
      * Constructs a TankData with RANDOMIZED stats.
      * This is the version used in the character selection screen so each
-     * session feels different. Stats are rolled immediately by calling rerollStats().
+     * session feels different. Stats are rolled immediately by calling
+     * rerollStats().
      *
      * @param name The tank's display name.
      */
     public TankData(String name) {
-        this.name   = name;
+        this.name = name;
         this.random = new Random();
         this.rerollStats(); // Immediately generate random values on creation
     }
@@ -93,21 +95,21 @@ public class TankData {
      * Re-randomizes both stats using the existing Random instance.
      *
      * LEARNING (random.nextDouble()):
-     *   'random.nextDouble()' returns a value in [0.0, 1.0).
-     *   Multiplying by 100 scales the range to [0.0, 100.0).
-     *   This is a common technique to generate a random percentage.
+     * 'random.nextDouble()' returns a value in [0.0, 1.0).
+     * Multiplying by 100 scales the range to [0.0, 100.0).
+     * This is a common technique to generate a random percentage.
      */
     public void rerollStats() {
         this.offensivePower = random.nextDouble() * 100;
-        this.mobilityIndex  = random.nextDouble() * 100;
+        this.mobilityIndex = random.nextDouble() * 100;
     }
 
     // -----------------------------------------------------------------------
     // LEARNING (Getter Methods):
-    //   These are simple public methods that return the value of a private field.
-    //   Because the fields are private, this is the only way external code can 
-    //   READ the data — which is intentional. If we wanted to allow external code 
-    //   to CHANGE the data too, we'd add a corresponding 'setter' method.
+    // These are simple public methods that return the value of a private field.
+    // Because the fields are private, this is the only way external code can
+    // READ the data — which is intentional. If we wanted to allow external code
+    // to CHANGE the data too, we'd add a corresponding 'setter' method.
     // -----------------------------------------------------------------------
 
     /** @return The display name of this tank unit. */
@@ -133,17 +135,17 @@ public class TankData {
      * so the sprites are always visually consistent.
      *
      * LEARNING (switch expression):
-     *   The '->' syntax is a Java 14+ switch expression. Unlike the old switch
-     *   statement it is an expression (produces a value) and doesn't fall through.
+     * The '->' syntax is a Java 14+ switch expression. Unlike the old switch
+     * statement it is an expression (produces a value) and doesn't fall through.
      *
      * @return Relative path to the PNG, e.g. "images/m8_greyhound.png"
      */
     public String getImagePath() {
         return switch (name) {
             case "M8 GREYHOUND" -> "images/m8_greyhound.png";
-            case "FLAK 88"      -> "images/flak_88.png";
-            case "BLACK CAT"    -> "images/black_cat.png";
-            default             -> null;
+            case "FLAK 88" -> "images/flak_88.png";
+            case "BLACK CAT" -> "images/black_cat.png";
+            default -> null;
         };
     }
 }
