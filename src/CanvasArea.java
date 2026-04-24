@@ -1,3 +1,10 @@
+/* 
+ * Name:    CanvasArea.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 24th 2026
+ * Desc:    Custom rendering panel for the animated 3D tank preview on the home screen.
+ */
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -18,43 +25,46 @@ import java.util.function.IntSupplier;
  *
  * Previously used hand-coded fillRect() calls to draw the tank, which meant
  * the sprite in this panel and the one in CharacterSelectPanel could drift
- * apart over time. By loading the shared PNG files from TankData.getImagePath(),
+ * apart over time. By loading the shared PNG files from
+ * TankData.getImagePath(),
  * both panels are guaranteed to always show exactly the same image.
  *
  * Dependencies:
- *   - tanks          : the shared list of TankData objects from MainMenu
- *   - tankIndexGetter: a lambda that returns the currently selected index
- *   - vt323          : the loaded VT323 font for the tank name label
+ * - tanks : the shared list of TankData objects from MainMenu
+ * - tankIndexGetter: a lambda that returns the currently selected index
+ * - vt323 : the loaded VT323 font for the tank name label
  */
 public class CanvasArea extends JPanel {
 
     private final Color foreground = new Color(0, 0, 0);
     private final Color background = new Color(239, 243, 241);
 
-    private final List<TankData>  tanks;
-    private final IntSupplier     tankIndexGetter;
-    private final Font            pixelFont;
+    private final List<TankData> tanks;
+    private final IntSupplier tankIndexGetter;
+    private final Font pixelFont;
 
     /**
      * Cache of loaded BufferedImages so we don't re-read the PNG file on
-     * every repaint. The map key is the image path string from TankData.getImagePath().\
+     * every repaint. The map key is the image path string from
+     * TankData.getImagePath().\
      *
      * LEARNING (HashMap as a cache):
-     *   HashMap.computeIfAbsent(key, loader) checks if the key already has a value.
-     *   If it does, it returns it. If not, it calls the loader function to create
-     *   one, stores it, and returns it. This means each PNG is loaded exactly once.
+     * HashMap.computeIfAbsent(key, loader) checks if the key already has a value.
+     * If it does, it returns it. If not, it calls the loader function to create
+     * one, stores it, and returns it. This means each PNG is loaded exactly once.
      */
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
 
     /**
      * @param tanks           The shared list of all available TankData objects.
-     * @param tankIndexGetter A supplier that returns the currently selected tank index.
+     * @param tankIndexGetter A supplier that returns the currently selected tank
+     *                        index.
      * @param font            The VT323 font instance shared from MainMenu.
      */
     public CanvasArea(List<TankData> tanks, IntSupplier tankIndexGetter, Font font) {
-        this.tanks           = tanks;
+        this.tanks = tanks;
         this.tankIndexGetter = tankIndexGetter;
-        this.pixelFont       = font;
+        this.pixelFont = font;
     }
 
     /**
@@ -62,7 +72,8 @@ public class CanvasArea extends JPanel {
      * Returns null if the file doesn't exist or can't be read.
      */
     private BufferedImage loadImage(String imagePath) {
-        if (imagePath == null) return null;
+        if (imagePath == null)
+            return null;
         return imageCache.computeIfAbsent(imagePath, path -> {
             try {
                 return ImageIO.read(new File(path));
@@ -81,18 +92,18 @@ public class CanvasArea extends JPanel {
         // Horizontal centre of the canvas — used to position text and image
         int canvasCenterX = getWidth() / 2;
 
-        int      selectedTankIndex = tankIndexGetter.getAsInt();
-        TankData currentTank       = tanks.get(selectedTankIndex);
-        String   tankName          = currentTank.getName();
+        int selectedTankIndex = tankIndexGetter.getAsInt();
+        TankData currentTank = tanks.get(selectedTankIndex);
+        String tankName = currentTank.getName();
 
         // --- Draw tank name label (inverted chip at bottom of canvas) ---
         graphics2d.setFont(pixelFont.deriveFont(32f));
-        FontMetrics fontMetrics     = graphics2d.getFontMetrics();
-        int tankNameTextWidth       = fontMetrics.stringWidth(tankName);
-        int labelBoxHeight          = 40;
-        int labelBoxY               = getHeight() - 60;
-        int tankNameTextX           = canvasCenterX - tankNameTextWidth / 2;
-        int tankNameTextY           = labelBoxY + (labelBoxHeight + fontMetrics.getAscent()) / 2 - 4;
+        FontMetrics fontMetrics = graphics2d.getFontMetrics();
+        int tankNameTextWidth = fontMetrics.stringWidth(tankName);
+        int labelBoxHeight = 40;
+        int labelBoxY = getHeight() - 60;
+        int tankNameTextX = canvasCenterX - tankNameTextWidth / 2;
+        int tankNameTextY = labelBoxY + (labelBoxHeight + fontMetrics.getAscent()) / 2 - 4;
         graphics2d.setColor(foreground);
         graphics2d.fillRect(tankNameTextX - 10, labelBoxY + 5, tankNameTextWidth + 20, labelBoxHeight - 10);
         graphics2d.setColor(background);
@@ -104,20 +115,21 @@ public class CanvasArea extends JPanel {
             // Use nearest-neighbour interpolation so the pixel art stays crisp
             // when scaled up (no blurring of the hard edges).
             graphics2d.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                    RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
             // Scale the image to fill roughly 55% of the shorter panel dimension,
             // then centre it in the canvas area.
-            int    maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.55);
-            int    imageWidth        = tankImage.getWidth();
-            int    imageHeight       = tankImage.getHeight();
-            double imageScale        = Math.min((double) maxImageDimension / imageWidth, (double) maxImageDimension / imageHeight);
-            int    drawWidth         = (int) (imageWidth  * imageScale);
-            int    drawHeight        = (int) (imageHeight * imageScale);
-            int    centeredDrawX     = canvasCenterX - drawWidth / 2;
+            int maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.55);
+            int imageWidth = tankImage.getWidth();
+            int imageHeight = tankImage.getHeight();
+            double imageScale = Math.min((double) maxImageDimension / imageWidth,
+                    (double) maxImageDimension / imageHeight);
+            int drawWidth = (int) (imageWidth * imageScale);
+            int drawHeight = (int) (imageHeight * imageScale);
+            int centeredDrawX = canvasCenterX - drawWidth / 2;
             // Centre vertically in the space above the name label
-            int    centeredDrawY     = (labelBoxY - drawHeight) / 2;
+            int centeredDrawY = (labelBoxY - drawHeight) / 2;
 
             graphics2d.drawImage(tankImage, centeredDrawX, centeredDrawY, drawWidth, drawHeight, null);
         }

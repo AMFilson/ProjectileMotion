@@ -194,6 +194,13 @@ public class MainWindow extends JFrame {
                     ? Font.createFont(Font.TRUETYPE_FONT, fontFile)  // Custom pixel font
                     : new Font("Monospaced", Font.PLAIN, 16);         // Fallback
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(pixelFont);
+
+            // Global Tooltip Style (matches uicomponents aesthetic)
+            UIManager.put("ToolTip.font", pixelFont.deriveFont(18f));
+            UIManager.put("ToolTip.background", background);
+            UIManager.put("ToolTip.foreground", foreground);
+            UIManager.put("ToolTip.border", BorderFactory.createLineBorder(foreground, 2));
+
         } catch (Exception e) {
             pixelFont = new Font("Monospaced", Font.PLAIN, 16); // Catch-all fallback
         }
@@ -306,14 +313,17 @@ public class MainWindow extends JFrame {
 
         inputRow.add(lbl("ANGLE (0-180):", 18f));
         angleField = styledField(6); // 6-character wide input box
+        angleField.setToolTipText("Set launch trajectory (0-180 degrees)");
         inputRow.add(angleField);
 
         inputRow.add(lbl("POS SHIFT:", 18f));
         posShiftField = styledField(6);
+        posShiftField.setToolTipText("Shift unit position (limited by MOB. INDEX)");
         inputRow.add(posShiftField);
 
         // FIRE button — triggers the physics calculation when clicked
         JPanel fireBtn = createButton("FIRE", () -> handleFire());
+        fireBtn.setToolTipText("Execute projectile launch with specified parameters");
         inputRow.add(fireBtn);
 
         bottom.add(inputRow, BorderLayout.CENTER);
@@ -323,8 +333,9 @@ public class MainWindow extends JFrame {
         footerRow.setOpaque(false);
         footerRow.add(lbl("CREATED BY ANDREW FILSON", 14f), BorderLayout.WEST);
 
-        // Clickable "[ MAIN MENU ]" label — acts like a hyperlink
-        JLabel mainMenuLink = lbl("[ MAIN MENU ]", 14f);
+        // Clickable "[ END GAME ]" label — acts like a hyperlink
+        JLabel mainMenuLink = lbl("[ END GAME ]", 14f);
+        mainMenuLink.setToolTipText("Abort mission and return to command center");
         mainMenuLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mainMenuLink.setHorizontalAlignment(SwingConstants.RIGHT);
         mainMenuLink.addMouseListener(new MouseAdapter() {
@@ -443,6 +454,7 @@ public class MainWindow extends JFrame {
 
         // Vertical 'glue' pushes everything above it upwards — keeps items top-aligned
         strip.add(Box.createVerticalGlue());
+        strip.setToolTipText("Operational data for " + name);
         return strip;
     }
 
@@ -474,6 +486,7 @@ public class MainWindow extends JFrame {
         statValueLabel.setFont(statValueLabel.getFont().deriveFont(Font.BOLD));
         statValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statBox.add(statValueLabel);
+        statBox.setToolTipText("Current tank performance metric: " + label);
         return statBox;
     }
 

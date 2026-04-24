@@ -21,12 +21,11 @@ public class Main {
     // LEARNING (static fields):
     //   Fields marked 'static' belong to the CLASS itself, not to any specific
     //   instance (object) of the class. This means they exist as a single,
-    //   shared copy that any other class can reference using 'Main.playersList'
+    //   shared copy that any other class can reference using 'LeaderboardPanel.playersList'
     //   or 'Main.gamesPlayed'. Think of them as global variables for the app.
     // -----------------------------------------------------------------------
 
-    /** Shared roster of all players — referenced by the Leaderboard panel in MainMenu. */
-    public static java.util.List<Player> playersList = new java.util.ArrayList<>();
+    // -----------------------------------------------------------------------
 
     /**
      * Tracks how many total rounds have been completed across the whole session.
@@ -35,36 +34,6 @@ public class Main {
     public static int gamesPlayed = 0;
 
     // -----------------------------------------------------------------------
-    // LEARNING (static initializer block):
-    //   A 'static { ... }' block runs exactly ONCE, the very first time this 
-    //   class is loaded by the JVM — before main() is even called. It's the 
-    //   right place to populate static data that the rest of the app needs 
-    //   to exist before anything else happens.
-    //
-    //   Here we pre-populate the playersList with placeholder/mock leaderboard 
-    //   entries so the Leaderboard screen isn't empty on first launch.
-    // -----------------------------------------------------------------------
-    static {
-        // Mock leaderboard entry #1
-        Player topRankedPlayer = new Player("VON_NEUMANN");
-        topRankedPlayer.setScore(999999);
-        topRankedPlayer.setSelectedTankIndex(1); // Index 1 = FLAK 88
-
-        // Mock leaderboard entry #2
-        Player secondRankedPlayer = new Player("CYBER_PUNK_88");
-        secondRankedPlayer.setScore(842550);
-        secondRankedPlayer.setSelectedTankIndex(0); // Index 0 = M8 GREYHOUND
-
-        // Mock leaderboard entry #3
-        Player thirdRankedPlayer = new Player("YOU // USER_772");
-        thirdRankedPlayer.setScore(760042);
-        thirdRankedPlayer.setSelectedTankIndex(2); // Index 2 = BLACK CAT
-
-        // Add them all to the shared roster
-        playersList.add(topRankedPlayer);
-        playersList.add(secondRankedPlayer);
-        playersList.add(thirdRankedPlayer);
-    }
 
     /**
      * Application entry point. The JVM calls this method to start the program.

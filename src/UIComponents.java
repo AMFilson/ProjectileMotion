@@ -1,3 +1,10 @@
+/* 
+ * Name:    UIComponents.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 24th 2026
+ * Desc:    Shared custom Swing components and borders used throughout the application.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -25,21 +32,21 @@ import java.awt.image.BufferedImage;
  * A custom Swing border that draws a single dashed/dotted rectangle outline.
  *
  * Usage:
- *   component.setBorder(new DashedBorder(Color.BLACK, 1, 4));
+ * component.setBorder(new DashedBorder(Color.BLACK, 1, 4));
  *
  * Parameters:
- *   color      - The colour of the dashes.
- *   thickness  - Stroke width in pixels (1 = hairline).
- *   dashLength - Length of each dash segment in pixels.
+ * color - The colour of the dashes.
+ * thickness - Stroke width in pixels (1 = hairline).
+ * dashLength - Length of each dash segment in pixels.
  */
 class DashedBorder extends javax.swing.border.AbstractBorder {
     private Color color;
-    private int   thickness;
-    private int   dashLength;
+    private int thickness;
+    private int dashLength;
 
     public DashedBorder(Color color, int thickness, int dashLength) {
-        this.color      = color;
-        this.thickness  = thickness;
+        this.color = color;
+        this.thickness = thickness;
         this.dashLength = dashLength;
     }
 
@@ -57,9 +64,11 @@ class DashedBorder extends javax.swing.border.AbstractBorder {
     public void paintBorder(Component component, Graphics graphics, int originX, int originY, int width, int height) {
         Graphics2D graphics2d = (Graphics2D) graphics.create();
         graphics2d.setColor(color);
-        // dashPattern = {dashLength} means: dashLength pixels ON, dashLength pixels OFF (repeating)
+        // dashPattern = {dashLength} means: dashLength pixels ON, dashLength pixels OFF
+        // (repeating)
         float[] dashPattern = { dashLength };
-        graphics2d.setStroke(new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+        graphics2d.setStroke(
+                new BasicStroke(thickness, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
         // Draw rect subtracting 1 to stay inside the component's bounds
         graphics2d.drawRect(originX, originY, width - 1, height - 1);
         graphics2d.dispose();
@@ -74,14 +83,14 @@ class DashedBorder extends javax.swing.border.AbstractBorder {
  * A custom JPanel that renders a horizontal progress bar.
  *
  * When dithered=false: fills a solid black rectangle proportional to percent.
- * When dithered=true:  fills with a diagonal hatch pattern (TexturePaint).
+ * When dithered=true: fills with a diagonal hatch pattern (TexturePaint).
  *
  * Usage:
- *   DitheredBar bar = new DitheredBar(75, false); // 75% solid fill
- *   DitheredBar bar = new DitheredBar(45, true);  // 45% dithered/hatch fill
+ * DitheredBar bar = new DitheredBar(75, false); // 75% solid fill
+ * DitheredBar bar = new DitheredBar(45, true); // 45% dithered/hatch fill
  */
 class DitheredBar extends JPanel {
-    private int     percent;
+    private int percent;
     private boolean dithered;
 
     // FILL_COLOR is the colour used to draw the filled portion of the bar.
@@ -89,7 +98,7 @@ class DitheredBar extends JPanel {
     private static final Color FILL_COLOR = new Color(0, 0, 0);
 
     public DitheredBar(int percent, boolean dithered) {
-        this.percent  = percent;
+        this.percent = percent;
         this.dithered = dithered;
         setBorder(BorderFactory.createLineBorder(FILL_COLOR, 1));
         setOpaque(false);
@@ -126,16 +135,16 @@ class DitheredBar extends JPanel {
  * A custom JPanel that draws BIT-REKT's signature decorative border frame.
  *
  * Renders:
- *   - Filled background in the app's off-white (#eff3f1)
- *   - Outer thin hairline rectangle
- *   - Inner 4px thick rectangle (inset by 4px on all sides)
- *   - L-shaped corner bracket accents at each corner
- *   - Optional opacity (used for the flicker animation in MainMenu)
+ * - Filled background in the app's off-white (#eff3f1)
+ * - Outer thin hairline rectangle
+ * - Inner 4px thick rectangle (inset by 4px on all sides)
+ * - L-shaped corner bracket accents at each corner
+ * - Optional opacity (used for the flicker animation in MainMenu)
  *
  * Usage:
- *   MainFramePanel frame = new MainFramePanel();
- *   frame.setPreferredSize(new Dimension(900, 600));
- *   frame.setLayout(new BorderLayout());
+ * MainFramePanel frame = new MainFramePanel();
+ * frame.setPreferredSize(new Dimension(900, 600));
+ * frame.setLayout(new BorderLayout());
  */
 class MainFramePanel extends JPanel {
     private final Color foreground = new Color(0, 0, 0);
@@ -171,10 +180,11 @@ class MainFramePanel extends JPanel {
 
         // Corner bracket decorations — L-shaped accents at each corner
         int bracketSize = 15;
-        drawBracket(graphics2d, -10,                        -10,                        bracketSize, true,  true);  // Top-left
-        drawBracket(graphics2d, getWidth() + 10 - bracketSize, -10,                     bracketSize, true,  false); // Top-right
-        drawBracket(graphics2d, -10,                        getHeight() + 10 - bracketSize, bracketSize, false, true);  // Bottom-left
-        drawBracket(graphics2d, getWidth() + 10 - bracketSize, getHeight() + 10 - bracketSize, bracketSize, false, false); // Bottom-right
+        drawBracket(graphics2d, -10, -10, bracketSize, true, true); // Top-left
+        drawBracket(graphics2d, getWidth() + 10 - bracketSize, -10, bracketSize, true, false); // Top-right
+        drawBracket(graphics2d, -10, getHeight() + 10 - bracketSize, bracketSize, false, true); // Bottom-left
+        drawBracket(graphics2d, getWidth() + 10 - bracketSize, getHeight() + 10 - bracketSize, bracketSize, false,
+                false); // Bottom-right
 
         graphics2d.dispose();
     }
@@ -182,27 +192,30 @@ class MainFramePanel extends JPanel {
     /**
      * Draws a single L-shaped corner bracket.
      *
-     * @param graphics2d  The Graphics2D context to draw into.
-     * @param originX     Left X of the bounding box for this bracket.
-     * @param originY     Top Y of the bounding box for this bracket.
-     * @param armLength   Length (in pixels) of each arm of the L-shape.
-     * @param armAtTop    If true, the horizontal arm goes along the top; otherwise bottom.
-     * @param armAtLeft   If true, the vertical arm goes along the left; otherwise right.
+     * @param graphics2d The Graphics2D context to draw into.
+     * @param originX    Left X of the bounding box for this bracket.
+     * @param originY    Top Y of the bounding box for this bracket.
+     * @param armLength  Length (in pixels) of each arm of the L-shape.
+     * @param armAtTop   If true, the horizontal arm goes along the top; otherwise
+     *                   bottom.
+     * @param armAtLeft  If true, the vertical arm goes along the left; otherwise
+     *                   right.
      */
-    private void drawBracket(Graphics2D graphics2d, int originX, int originY, int armLength, boolean armAtTop, boolean armAtLeft) {
+    private void drawBracket(Graphics2D graphics2d, int originX, int originY, int armLength, boolean armAtTop,
+            boolean armAtLeft) {
         graphics2d.setColor(foreground);
         if (armAtTop && armAtLeft) {
-            graphics2d.fillRect(originX, originY, armLength, 2);                    // Horizontal arm (top)
-            graphics2d.fillRect(originX, originY, 2, armLength);                    // Vertical arm (left)
+            graphics2d.fillRect(originX, originY, armLength, 2); // Horizontal arm (top)
+            graphics2d.fillRect(originX, originY, 2, armLength); // Vertical arm (left)
         } else if (armAtTop && !armAtLeft) {
-            graphics2d.fillRect(originX, originY, armLength, 2);                    // Horizontal arm (top)
-            graphics2d.fillRect(originX + armLength - 2, originY, 2, armLength);    // Vertical arm (right)
+            graphics2d.fillRect(originX, originY, armLength, 2); // Horizontal arm (top)
+            graphics2d.fillRect(originX + armLength - 2, originY, 2, armLength); // Vertical arm (right)
         } else if (!armAtTop && armAtLeft) {
-            graphics2d.fillRect(originX, originY + armLength - 2, armLength, 2);   // Horizontal arm (bottom)
-            graphics2d.fillRect(originX, originY, 2, armLength);                    // Vertical arm (left)
+            graphics2d.fillRect(originX, originY + armLength - 2, armLength, 2); // Horizontal arm (bottom)
+            graphics2d.fillRect(originX, originY, 2, armLength); // Vertical arm (left)
         } else {
-            graphics2d.fillRect(originX, originY + armLength - 2, armLength, 2);   // Horizontal arm (bottom)
-            graphics2d.fillRect(originX + armLength - 2, originY, 2, armLength);   // Vertical arm (right)
+            graphics2d.fillRect(originX, originY + armLength - 2, armLength, 2); // Horizontal arm (bottom)
+            graphics2d.fillRect(originX + armLength - 2, originY, 2, armLength); // Vertical arm (right)
         }
     }
 }

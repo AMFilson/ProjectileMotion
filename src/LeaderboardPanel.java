@@ -1,3 +1,10 @@
+/* 
+ * Name:    LeaderboardPanel.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 24th 2026
+ * Desc:    Displays the high scores and career stats for BIT-REKT pilots.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -5,13 +12,41 @@ import java.awt.*;
  * LeaderboardPanel.java
  *
  * A self-contained JPanel that displays the BIT-REKT leaderboard.
- * It reads player data from Main.playersList (a static field) and game stats
- * from Main.gamesPlayed — no data needs to be injected at construction time.
+ * It reads player data from its own playersList (a static field) and game stats
+ * from Main.gamesPlayed.
  *
  * Shown when the user clicks "LEADERBOARD" in the MainMenu sidebar.
  * Added to the CardLayout in MainMenu under the key "LEADERBOARD".
  */
 public class LeaderboardPanel extends JPanel {
+
+    /**
+     * Shared roster of all players — referenced by CharacterSelectPanel and this
+     * panel.
+     */
+    public static java.util.List<Player> playersList = new java.util.ArrayList<>();
+
+    static {
+        // Mock leaderboard entry #1
+        Player topRankedPlayer = new Player("VON_NEUMANN");
+        topRankedPlayer.setScore(999999);
+        topRankedPlayer.setSelectedTankIndex(1); // Index 1 = FLAK 88
+
+        // Mock leaderboard entry #2
+        Player secondRankedPlayer = new Player("CYBER_PUNK_88");
+        secondRankedPlayer.setScore(842550);
+        secondRankedPlayer.setSelectedTankIndex(0); // Index 0 = M8 GREYHOUND
+
+        // Mock leaderboard entry #3
+        Player thirdRankedPlayer = new Player("YOU // USER_772");
+        thirdRankedPlayer.setScore(760042);
+        thirdRankedPlayer.setSelectedTankIndex(2); // Index 2 = BLACK CAT
+
+        // Add them all to the shared roster
+        playersList.add(topRankedPlayer);
+        playersList.add(secondRankedPlayer);
+        playersList.add(thirdRankedPlayer);
+    }
 
     private final Color foreground = new Color(0, 0, 0);
     private final Color background = new Color(239, 243, 241);
@@ -53,19 +88,23 @@ public class LeaderboardPanel extends JPanel {
         tablePanel.add(headerRow);
         tablePanel.add(Box.createVerticalStrut(10));
 
-        // Player rows — reads from the shared static list in Main
-        java.util.List<Player> players = Main.playersList;
-        if (players == null) players = new java.util.ArrayList<>();
+        // Player rows — reads from the shared static list
+        java.util.List<Player> players = playersList;
+        if (players == null)
+            players = new java.util.ArrayList<>();
 
         for (int rankIndex = 0; rankIndex < players.size() && rankIndex < 5; rankIndex++) {
             Player player = players.get(rankIndex);
-            tablePanel.add(createRankRow(rankIndex + 1, player.getName(), player.getSelectedTankIndex(), player.getScore()));
+            tablePanel.add(
+                    createRankRow(rankIndex + 1, player.getName(), player.getSelectedTankIndex(), player.getScore()));
         }
 
         tablePanel.add(Box.createVerticalGlue());
 
-        layoutConstraints.gridx = 0; layoutConstraints.gridy = 0;
-        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 1.0;
+        layoutConstraints.gridx = 0;
+        layoutConstraints.gridy = 0;
+        layoutConstraints.weightx = 1.0;
+        layoutConstraints.weighty = 1.0;
         add(tablePanel, layoutConstraints);
 
         // --- RIGHT: Stats sidebar ---
@@ -76,9 +115,9 @@ public class LeaderboardPanel extends JPanel {
                 BorderFactory.createMatteBorder(0, 1, 0, 0, foreground),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
-        rightPanel.add(createLeaderboardStatBox("GAMES PLAYED", String.valueOf(Main.gamesPlayed), 0, false));
-        rightPanel.add(Box.createVerticalStrut(20));
-        rightPanel.add(createLeaderboardStatBox("SEASON PROGRESS", "WEEK 04", 45, true));
+        JPanel gamesPlayedBox = createLeaderboardStatBox("GAMES PLAYED", String.valueOf(Main.gamesPlayed), 0, false);
+        gamesPlayedBox.setToolTipText("Total combat encounters completed in the current session");
+        rightPanel.add(gamesPlayedBox);
         rightPanel.add(Box.createVerticalStrut(20));
 
         // Legacy status chip (inverted colours)
@@ -107,12 +146,15 @@ public class LeaderboardPanel extends JPanel {
         unlockLbl.setForeground(background);
         unlockLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         legacyBox.add(unlockLbl);
+        legacyBox.setToolTipText("Player achievement tier");
 
         rightPanel.add(legacyBox);
         rightPanel.add(Box.createVerticalGlue());
 
-        layoutConstraints.gridx = 1; layoutConstraints.gridy = 0;
-        layoutConstraints.weightx = 0.0; layoutConstraints.weighty = 1.0;
+        layoutConstraints.gridx = 1;
+        layoutConstraints.gridy = 0;
+        layoutConstraints.weightx = 0.0;
+        layoutConstraints.weighty = 1.0;
         rightPanel.setPreferredSize(new Dimension(185, 0));
         add(rightPanel, layoutConstraints);
     }
@@ -146,7 +188,8 @@ public class LeaderboardPanel extends JPanel {
         } else {
             rankBadge.setBackground(new Color(0, 0, 0, 0));
             rankBadge.setForeground(foreground);
-            rankBadge.setBorder(rank == 2 ? BorderFactory.createLineBorder(foreground, 2) : new DashedBorder(foreground, 1, 4));
+            rankBadge.setBorder(
+                    rank == 2 ? BorderFactory.createLineBorder(foreground, 2) : new DashedBorder(foreground, 1, 4));
         }
         rankBadge.setPreferredSize(new Dimension(40, 40));
         rankBadge.setHorizontalAlignment(SwingConstants.CENTER);
@@ -163,29 +206,47 @@ public class LeaderboardPanel extends JPanel {
                 graphics2d.scale(0.8, 0.8);
                 graphics2d.setColor(foreground);
                 if (tankIndex == 0) { // M8 GREYHOUND
-                    graphics2d.fillRect(10, 44, 44, 10); graphics2d.fillRect(12, 42, 40, 2);
+                    graphics2d.fillRect(10, 44, 44, 10);
+                    graphics2d.fillRect(12, 42, 40, 2);
                     graphics2d.setColor(background);
-                    graphics2d.fillRect(14, 46, 4, 6); graphics2d.fillRect(22, 46, 4, 6);
-                    graphics2d.fillRect(30, 46, 4, 6); graphics2d.fillRect(38, 46, 4, 6); graphics2d.fillRect(46, 46, 4, 6);
+                    graphics2d.fillRect(14, 46, 4, 6);
+                    graphics2d.fillRect(22, 46, 4, 6);
+                    graphics2d.fillRect(30, 46, 4, 6);
+                    graphics2d.fillRect(38, 46, 4, 6);
+                    graphics2d.fillRect(46, 46, 4, 6);
                     graphics2d.setColor(foreground);
-                    graphics2d.fillRect(14, 34, 36, 10); graphics2d.fillRect(18, 32, 28, 2);
-                    graphics2d.fillRect(22, 24, 20, 8); graphics2d.fillRect(24, 22, 16, 2);
-                    graphics2d.fillRect(42, 26, 18, 4); graphics2d.fillRect(58, 25, 2, 6); graphics2d.fillRect(26, 20, 8, 2);
+                    graphics2d.fillRect(14, 34, 36, 10);
+                    graphics2d.fillRect(18, 32, 28, 2);
+                    graphics2d.fillRect(22, 24, 20, 8);
+                    graphics2d.fillRect(24, 22, 16, 2);
+                    graphics2d.fillRect(42, 26, 18, 4);
+                    graphics2d.fillRect(58, 25, 2, 6);
+                    graphics2d.fillRect(26, 20, 8, 2);
                     graphics2d.setColor(background);
-                    graphics2d.fillRect(24, 24, 2, 2); graphics2d.fillRect(26, 26, 2, 2);
+                    graphics2d.fillRect(24, 24, 2, 2);
+                    graphics2d.fillRect(26, 26, 2, 2);
                 } else if (tankIndex == 1) { // FLAK 88
-                    graphics2d.fillRect(24, 48, 16, 6); graphics2d.fillRect(18, 46, 28, 2);
-                    graphics2d.fillRect(28, 38, 8, 8); graphics2d.fillRect(30, 32, 4, 6);
-                    graphics2d.fillRect(32, 20, 4, 16); graphics2d.fillRect(34, 12, 4, 10);
-                    graphics2d.fillRect(36, 4, 4, 10); graphics2d.fillRect(38, -4, 2, 8);
+                    graphics2d.fillRect(24, 48, 16, 6);
+                    graphics2d.fillRect(18, 46, 28, 2);
+                    graphics2d.fillRect(28, 38, 8, 8);
+                    graphics2d.fillRect(30, 32, 4, 6);
+                    graphics2d.fillRect(32, 20, 4, 16);
+                    graphics2d.fillRect(34, 12, 4, 10);
+                    graphics2d.fillRect(36, 4, 4, 10);
+                    graphics2d.fillRect(38, -4, 2, 8);
                 } else { // BLACK CAT
                     graphics2d.fillRect(6, 46, 52, 8);
                     graphics2d.setColor(background);
-                    graphics2d.fillRect(10, 48, 6, 4); graphics2d.fillRect(22, 48, 6, 4);
-                    graphics2d.fillRect(34, 48, 6, 4); graphics2d.fillRect(46, 48, 6, 4);
+                    graphics2d.fillRect(10, 48, 6, 4);
+                    graphics2d.fillRect(22, 48, 6, 4);
+                    graphics2d.fillRect(34, 48, 6, 4);
+                    graphics2d.fillRect(46, 48, 6, 4);
                     graphics2d.setColor(foreground);
-                    graphics2d.fillRect(10, 38, 44, 8); graphics2d.fillRect(14, 34, 34, 4);
-                    graphics2d.fillRect(16, 24, 24, 10); graphics2d.fillRect(40, 28, 20, 2); graphics2d.fillRect(58, 27, 4, 4);
+                    graphics2d.fillRect(10, 38, 44, 8);
+                    graphics2d.fillRect(14, 34, 34, 4);
+                    graphics2d.fillRect(16, 24, 24, 10);
+                    graphics2d.fillRect(40, 28, 20, 2);
+                    graphics2d.fillRect(58, 27, 4, 4);
                 }
                 graphics2d.dispose();
             }
@@ -204,7 +265,10 @@ public class LeaderboardPanel extends JPanel {
         return rankRow;
     }
 
-    /** Creates a stat display box with label, value, and optional dithered progress bar. */
+    /**
+     * Creates a stat display box with label, value, and optional dithered progress
+     * bar.
+     */
     private JPanel createLeaderboardStatBox(String labelText, String valueText, int percentage, boolean dithered) {
         JPanel statBox = new JPanel();
         statBox.setLayout(new BoxLayout(statBox, BoxLayout.Y_AXIS));

@@ -1,3 +1,11 @@
+/* 
+ * Name:    MainMenu.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 24th 2026
+ * Desc:    The main navigation hub for BIT-REKT. 
+ *          Manages the outer shell and screen transitions (Home, Leaderboard, New Game).
+ */
+
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
@@ -13,37 +21,38 @@ import java.util.Date;
  * The entry-point JFrame for the BIT-REKT application.
  * Manages the outer shell (title bar, sidebar navigation, header, footer)
  * and a CardLayout that switches between three screens:
- *   - HOME          : CanvasArea tank preview + stats sidebar
- *   - LEADERBOARD   : LeaderboardPanel
- *   - NEW_GAME      : CharacterSelectPanel
+ * - HOME : CanvasArea tank preview + stats sidebar
+ * - LEADERBOARD : LeaderboardPanel
+ * - NEW_GAME : CharacterSelectPanel
  *
  * All inner panel classes have been extracted to their own files:
- *   UIComponents.java         -> DashedBorder, DitheredBar, MainFramePanel
- *   CanvasArea.java           -> Home-screen tank preview canvas
- *   LeaderboardPanel.java     -> Leaderboard card
- *   CharacterSelectPanel.java -> NEW GAME card + PlayerColumn
+ * UIComponents.java -> DashedBorder, DitheredBar, MainFramePanel
+ * CanvasArea.java -> Home-screen tank preview canvas
+ * LeaderboardPanel.java -> Leaderboard card
+ * CharacterSelectPanel.java -> NEW GAME card + PlayerColumn
  */
 public class MainMenu extends JFrame {
 
-    private Font  pixelFont;
+    private Font pixelFont;
     private Color background = new Color(239, 243, 241);
     private Color foreground = new Color(0, 0, 0);
 
-    // Shared tank roster — passed by reference to CanvasArea and CharacterSelectPanel
+    // Shared tank roster — passed by reference to CanvasArea and
+    // CharacterSelectPanel
     private java.util.List<TankData> tanks = new java.util.ArrayList<>();
     private int currentTankIndex = 0;
 
     // Home-screen components updated by the arrow buttons in updateInfoPanel()
-    private JPanel     infoPanel;
+    private JPanel infoPanel;
     private CanvasArea canvas;
-    private int        flickerStep = 0;
+    private int flickerStep = 0;
 
     // CardLayout controls which screen is currently shown
     private CardLayout cardLayout;
-    private JPanel     cardContentPanel;
+    private JPanel cardContentPanel;
 
     // Nav item helpers — allow resetting all highlights when changing cards
-    private java.util.List<JPanel>   navItemsList          = new java.util.ArrayList<>();
+    private java.util.List<JPanel> navItemsList = new java.util.ArrayList<>();
     private java.util.List<Runnable> navHighlightResetters = new java.util.ArrayList<>();
 
     public MainMenu() {
@@ -60,7 +69,8 @@ public class MainMenu extends JFrame {
         // Global repaint timer — drives the blinking/flicker animations
         Timer blinkTimer = new Timer(600, e -> {
             for (Window w : Window.getWindows()) {
-                if (w instanceof MainMenu) w.repaint();
+                if (w instanceof MainMenu)
+                    w.repaint();
             }
         });
         blinkTimer.start();
@@ -77,6 +87,12 @@ public class MainMenu extends JFrame {
         } catch (Exception e) {
             pixelFont = new Font("Monospaced", Font.PLAIN, 16);
         }
+
+        // Global Tooltip Style (matches uicomponents aesthetic)
+        UIManager.put("ToolTip.font", pixelFont.deriveFont(18f));
+        UIManager.put("ToolTip.background", background);
+        UIManager.put("ToolTip.foreground", foreground);
+        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(foreground, 2));
 
         // Custom crosshair cursor
         BufferedImage cursorImg = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
@@ -133,8 +149,11 @@ public class MainMenu extends JFrame {
         headerPanel.add(titleBlock, BorderLayout.WEST);
         headerPanel.add(systemStatus, BorderLayout.EAST);
 
-        layoutConstraints.gridx = 0; layoutConstraints.gridy = 0; layoutConstraints.gridwidth = 3;
-        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 0.0;
+        layoutConstraints.gridx = 0;
+        layoutConstraints.gridy = 0;
+        layoutConstraints.gridwidth = 3;
+        layoutConstraints.weightx = 1.0;
+        layoutConstraints.weighty = 0.0;
         mainFrame.add(headerPanel, layoutConstraints);
 
         // =====================================================================
@@ -148,7 +167,7 @@ public class MainMenu extends JFrame {
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
         String[] navNames = { "NEW GAME", "HOW TO PLAY", "LEADERBOARD", "SAVE/LOAD", "TERMINATE" };
-        String[] navIds   = { "01",       "02",          "03",          "04",        "05" };
+        String[] navIds = { "01", "02", "03", "04", "05" };
 
         for (int i = 0; i < navNames.length; i++) {
             JPanel navItem = createNavItem(navNames[i], navIds[i]);
@@ -163,11 +182,15 @@ public class MainMenu extends JFrame {
 
         sidebar.add(Box.createVerticalGlue());
         JPanel homeBtn = createNavItem("HOME", "06");
+        homeBtn.setToolTipText("Return to the main command center");
         navItemsList.add(homeBtn);
         sidebar.add(homeBtn);
 
-        layoutConstraints.gridx = 0; layoutConstraints.gridy = 1; layoutConstraints.gridwidth = 1;
-        layoutConstraints.weightx = 0.0; layoutConstraints.weighty = 1.0;
+        layoutConstraints.gridx = 0;
+        layoutConstraints.gridy = 1;
+        layoutConstraints.gridwidth = 1;
+        layoutConstraints.weightx = 0.0;
+        layoutConstraints.weighty = 1.0;
         sidebar.setPreferredSize(new Dimension(220, 0));
         mainFrame.add(sidebar, layoutConstraints);
 
@@ -193,9 +216,13 @@ public class MainMenu extends JFrame {
         homePanel.setOpaque(false);
         GridBagConstraints homeLayoutConstraints = new GridBagConstraints();
         homeLayoutConstraints.fill = GridBagConstraints.BOTH;
-        homeLayoutConstraints.gridx = 0; homeLayoutConstraints.gridy = 0; homeLayoutConstraints.weightx = 1.0; homeLayoutConstraints.weighty = 1.0;
+        homeLayoutConstraints.gridx = 0;
+        homeLayoutConstraints.gridy = 0;
+        homeLayoutConstraints.weightx = 1.0;
+        homeLayoutConstraints.weighty = 1.0;
         homePanel.add(canvas, homeLayoutConstraints);
-        homeLayoutConstraints.gridx = 1; homeLayoutConstraints.weightx = 0.0;
+        homeLayoutConstraints.gridx = 1;
+        homeLayoutConstraints.weightx = 0.0;
         homePanel.add(infoPanel, homeLayoutConstraints);
 
         // =====================================================================
@@ -205,12 +232,15 @@ public class MainMenu extends JFrame {
         cardContentPanel = new JPanel(cardLayout);
         cardContentPanel.setOpaque(false);
 
-        cardContentPanel.add(homePanel,                                      "HOME");
-        cardContentPanel.add(new LeaderboardPanel(pixelFont),                "LEADERBOARD");
-        cardContentPanel.add(new CharacterSelectPanel(tanks, pixelFont),     "NEW_GAME");
+        cardContentPanel.add(homePanel, "HOME");
+        cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
+        cardContentPanel.add(new CharacterSelectPanel(tanks, pixelFont), "NEW_GAME");
 
-        layoutConstraints.gridx = 1; layoutConstraints.gridy = 1; layoutConstraints.gridwidth = 2;
-        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 1.0;
+        layoutConstraints.gridx = 1;
+        layoutConstraints.gridy = 1;
+        layoutConstraints.gridwidth = 2;
+        layoutConstraints.weightx = 1.0;
+        layoutConstraints.weighty = 1.0;
         mainFrame.add(cardContentPanel, layoutConstraints);
 
         // =====================================================================
@@ -227,8 +257,11 @@ public class MainMenu extends JFrame {
         rightFooterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         footerPanel.add(rightFooterLabel, BorderLayout.EAST);
 
-        layoutConstraints.gridx = 0; layoutConstraints.gridy = 2; layoutConstraints.gridwidth = 3;
-        layoutConstraints.weightx = 1.0; layoutConstraints.weighty = 0.0;
+        layoutConstraints.gridx = 0;
+        layoutConstraints.gridy = 2;
+        layoutConstraints.gridwidth = 3;
+        layoutConstraints.weightx = 1.0;
+        layoutConstraints.weighty = 0.0;
         mainFrame.add(footerPanel, layoutConstraints);
 
         rootPanel.add(mainFrame);
@@ -246,8 +279,10 @@ public class MainMenu extends JFrame {
         Timer flickerAct = new Timer(100, e -> {
             flickerStep = (flickerStep + 1) % 40;
             float frameOpacity = 1.0f;
-            if (flickerStep == 5)  frameOpacity = 0.95f;
-            if (flickerStep == 7)  frameOpacity = 0.98f;
+            if (flickerStep == 5)
+                frameOpacity = 0.95f;
+            if (flickerStep == 7)
+                frameOpacity = 0.98f;
             mainFrame.setOpacity(frameOpacity);
             mainFrame.repaint();
         });
@@ -274,20 +309,25 @@ public class MainMenu extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         // Tooltip for each nav item
-        if      (title.equals("NEW GAME"))    panel.setToolTipText("Start a new game session");
-        else if (title.equals("HOW TO PLAY")) panel.setToolTipText("View gameplay instructions");
-        else if (title.equals("LEADERBOARD")) panel.setToolTipText("View global high scores");
-        else if (title.equals("SAVE/LOAD"))   panel.setToolTipText("Save or load your game state");
-        else if (title.equals("TERMINATE"))   panel.setToolTipText("Exit the application");
+        if (title.equals("NEW GAME"))
+            panel.setToolTipText("Start a new game session");
+        else if (title.equals("HOW TO PLAY"))
+            panel.setToolTipText("View gameplay instructions");
+        else if (title.equals("LEADERBOARD"))
+            panel.setToolTipText("View global high scores");
+        else if (title.equals("SAVE/LOAD"))
+            panel.setToolTipText("Save or load your game state");
+        else if (title.equals("TERMINATE"))
+            panel.setToolTipText("Exit the application");
 
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(foreground, 2),
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
-        JLabel navTitleLabel  = createLabel("□ " + title, 24f);
+        JLabel navTitleLabel = createLabel("□ " + title, 24f);
         JLabel navNumberLabel = createLabel(num, 24f);
-        panel.add(navTitleLabel,  BorderLayout.WEST);
+        panel.add(navTitleLabel, BorderLayout.WEST);
         panel.add(navNumberLabel, BorderLayout.EAST);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
@@ -311,19 +351,35 @@ public class MainMenu extends JFrame {
         navHighlightResetters.add(onUnhover);
 
         panel.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { onHover.run(); }
-            public void focusLost(FocusEvent e)   { onUnhover.run(); }
+            public void focusGained(FocusEvent e) {
+                onHover.run();
+            }
+
+            public void focusLost(FocusEvent e) {
+                onUnhover.run();
+            }
         });
 
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
         panel.getActionMap().put("onEnter", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) { handleNavClick(title); }
+            public void actionPerformed(ActionEvent e) {
+                handleNavClick(title);
+            }
         });
 
         panel.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { onHover.run(); }
-            public void mouseExited(MouseEvent e)  { if (!isNavActive(title)) onUnhover.run(); }
-            public void mousePressed(MouseEvent e) { handleNavClick(title); }
+            public void mouseEntered(MouseEvent e) {
+                onHover.run();
+            }
+
+            public void mouseExited(MouseEvent e) {
+                if (!isNavActive(title))
+                    onUnhover.run();
+            }
+
+            public void mousePressed(MouseEvent e) {
+                handleNavClick(title);
+            }
         });
 
         return panel;
@@ -338,13 +394,19 @@ public class MainMenu extends JFrame {
     // =========================================================================
 
     private void handleNavClick(String title) {
-        for (Runnable resetHighlight : navHighlightResetters) resetHighlight.run();
+        for (Runnable resetHighlight : navHighlightResetters)
+            resetHighlight.run();
 
-        if      (title.equals("NEW GAME"))    cardLayout.show(cardContentPanel, "NEW_GAME");
-        else if (title.equals("LEADERBOARD")) cardLayout.show(cardContentPanel, "LEADERBOARD");
-        else if (title.equals("SAVE/LOAD"))   handleSaveLoad();
-        else if (title.equals("TERMINATE"))   System.exit(0);
-        else                                  cardLayout.show(cardContentPanel, "HOME");
+        if (title.equals("NEW GAME"))
+            cardLayout.show(cardContentPanel, "NEW_GAME");
+        else if (title.equals("LEADERBOARD"))
+            cardLayout.show(cardContentPanel, "LEADERBOARD");
+        else if (title.equals("SAVE/LOAD"))
+            handleSaveLoad();
+        else if (title.equals("TERMINATE"))
+            System.exit(0);
+        else
+            cardLayout.show(cardContentPanel, "HOME");
     }
 
     private void handleSaveLoad() {
@@ -357,7 +419,7 @@ public class MainMenu extends JFrame {
                 null, options, options[2]);
 
         if (dialogChoice == JOptionPane.YES_OPTION) {
-            DataManager.saveGame(this, new String[]{ "No actual game data to save from menu yet" });
+            DataManager.saveGame(this, new String[] { "No actual game data to save from menu yet" });
         } else if (dialogChoice == JOptionPane.NO_OPTION) {
             DataManager.loadGame(this);
         }
@@ -368,13 +430,16 @@ public class MainMenu extends JFrame {
     // =========================================================================
 
     private void updateInfoPanel() {
-        if (infoPanel == null) return;
+        if (infoPanel == null)
+            return;
         infoPanel.removeAll();
 
         TankData currentTank = tanks.get(currentTankIndex);
-        infoPanel.add(createStatBox("OFFENSIVE POWER", String.format("%.1f", currentTank.getOffensivePower()), (int) currentTank.getOffensivePower(), false));
+        infoPanel.add(createStatBox("OFFENSIVE POWER", String.format("%.1f", currentTank.getOffensivePower()),
+                (int) currentTank.getOffensivePower(), false));
         infoPanel.add(Box.createVerticalStrut(16));
-        infoPanel.add(createStatBox("MOBILITY INDEX", String.format("%.1f", currentTank.getMobilityIndex()), (int) currentTank.getMobilityIndex(), false));
+        infoPanel.add(createStatBox("MOBILITY INDEX", String.format("%.1f", currentTank.getMobilityIndex()),
+                (int) currentTank.getMobilityIndex(), false));
         infoPanel.add(Box.createVerticalStrut(16));
         infoPanel.add(createExpBlock());
         infoPanel.add(Box.createVerticalGlue());
@@ -391,7 +456,8 @@ public class MainMenu extends JFrame {
         }));
         arrowPanel.add(Box.createVerticalStrut(8));
         arrowPanel.add(createIconButton(() -> {
-            for (TankData tank : tanks) tank.rerollStats();
+            for (TankData tank : tanks)
+                tank.rerollStats();
             updateInfoPanel();
             canvas.repaint();
         }));
@@ -468,6 +534,7 @@ public class MainMenu extends JFrame {
         progressBar.setAlignmentX(Component.LEFT_ALIGNMENT);
         expBox.add(progressBar);
         expBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
+        expBox.setToolTipText("Pilot proficiency and level progress");
         return expBox;
     }
 
@@ -479,7 +546,7 @@ public class MainMenu extends JFrame {
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(8, 16, 8, 16)));
-        panel.setToolTipText(title.equals("^") ? "Previous tank unit" : "Next tank unit");
+        panel.setToolTipText(title.equals("^") ? "Previous tank" : "Next tank");
 
         JLabel arrowLabel = createLabel(title, 20f);
         arrowLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -487,21 +554,48 @@ public class MainMenu extends JFrame {
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
 
-        Runnable onHover   = () -> { panel.setOpaque(true); panel.setBackground(foreground); arrowLabel.setForeground(background); panel.repaint(); };
-        Runnable onUnhover = () -> { panel.setOpaque(false); arrowLabel.setForeground(foreground); panel.repaint(); };
+        Runnable onHover = () -> {
+            panel.setOpaque(true);
+            panel.setBackground(foreground);
+            arrowLabel.setForeground(background);
+            panel.repaint();
+        };
+        Runnable onUnhover = () -> {
+            panel.setOpaque(false);
+            arrowLabel.setForeground(foreground);
+            panel.repaint();
+        };
 
         panel.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { onHover.run(); }
-            public void focusLost(FocusEvent e)   { onUnhover.run(); }
+            public void focusGained(FocusEvent e) {
+                onHover.run();
+            }
+
+            public void focusLost(FocusEvent e) {
+                onUnhover.run();
+            }
         });
         panel.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
         panel.getActionMap().put("onEnter", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
+            public void actionPerformed(ActionEvent e) {
+                if (action != null)
+                    action.run();
+            }
         });
         panel.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { onHover.run(); }
-            public void mouseExited(MouseEvent e)  { if (!panel.hasFocus()) onUnhover.run(); }
-            public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
+            public void mouseEntered(MouseEvent e) {
+                onHover.run();
+            }
+
+            public void mouseExited(MouseEvent e) {
+                if (!panel.hasFocus())
+                    onUnhover.run();
+            }
+
+            public void mousePressed(MouseEvent e) {
+                if (action != null)
+                    action.run();
+            }
         });
         return panel;
     }
@@ -521,17 +615,46 @@ public class MainMenu extends JFrame {
                 setFocusable(true);
 
                 addFocusListener(new FocusAdapter() {
-                    public void focusGained(FocusEvent e) { isHovered = true; setOpaque(true); setBackground(foreground); repaint(); }
-                    public void focusLost(FocusEvent e)   { isHovered = false; setOpaque(false); repaint(); }
+                    public void focusGained(FocusEvent e) {
+                        isHovered = true;
+                        setOpaque(true);
+                        setBackground(foreground);
+                        repaint();
+                    }
+
+                    public void focusLost(FocusEvent e) {
+                        isHovered = false;
+                        setOpaque(false);
+                        repaint();
+                    }
                 });
                 getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
                 getActionMap().put("onEnter", new AbstractAction() {
-                    public void actionPerformed(ActionEvent e) { if (action != null) action.run(); }
+                    public void actionPerformed(ActionEvent e) {
+                        if (action != null)
+                            action.run();
+                    }
                 });
                 addMouseListener(new MouseAdapter() {
-                    public void mouseEntered(MouseEvent e) { isHovered = true; setOpaque(true); setBackground(foreground); repaint(); }
-                    public void mouseExited(MouseEvent e)  { if (!hasFocus()) { isHovered = false; setOpaque(false); repaint(); } }
-                    public void mousePressed(MouseEvent e) { if (action != null) action.run(); }
+                    public void mouseEntered(MouseEvent e) {
+                        isHovered = true;
+                        setOpaque(true);
+                        setBackground(foreground);
+                        repaint();
+                    }
+
+                    public void mouseExited(MouseEvent e) {
+                        if (!hasFocus()) {
+                            isHovered = false;
+                            setOpaque(false);
+                            repaint();
+                        }
+                    }
+
+                    public void mousePressed(MouseEvent e) {
+                        if (action != null)
+                            action.run();
+                    }
                 });
             }
 
@@ -541,12 +664,12 @@ public class MainMenu extends JFrame {
                 Graphics2D graphics2d = (Graphics2D) graphics.create();
                 graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 graphics2d.setColor(isHovered ? background : foreground);
-                int centerX = getWidth()  / 2;
+                int centerX = getWidth() / 2;
                 int centerY = getHeight() / 2;
                 graphics2d.translate(centerX - 8, centerY - 8);
                 // Refresh icon (two curved arrow shapes)
-                int[] arrowLeftXPoints  = { 3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3 };
-                int[] arrowLeftYPoints  = { 2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2 };
+                int[] arrowLeftXPoints = { 3, 3, 2, 2, 1, 1, 3, 3, 8, 8, 4, 4, 6, 6, 5, 5, 4, 4, 3 };
+                int[] arrowLeftYPoints = { 2, 3, 3, 4, 4, 5, 5, 13, 13, 12, 12, 5, 5, 4, 4, 3, 3, 2, 2 };
                 graphics2d.fillPolygon(arrowLeftXPoints, arrowLeftYPoints, 19);
                 int[] arrowRightXPoints = { 7, 7, 12, 12, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 13, 13, 7 };
                 int[] arrowRightYPoints = { 3, 4, 4, 11, 11, 12, 12, 13, 13, 14, 14, 13, 13, 12, 12, 11, 11, 3, 3 };

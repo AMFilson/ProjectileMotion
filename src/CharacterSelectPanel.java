@@ -1,3 +1,10 @@
+/* 
+ * Name:    CharacterSelectPanel.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 24th 2026
+ * Desc:    The "NEW GAME" screen where players choose their usernames and tanks.
+ */
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +50,7 @@ public class CharacterSelectPanel extends JPanel {
     private boolean isBlinkVisible = true;
 
     public CharacterSelectPanel(List<TankData> tanks, Font font) {
-        this.tanks     = tanks;
+        this.tanks = tanks;
         this.pixelFont = font;
 
         setLayout(new BorderLayout(0, 0));
@@ -116,14 +123,20 @@ public class CharacterSelectPanel extends JPanel {
      * Updates the BATTLE button's enabled state and the status label text.
      */
     void onStatusChanged() {
-        boolean p1Ready   = p1Col.isReady();
-        boolean p2Ready   = p2Col.isReady();
-        boolean bothReady = p1Ready && p2Ready;
+        boolean p1Ready = p1Col.isReady();
+        boolean p2Ready = p2Col.isReady();
+        
+        String p1Name = p1Col.getPlayerNameRaw();
+        String p2Name = p2Col.getPlayerNameRaw();
+        boolean namesEntered = !p1Name.trim().isEmpty() && !p2Name.trim().isEmpty();
+        
+        boolean canBattle = p1Ready && p2Ready && namesEntered;
+        battleBtn.setEnabled(canBattle);
 
-        battleBtn.setEnabled(bothReady);
-
-        if (bothReady) {
+        if (canBattle) {
             battleStatusLabel.setText("[ ALL SYSTEMS GO ]");
+        } else if (!namesEntered) {
+            battleStatusLabel.setText("ENTER NAMES...");
         } else if (!p1Ready && !p2Ready) {
             battleStatusLabel.setText("AWAITING PLAYERS...");
         } else if (!p1Ready) {
@@ -176,6 +189,7 @@ public class CharacterSelectPanel extends JPanel {
         battleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         battleButtonPanel.add(battleLabel, BorderLayout.CENTER);
         battleButtonPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        battleButtonPanel.setToolTipText("Launch mission sequence (Both players must be READY)");
 
         battleButtonPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -184,17 +198,17 @@ public class CharacterSelectPanel extends JPanel {
                     return;
 
                 // Collect selected data from both player columns
-                String p1Name   = p1Col.getPlayerName();
-                int    p1TankIdx = p1Col.getSelectedTankIndex();
-                String p2Name   = p2Col.getPlayerName();
-                int    p2TankIdx = p2Col.getSelectedTankIndex();
+                String p1Name = p1Col.getPlayerName();
+                int p1TankIdx = p1Col.getSelectedTankIndex();
+                String p2Name = p2Col.getPlayerName();
+                int p2TankIdx = p2Col.getSelectedTankIndex();
 
                 // Sync back to the global players list so Leaderboard stays current
-                if (Main.playersList.size() >= 2) {
-                    Main.playersList.get(0).setName(p1Name);
-                    Main.playersList.get(0).setSelectedTankIndex(p1TankIdx);
-                    Main.playersList.get(1).setName(p2Name);
-                    Main.playersList.get(1).setSelectedTankIndex(p2TankIdx);
+                if (LeaderboardPanel.playersList.size() >= 2) {
+                    LeaderboardPanel.playersList.get(0).setName(p1Name);
+                    LeaderboardPanel.playersList.get(0).setSelectedTankIndex(p1TankIdx);
+                    LeaderboardPanel.playersList.get(1).setName(p2Name);
+                    LeaderboardPanel.playersList.get(1).setSelectedTankIndex(p2TankIdx);
                 }
 
                 // Retrieve the TankData objects and launch the battle window
@@ -269,7 +283,7 @@ public class CharacterSelectPanel extends JPanel {
 
         PlayerColumn(int playerNumber, String defaultName, boolean startReady) {
             this.playerNumber = playerNumber;
-            this.ready        = startReady;
+            this.ready = startReady;
             setLayout(new BorderLayout(0, 0));
             setOpaque(false);
 
@@ -344,6 +358,12 @@ public class CharacterSelectPanel extends JPanel {
                     nameField.setCaretColor(foreground);
                 }
             });
+            nameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                public void insertUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
+                public void removeUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
+                public void changedUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
+            });
+            nameField.setToolTipText("Enter your Username");
             nameAndStatusRow.add(nameField);
             nameAndStatusRow.add(Box.createHorizontalStrut(5));
 
@@ -371,6 +391,7 @@ public class CharacterSelectPanel extends JPanel {
             statusBtnMain.add(statusLbl, BorderLayout.WEST);
             statusBtnMain.add(statusVal, BorderLayout.EAST);
             statusBtnMain.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+            statusBtnMain.setToolTipText("Toggle readiness state (READY / STANDBY)");
 
             statusBtnWrapper.add(statusBtnMain);
             statusBtnWrapper.add(statusBtnShadow);
@@ -406,7 +427,8 @@ public class CharacterSelectPanel extends JPanel {
                     Graphics2D graphics2d = (Graphics2D) graphics.create();
                     graphics2d.setColor(foreground);
                     float[] dashPattern = { 4f };
-                    graphics2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+                    graphics2d.setStroke(
+                            new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
                     // Draw only top and bottom dashed lines
                     graphics2d.drawLine(0, 0, getWidth() - 1, 0);
                     graphics2d.drawLine(0, getHeight() - 1, getWidth() - 1, getHeight() - 1);
@@ -432,7 +454,7 @@ public class CharacterSelectPanel extends JPanel {
                             RenderingHints.KEY_INTERPOLATION,
                             RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
                     TankData selectedTank = tanks.get(selectedTankIndex);
-                    String   imagePath    = selectedTank.getImagePath();
+                    String imagePath = selectedTank.getImagePath();
                     if (imagePath != null) {
                         BufferedImage tankImage = imageCache.computeIfAbsent(imagePath, path -> {
                             try {
@@ -443,13 +465,13 @@ public class CharacterSelectPanel extends JPanel {
                         });
                         if (tankImage != null) {
                             // Scale image to fill 90% of the canvas, then centre it
-                            int    maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.90);
-                            double imageScale        = Math.min((double) maxImageDimension / tankImage.getWidth(),
+                            int maxImageDimension = (int) (Math.min(getWidth(), getHeight()) * 0.90);
+                            double imageScale = Math.min((double) maxImageDimension / tankImage.getWidth(),
                                     (double) maxImageDimension / tankImage.getHeight());
-                            int    drawWidth         = (int) (tankImage.getWidth()  * imageScale);
-                            int    drawHeight        = (int) (tankImage.getHeight() * imageScale);
-                            int    centeredDrawX     = getWidth()  / 2 - drawWidth  / 2;
-                            int    centeredDrawY     = getHeight() / 2 - drawHeight / 2;
+                            int drawWidth = (int) (tankImage.getWidth() * imageScale);
+                            int drawHeight = (int) (tankImage.getHeight() * imageScale);
+                            int centeredDrawX = getWidth() / 2 - drawWidth / 2;
+                            int centeredDrawY = getHeight() / 2 - drawHeight / 2;
                             graphics2d.drawImage(tankImage, centeredDrawX, centeredDrawY, drawWidth, drawHeight, null);
                         }
                     }
@@ -565,6 +587,7 @@ public class CharacterSelectPanel extends JPanel {
             progressBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
             progressBarContainer.add(progressBar);
             statPanel.add(progressBarContainer);
+            statPanel.setToolTipText("Current unit performance metric: " + labelText);
             return statPanel;
         }
 
@@ -577,6 +600,7 @@ public class CharacterSelectPanel extends JPanel {
             carouselButtonPanel.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(foreground, 1),
                     BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+            carouselButtonPanel.setToolTipText("View " + (left ? "previous" : "next") + " tank in roster");
             JLabel carouselArrowLabel = createLabel(label, 28f);
             carouselArrowLabel.setHorizontalAlignment(SwingConstants.CENTER);
             carouselButtonPanel.add(carouselArrowLabel, BorderLayout.CENTER);
@@ -609,6 +633,10 @@ public class CharacterSelectPanel extends JPanel {
 
         String getPlayerName() {
             return nameField.getText().trim().isEmpty() ? "PLAYER_" + playerNumber : nameField.getText().trim();
+        }
+
+        String getPlayerNameRaw() {
+            return nameField.getText();
         }
 
         int getSelectedTankIndex() {
