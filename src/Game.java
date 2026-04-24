@@ -111,7 +111,8 @@ public class Game {
      *   Wrapping it in try-catch prevents the program from crashing — instead,
      *   we display a friendly error and loop back to ask again.
      */
-    public void start() {
+   /* Appended legacy terminal code 
+   public void start() {
         boolean needInput = true;
         int menuChoice    = 0;
 
@@ -160,7 +161,7 @@ public class Game {
                 System.out.println("Error: Invalid input. Please enter a valid number.");
             }
         }
-    }
+    } */
 
     // -----------------------------------------------------------------------
     // GAME SESSION LOGIC
@@ -276,7 +277,7 @@ public class Game {
     // -----------------------------------------------------------------------
     // SCOREBOARD DISPLAY
     // -----------------------------------------------------------------------
-
+// Legacy scoreboard appended replaced by leaderboard panel
     /**
      * Prints all past game results stored in the scoreBoard ArrayList.
      * If no games have been played, prompts the user to play first.
@@ -288,7 +289,7 @@ public class Game {
      *   - 'isEmpty()' → true if the list has no elements
      *   - for-each loop → iterates over every element
      */
-    private void showScoreboard() {
+    /* private void showScoreboard() {
         if (scoreBoard.isEmpty()) {
             System.out.println("There is no scoreboard! Play a game first!");
             System.out.println("Press enter to go back to main menu");
@@ -299,20 +300,20 @@ public class Game {
                 System.out.println(scoreEntry);
             }
 
-            /*
-             * TODO: Sorting the scoreboard by round count or score is still pending.
-             * The challenge is that the result is one compound String (e.g., 
-             * "Winner: GHOST Game: 3 Round: 2"), not a structured object.
-             * A cleaner approach would be to store a custom Result class instead.
-             *
-             *   ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
-             *   bestScore.sort(null); // Alphabetical sort — not useful here
-             */
+            //
+            // TODO: Sorting the scoreboard by round count or score is still pending.
+            // The challenge is that the result is one compound String (e.g., 
+            // "Winner: GHOST Game: 3 Round: 2"), not a structured object.
+            // A cleaner approach would be to store a custom Result class instead.
+            //
+            //   ArrayList<String> bestScore = new ArrayList<>(scoreBoard);
+            //   bestScore.sort(null); // Alphabetical sort — not useful here
+            //
 
             System.out.println("Press enter to go back to main menu");
             universalInput.nextLine();
         }
-    }
+    } */
 
     // -----------------------------------------------------------------------
     // TUTORIAL
