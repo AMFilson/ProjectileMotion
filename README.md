@@ -4,7 +4,7 @@
 
 ![BIT-REKT Logo](https://via.placeholder.com/800x200?text=BIT-REKT+ARTILLERY+COMBAT)
 
-## 🚀 Key Features
+## Key Features
 
 - **Tactical Versus Combat**: Two players compete head-to-head, adjusting angles and velocity to land the killing blow.
 - **Persistent Career Tracking**: Every shot counts. All matches are automatically logged to `match_history.csv`, tracking winners, losers, and record-breaking scores.
@@ -13,14 +13,14 @@
 - **Retro-Industrial UI**: A custom-built Swing interface featuring dithered progress bars, dashed borders, and the signature VT323 pixel font.
 - **Tank Roster**: Choose from specialized units like the **M8 Greyhound**, **Flak 88**, or the experimental **Black Cat**, each with unique performance metrics.
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 - **Language**: Java 25 (OpenJDK)
 - **Framework**: Java Swing (Custom UI Components)
 - **Data Persistence**: CSV Flat-file storage (`match_history.csv`)
 - **Graphics**: 2D Graphics engine with manual pixel-art rendering and interpolation.
 
-## 📂 Project Structure
+## Project Structure
 
 - `src/Main.java`: The application entry point.
 - `src/MainMenu.java`: The primary hub and navigation system.
@@ -29,14 +29,14 @@
 - `src/LeaderboardPanel.java`: Aggregates and displays the global rankings.
 - `src/CharacterSelectPanel.java`: Username validation and tank configuration.
 
-## 🎮 How to Run
+## How to Run
 
 1. Ensure you have **JDK 25** or higher installed.
 2. Compile all files in the `src/` directory.
 3. Run the `Main` class.
 4. Use **Tab** to navigate the menu and **Enter** to initialize the sequence.
 
-## ✍️ Author
+## Author
 
 **Andrew Filson**  
 *Heavy Armored Division - Camp 30*  
