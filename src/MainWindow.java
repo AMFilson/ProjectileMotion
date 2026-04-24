@@ -62,6 +62,9 @@ public class MainWindow extends JFrame {
     /** Player 2's selected tank. */
     private TankData p2Tank;
 
+    /** Indices for logging. */
+    private int p1TankIndex, p2TankIndex;
+
     // -----------------------------------------------------------------------
     // Game state — these fields change as rounds progress
     // -----------------------------------------------------------------------
@@ -132,12 +135,14 @@ public class MainWindow extends JFrame {
      * @param p2Name Player 2's chosen name.
      * @param p2Tank Player 2's chosen tank and its stats.
      */
-    public MainWindow(String p1Name, TankData p1Tank, String p2Name, TankData p2Tank) {
+    public MainWindow(String p1Name, TankData p1Tank, int p1Idx, String p2Name, TankData p2Tank, int p2Idx) {
         // Store incoming player data as fields for use throughout this class
         this.p1Name = p1Name;
         this.p1Tank = p1Tank;
+        this.p1TankIndex = p1Idx;
         this.p2Name = p2Name;
         this.p2Tank = p2Tank;
+        this.p2TankIndex = p2Idx;
 
         loadFont(); // Must load font BEFORE any UI components are created
 
@@ -164,8 +169,8 @@ public class MainWindow extends JFrame {
      *   the real initialization code lives in one place, avoiding duplication.
      */
     public MainWindow() {
-        this("PLAYER_1", new TankData("M8 GREYHOUND", 63.5, 88.2),
-             "PLAYER_2", new TankData("FLAK 88", 78.0, 41.5));
+        this("PLAYER_1", new TankData("M8 GREYHOUND", 63.5, 88.2), 0,
+             "PLAYER_2", new TankData("FLAK 88", 78.0, 41.5), 1);
     }
 
     // -----------------------------------------------------------------------
@@ -505,11 +510,12 @@ public class MainWindow extends JFrame {
      */
     private void refreshTurnUI() {
         roundNum++;
-        roundLabel.setText(String.format("ROUND %02d", roundNum)); // %02d = zero-padded 2 digits
 
-        // Determine whose data to show based on the p1Turn flag
+        // Identify the active player's data for this turn
         String   activePlayerName = p1Turn ? p1Name : p2Name;
         TankData tank             = p1Turn ? p1Tank  : p2Tank;
+
+        roundLabel.setText(String.format("ROUND %02d  |  %s", roundNum, activePlayerName)); // %02d = zero-padded 2 digits
 
         // Status bar: shows active player's name + their tank's stat caps
         statusLabel.setText(activePlayerName + "'s TURN  |  MAX PWR: " +
@@ -519,9 +525,6 @@ public class MainWindow extends JFrame {
         // Sync position labels with current game state
         p1PosLabel.setText(String.valueOf(p1Position));
         p2PosLabel.setText(String.valueOf(p2Position));
-
-        // Keep the global game counter in sync with round number
-        Main.gamesPlayed = roundNum;
 
         // Clear input fields ready for the next player's entry
         angleField.setText("");
@@ -609,6 +612,12 @@ public class MainWindow extends JFrame {
                 p2ScoreLabel.setText(String.valueOf(p2Score));
             }
             Main.gamesPlayed++;
+
+            // --- Log to persistent match history (Step 3) ---
+            int gameNum = DataManager.getNextGameNumber();
+            MatchRecord record = new MatchRecord(gameNum, p1Name, p1TankIndex, p1Score, p2Name, p2TankIndex, p2Score);
+            DataManager.appendMatchRecord(record);
+            LeaderboardPanel.sessionHistory.add(record);
 
             int postHitDialogChoice = JOptionPane.showOptionDialog(this,
                     String.format("%s lands at %.1f — DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
@@ -741,9 +750,34 @@ public class MainWindow extends JFrame {
             }
             public void mouseExited(MouseEvent e) {
                 // Restore: back to black bg, white text
+                if (!buttonPanel.isFocusOwner()) {
+                    buttonPanel.setBackground(foreground); buttonLabel.setForeground(background); buttonPanel.repaint();
+                }
+            }
+        });
+
+        // --- Keyboard Focus & Accessibility (New) ---
+        buttonPanel.setFocusable(true);
+        buttonPanel.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {
+                // Visual indicator for focus: same as hover
+                buttonPanel.setBackground(background); buttonLabel.setForeground(foreground); buttonPanel.repaint();
+            }
+            public void focusLost(FocusEvent e) {
+                // Restore when focus is lost
                 buttonPanel.setBackground(foreground); buttonLabel.setForeground(background); buttonPanel.repaint();
             }
         });
+
+        buttonPanel.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                // Trigger action on SPACE or ENTER
+                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    action.run();
+                }
+            }
+        });
+
         return buttonPanel;
     }
 

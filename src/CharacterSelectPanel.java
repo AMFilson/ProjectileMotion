@@ -194,30 +194,7 @@ public class CharacterSelectPanel extends JPanel {
         battleButtonPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!battleButtonPanel.isEnabled())
-                    return;
-
-                // Collect selected data from both player columns
-                String p1Name = p1Col.getPlayerName();
-                int p1TankIdx = p1Col.getSelectedTankIndex();
-                String p2Name = p2Col.getPlayerName();
-                int p2TankIdx = p2Col.getSelectedTankIndex();
-
-                // Sync back to the global players list so Leaderboard stays current
-                if (LeaderboardPanel.playersList.size() >= 2) {
-                    LeaderboardPanel.playersList.get(0).setName(p1Name);
-                    LeaderboardPanel.playersList.get(0).setSelectedTankIndex(p1TankIdx);
-                    LeaderboardPanel.playersList.get(1).setName(p2Name);
-                    LeaderboardPanel.playersList.get(1).setSelectedTankIndex(p2TankIdx);
-                }
-
-                // Retrieve the TankData objects and launch the battle window
-                TankData t1 = tanks.get(p1TankIdx);
-                TankData t2 = tanks.get(p2TankIdx);
-                SwingUtilities.invokeLater(() -> {
-                    MainWindow mw = new MainWindow(p1Name, t1, p2Name, t2);
-                    mw.setVisible(true);
-                });
+                if (battleButtonPanel.isEnabled()) triggerBattleAction(battleButtonPanel);
             }
 
             @Override
@@ -231,13 +208,61 @@ public class CharacterSelectPanel extends JPanel {
 
             @Override
             public void mouseExited(MouseEvent e) {
+                if (!battleButtonPanel.isFocusOwner()) {
+                    battleButtonPanel.setOpaque(false);
+                    battleLabel.setForeground(foreground);
+                }
+            }
+        });
+
+        // --- Keyboard Focus & Accessibility ---
+        battleButtonPanel.setFocusable(true);
+        battleButtonPanel.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {
+                if (battleButtonPanel.isEnabled()) {
+                    battleButtonPanel.setOpaque(true);
+                    battleButtonPanel.setBackground(foreground);
+                    battleLabel.setForeground(background);
+                }
+            }
+            public void focusLost(FocusEvent e) {
                 battleButtonPanel.setOpaque(false);
                 battleLabel.setForeground(foreground);
-                battleLabel.setText("BATTLE");
+            }
+        });
+        battleButtonPanel.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if ((e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) && battleButtonPanel.isEnabled()) {
+                    triggerBattleAction(battleButtonPanel);
+                }
             }
         });
 
         return battleButtonPanel;
+    }
+
+    private void triggerBattleAction(JPanel battleButtonPanel) {
+        // Collect selected data from both player columns
+        String p1Name = p1Col.getPlayerName();
+        int p1TankIdx = p1Col.getSelectedTankIndex();
+        String p2Name = p2Col.getPlayerName();
+        int p2TankIdx = p2Col.getSelectedTankIndex();
+
+        // Sync back to the global players list so Leaderboard stays current
+        if (LeaderboardPanel.playersList.size() >= 2) {
+            LeaderboardPanel.playersList.get(0).setName(p1Name);
+            LeaderboardPanel.playersList.get(0).setSelectedTankIndex(p1TankIdx);
+            LeaderboardPanel.playersList.get(1).setName(p2Name);
+            LeaderboardPanel.playersList.get(1).setSelectedTankIndex(p2TankIdx);
+        }
+
+        // Retrieve the TankData objects and launch the battle window
+        TankData t1 = tanks.get(p1TankIdx);
+        TankData t2 = tanks.get(p2TankIdx);
+        SwingUtilities.invokeLater(() -> {
+            MainWindow mw = new MainWindow(p1Name, t1, p1TankIdx, p2Name, t2, p2TankIdx);
+            mw.setVisible(true);
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -400,18 +425,38 @@ public class CharacterSelectPanel extends JPanel {
             statusBtnMain.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    // Press-down animation: move main button 2px toward the shadow
-                    statusBtnMain.setLocation(2, 2);
-                    statusBtnShadow.setVisible(false);
-                    toggleStatus();
+                    pressStatusBtn();
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    // Release animation: return to original position
-                    statusBtnMain.setLocation(0, 0);
-                    if (ready)
-                        statusBtnShadow.setVisible(true);
+                    releaseStatusBtn();
+                }
+            });
+
+            // --- Keyboard Focus & Accessibility ---
+            statusBtnMain.setFocusable(true);
+            statusBtnMain.addFocusListener(new FocusListener() {
+                public void focusGained(FocusEvent e) {
+                    // Visual focus state matches READY state aesthetic
+                    statusBtnMain.setOpaque(true);
+                    statusBtnMain.setBackground(foreground);
+                    statusLbl.setForeground(background);
+                    statusVal.setForeground(background);
+                }
+                public void focusLost(FocusEvent e) {
+                    applyStatusStyle(); // Revert to based on state
+                }
+            });
+            statusBtnMain.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+                        pressStatusBtn();
+                        // Brief delay for animation feel? No, just release immediately for simplicity
+                        Timer timer = new Timer(100, ex -> releaseStatusBtn());
+                        timer.setRepeats(false);
+                        timer.start();
+                    }
                 }
             });
 
@@ -528,6 +573,19 @@ public class CharacterSelectPanel extends JPanel {
             onStatusChanged(); // Calls the outer CharacterSelectPanel method
         }
 
+        /** Helper for status button press animation */
+        private void pressStatusBtn() {
+            statusBtnMain.setLocation(2, 2);
+            statusBtnShadow.setVisible(false);
+            toggleStatus();
+        }
+
+        /** Helper for status button release animation */
+        private void releaseStatusBtn() {
+            statusBtnMain.setLocation(0, 0);
+            if (ready) statusBtnShadow.setVisible(true);
+        }
+
         /**
          * Updates the status button's visual style to reflect READY or STANDBY state.
          */
@@ -617,11 +675,35 @@ public class CharacterSelectPanel extends JPanel {
                 }
 
                 public void mouseExited(MouseEvent e) {
-                    carouselButtonPanel.setOpaque(false);
-                    carouselArrowLabel.setForeground(foreground);
-                    carouselButtonPanel.repaint();
+                    if (!carouselButtonPanel.isFocusOwner()) {
+                        carouselButtonPanel.setOpaque(false);
+                        carouselArrowLabel.setForeground(foreground);
+                        carouselButtonPanel.repaint();
+                    }
                 }
             });
+
+            // --- Keyboard Focus & Accessibility ---
+            carouselButtonPanel.setFocusable(true);
+            carouselButtonPanel.addFocusListener(new FocusListener() {
+                public void focusGained(FocusEvent e) {
+                    carouselButtonPanel.setOpaque(true);
+                    carouselButtonPanel.setBackground(foreground);
+                    carouselArrowLabel.setForeground(background);
+                }
+                public void focusLost(FocusEvent e) {
+                    carouselButtonPanel.setOpaque(false);
+                    carouselArrowLabel.setForeground(foreground);
+                }
+            });
+            carouselButtonPanel.addKeyListener(new KeyAdapter() {
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+                        action.run();
+                    }
+                }
+            });
+
             return carouselButtonPanel;
         }
 

@@ -28,8 +28,8 @@ public class Main {
     // -----------------------------------------------------------------------
 
     /**
-     * Tracks how many total rounds have been completed across the whole session.
-     * Incremented by MainWindow whenever a hit lands or a round ends.
+     * Tracks how many total matches have been completed across the whole session.
+     * Incremented by MainWindow whenever a hit lands and a match ends.
      */
     public static int gamesPlayed = 0;
 

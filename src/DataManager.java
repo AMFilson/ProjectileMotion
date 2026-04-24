@@ -124,7 +124,64 @@ public class DataManager {
             }
         }
 
-        // Return null if cancelled or failed — callers should always null-check this!
+    // Return null if cancelled or failed — callers should always null-check this!
         return null;
+    }
+
+    // =========================================================================
+    // MATCH HISTORY TRACKING (Match History Plan Steps 2 & 4)
+    // =========================================================================
+
+    private static final String HISTORY_FILE = "match_history.csv";
+
+    /** Appends a new match record to the match_history.csv file automatically. */
+    public static void appendMatchRecord(MatchRecord record) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(HISTORY_FILE, true))) {
+            writer.write(record.toCSV() + "\n");
+        } catch (IOException e) {
+            System.err.println("Failed to log match record: " + e.getMessage());
+        }
+    }
+
+    /** Loads all historical matches from the CSV file. */
+    public static List<MatchRecord> loadAllMatchRecords() {
+        List<MatchRecord> records = new ArrayList<>();
+        File file = new File(HISTORY_FILE);
+        if (!file.exists()) return records;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 7) {
+                    records.add(new MatchRecord(
+                        Integer.parseInt(parts[0]), // gameNumber
+                        parts[1],                   // p1Name
+                        Integer.parseInt(parts[2]), // p1Tank
+                        Integer.parseInt(parts[3]), // p1Score
+                        parts[4],                   // p2Name
+                        Integer.parseInt(parts[5]), // p2Tank
+                        Integer.parseInt(parts[6])  // p2Score
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading history: " + e.getMessage());
+        }
+        return records;
+    }
+
+    /** Counts the existing records to determine the number for the next game. */
+    public static int getNextGameNumber() {
+        int count = 0;
+        File file = new File(HISTORY_FILE);
+        if (!file.exists()) return 1;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            while (reader.readLine() != null) count++;
+        } catch (IOException e) {
+            // If read fails, just start at 1
+        }
+        return count + 1;
     }
 }

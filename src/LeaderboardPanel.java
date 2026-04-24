@@ -25,27 +25,36 @@ public class LeaderboardPanel extends JPanel {
      * panel.
      */
     public static java.util.List<Player> playersList = new java.util.ArrayList<>();
+    public static java.util.List<MatchRecord> sessionHistory = new java.util.ArrayList<>();
 
-    static {
-        // Mock leaderboard entry #1
-        Player topRankedPlayer = new Player("VON_NEUMANN");
-        topRankedPlayer.setScore(999999);
-        topRankedPlayer.setSelectedTankIndex(1); // Index 1 = FLAK 88
+    /** Aggregates historical match data into a ranked player list. */
+    public static void refreshLeaderboardData() {
+        if (sessionHistory.isEmpty()) {
+            playersList.clear();
+            return;
+        }
 
-        // Mock leaderboard entry #2
-        Player secondRankedPlayer = new Player("CYBER_PUNK_88");
-        secondRankedPlayer.setScore(842550);
-        secondRankedPlayer.setSelectedTankIndex(0); // Index 0 = M8 GREYHOUND
+        java.util.Map<String, Player> bestPerformances = new java.util.HashMap<>();
 
-        // Mock leaderboard entry #3
-        Player thirdRankedPlayer = new Player("YOU // USER_772");
-        thirdRankedPlayer.setScore(760042);
-        thirdRankedPlayer.setSelectedTankIndex(2); // Index 2 = BLACK CAT
+        for (MatchRecord record : sessionHistory) {
+            // Process Player 1
+            updateBest(bestPerformances, record.getP1Name(), record.getP1TankIndex(), record.getP1Score());
+            // Process Player 2
+            updateBest(bestPerformances, record.getP2Name(), record.getP2TankIndex(), record.getP2Score());
+        }
 
-        // Add them all to the shared roster
-        playersList.add(topRankedPlayer);
-        playersList.add(secondRankedPlayer);
-        playersList.add(thirdRankedPlayer);
+        playersList = new java.util.ArrayList<>(bestPerformances.values());
+        java.util.Collections.sort(playersList, (a, b) -> b.getScore() - a.getScore());
+    }
+
+    private static void updateBest(java.util.Map<String, Player> map, String name, int tankIdx, int score) {
+        Player p = map.get(name);
+        if (p == null || score > p.getScore()) {
+            Player newBest = new Player(name);
+            newBest.setScore(score);
+            newBest.setSelectedTankIndex(tankIdx);
+            map.put(name, newBest);
+        }
     }
 
     private final Color foreground = new Color(0, 0, 0);
@@ -60,6 +69,8 @@ public class LeaderboardPanel extends JPanel {
      */
     public LeaderboardPanel(Font font) {
         this.pixelFont = font;
+        refreshLeaderboardData(); // Reload latest stats whenever panel is created
+
         setLayout(new GridBagLayout());
         setOpaque(false);
 
@@ -81,9 +92,9 @@ public class LeaderboardPanel extends JPanel {
         headerRow.add(createLabel("RANK", 20f));
         headerRow.add(createLabel("UNIT", 20f));
         headerRow.add(createLabel("PLAYER", 20f));
-        JLabel highScoreLabel = createLabel("HIGH_SCORE", 20f);
-        highScoreLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        headerRow.add(highScoreLabel);
+        JLabel gamesWonLabel = createLabel("GAMES WON", 20f);
+        gamesWonLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        headerRow.add(gamesWonLabel);
         headerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         tablePanel.add(headerRow);
         tablePanel.add(Box.createVerticalStrut(10));
@@ -129,6 +140,8 @@ public class LeaderboardPanel extends JPanel {
         legacyBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
+        legacyBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
+        legacyBox.setPreferredSize(new Dimension(160, 75));
 
         JLabel legacyLbl = createLabel("LEGACY STATUS", 12f);
         legacyLbl.setForeground(background);
@@ -277,6 +290,8 @@ public class LeaderboardPanel extends JPanel {
         statBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(foreground, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
+        statBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
+        statBox.setPreferredSize(new Dimension(160, 75));
 
         JLabel statLabel = createLabel(labelText, 12f);
         statLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
@@ -287,12 +302,6 @@ public class LeaderboardPanel extends JPanel {
         statValueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statValueLabel.setFont(statValueLabel.getFont().deriveFont(Font.BOLD));
         statBox.add(statValueLabel);
-
-        DitheredBar progressBar = new DitheredBar(percentage, dithered);
-        progressBar.setPreferredSize(new Dimension(160, 12));
-        progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 12));
-        progressBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        statBox.add(progressBar);
 
         return statBox;
     }

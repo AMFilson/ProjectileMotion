@@ -399,9 +399,10 @@ public class MainMenu extends JFrame {
 
         if (title.equals("NEW GAME"))
             cardLayout.show(cardContentPanel, "NEW_GAME");
-        else if (title.equals("LEADERBOARD"))
+        else if (title.equals("LEADERBOARD")) {
+            cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
             cardLayout.show(cardContentPanel, "LEADERBOARD");
-        else if (title.equals("SAVE/LOAD"))
+        } else if (title.equals("SAVE/LOAD"))
             handleSaveLoad();
         else if (title.equals("TERMINATE"))
             System.exit(0);
@@ -419,9 +420,40 @@ public class MainMenu extends JFrame {
                 null, options, options[2]);
 
         if (dialogChoice == JOptionPane.YES_OPTION) {
-            DataManager.saveGame(this, new String[] { "No actual game data to save from menu yet" });
+            java.util.List<MatchRecord> history = LeaderboardPanel.sessionHistory;
+            String[] dataToSave;
+            if (history.isEmpty()) {
+                dataToSave = new String[] { "No match records found." };
+            } else {
+                dataToSave = new String[history.size()];
+                for (int i = 0; i < history.size(); i++) {
+                    dataToSave[i] = history.get(i).toCSV();
+                }
+            }
+            DataManager.saveGame(this, dataToSave);
         } else if (dialogChoice == JOptionPane.NO_OPTION) {
-            DataManager.loadGame(this);
+            String[] loadedData = DataManager.loadGame(this);
+            if (loadedData != null) {
+                LeaderboardPanel.sessionHistory.clear();
+                for (String line : loadedData) {
+                    if (line.equals("No match records found.")) continue;
+                    String[] parts = line.split(",");
+                    if (parts.length == 7) {
+                        try {
+                            LeaderboardPanel.sessionHistory.add(new MatchRecord(
+                                Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]),
+                                parts[4], Integer.parseInt(parts[5]), Integer.parseInt(parts[6])
+                            ));
+                        } catch (NumberFormatException e) {
+                            // Ignore malformed lines
+                        }
+                    }
+                }
+                LeaderboardPanel.refreshLeaderboardData();
+                Main.gamesPlayed = LeaderboardPanel.sessionHistory.size();
+                cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
+                cardLayout.show(cardContentPanel, "LEADERBOARD");
+            }
         }
     }
 
