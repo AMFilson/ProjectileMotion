@@ -263,7 +263,7 @@ public class MainWindow extends JFrame {
     }
 
     private void refreshTurnUI() {
-        roundNum++;
+        if (p1Turn) roundNum++;
         String activePlayerName = p1Turn ? p1.getName() : p2.getName();
         statusText = "ACTIVE: " + activePlayerName + "'s TURN";
         p1PosLabel.setText(String.valueOf(p1.getPosition()));
