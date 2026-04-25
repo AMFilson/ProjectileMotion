@@ -1,3 +1,10 @@
+/*
+ * Name:    AnimationPanel.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 25th 2026
+ * Desc:    Panel responsible for rendering the game canvas, tanks, and shots.
+ */
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -98,7 +105,7 @@ public class AnimationPanel extends JPanel {
             }
             
             g2d.setFont(pixelFont.deriveFont(14f));
-            g2d.drawString("GAMES PLAYED: " + Main.gamesPlayed, w - 140, 24);
+            g2d.drawString("GAMES PLAYED: " + Main.getGamesPlayed(), w - 140, 24);
         }
 
         // 4. Grid

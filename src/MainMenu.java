@@ -70,10 +70,9 @@ public class MainMenu extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Populate the shared tank roster
-        tanks.add(new TankData("M8 GREYHOUND"));
-        tanks.add(new TankData("FLAK 88"));
-        tanks.add(new TankData("BLACK CAT"));
+        tanks.add(new M8Greyhound());
+        tanks.add(new Flak88());
+        tanks.add(new BlackCat());
 
         // Global repaint timer — drives the blinking/flicker animations
         blinkTimer = new Timer(600, e -> {
@@ -439,7 +438,7 @@ public class MainMenu extends JFrame {
                 null, options, options[2]);
 
         if (dialogChoice == JOptionPane.YES_OPTION) {
-            java.util.List<MatchRecord> history = LeaderboardPanel.sessionHistory;
+            java.util.List<MatchRecord> history = LeaderboardPanel.getSessionHistory();
             String[] dataToSave;
             if (history.isEmpty()) {
                 dataToSave = new String[] { "No match records found." };
@@ -453,14 +452,14 @@ public class MainMenu extends JFrame {
         } else if (dialogChoice == JOptionPane.NO_OPTION) {
             String[] loadedData = DataManager.loadGame(this);
             if (loadedData != null) {
-                LeaderboardPanel.sessionHistory.clear();
+                LeaderboardPanel.clearSessionHistory();
                 for (String line : loadedData) {
                     if (line.equals("No match records found."))
                         continue;
                     String[] parts = line.split(",");
                     if (parts.length == 7) {
                         try {
-                            LeaderboardPanel.sessionHistory.add(new MatchRecord(
+                            LeaderboardPanel.addMatchRecord(new MatchRecord(
                                     Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]),
                                     Integer.parseInt(parts[3]),
                                     parts[4], Integer.parseInt(parts[5]), Integer.parseInt(parts[6])));
@@ -470,7 +469,7 @@ public class MainMenu extends JFrame {
                     }
                 }
                 LeaderboardPanel.refreshLeaderboardData();
-                Main.gamesPlayed = LeaderboardPanel.sessionHistory.size();
+                Main.setGamesPlayed(LeaderboardPanel.getSessionHistory().size());
                 leaderboardPanel.refreshUI();
                 cardLayout.show(cardContentPanel, "LEADERBOARD");
             }

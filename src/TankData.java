@@ -22,7 +22,7 @@ import java.util.Random;
  * - offensivePower: Sets the maximum shot power a player can use per turn.
  * - mobilityIndex: Sets how far a player can reposition their tank each round.
  */
-public class TankData {
+public abstract class TankData {
 
     // -----------------------------------------------------------------------
     // LEARNING (private fields):
@@ -140,12 +140,5 @@ public class TankData {
      *
      * @return Relative path to the PNG, e.g. "images/m8_greyhound.png"
      */
-    public String getImagePath() {
-        return switch (name) {
-            case "M8 GREYHOUND" -> "images/m8_greyhound.png";
-            case "FLAK 88" -> "images/flak_88.png";
-            case "BLACK CAT" -> "images/black_cat.png";
-            default -> null;
-        };
-    }
+    public abstract String getImagePath();
 }

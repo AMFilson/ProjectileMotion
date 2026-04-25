@@ -24,8 +24,20 @@ public class LeaderboardPanel extends JPanel {
      * Shared roster of all players — referenced by CharacterSelectPanel and this
      * panel.
      */
-    public static java.util.List<Player> playersList = new java.util.ArrayList<>();
-    public static java.util.List<MatchRecord> sessionHistory = new java.util.ArrayList<>();
+    private static java.util.List<Player> playersList = new java.util.ArrayList<>();
+    private static java.util.List<MatchRecord> sessionHistory = new java.util.ArrayList<>();
+
+    public static void addMatchRecord(MatchRecord record) {
+        sessionHistory.add(record);
+    }
+
+    public static java.util.List<MatchRecord> getSessionHistory() {
+        return sessionHistory;
+    }
+
+    public static void clearSessionHistory() {
+        sessionHistory.clear();
+    }
 
     /** Aggregates historical match data into a ranked player list. */
     public static void refreshLeaderboardData() {
@@ -135,7 +147,7 @@ public class LeaderboardPanel extends JPanel {
                 BorderFactory.createMatteBorder(0, 1, 0, 0, foreground),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
-        JPanel gamesPlayedBox = createLeaderboardStatBox("GAMES PLAYED", String.valueOf(Main.gamesPlayed), 0, false);
+        JPanel gamesPlayedBox = createLeaderboardStatBox("GAMES PLAYED", String.valueOf(Main.getGamesPlayed()), 0, false);
         gamesPlayedBox.setToolTipText("Total combat encounters completed in the current session");
         rightPanel.add(gamesPlayedBox);
         rightPanel.add(Box.createVerticalStrut(20));

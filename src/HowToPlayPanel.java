@@ -1,3 +1,10 @@
+/*
+ * Name:    HowToPlayPanel.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 25th 2026
+ * Desc:    Displays the gameplay instructions.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 

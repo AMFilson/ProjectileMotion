@@ -31,7 +31,11 @@ public class Main {
      * Tracks how many total matches have been completed across the whole session.
      * Incremented by MainWindow whenever a hit lands and a match ends.
      */
-    public static int gamesPlayed = 0;
+    private static int gamesPlayed = 0;
+
+    public static int getGamesPlayed() { return gamesPlayed; }
+    public static void setGamesPlayed(int value) { gamesPlayed = value; }
+    public static void incrementGamesPlayed() { gamesPlayed++; }
 
     // -----------------------------------------------------------------------
 

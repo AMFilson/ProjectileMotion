@@ -1,11 +1,24 @@
+/*
+ * Name:    MainWindow.java (ProjectileMotion / BIT-REKT)
+ * Author:  Andrew Filson
+ * Date:    April 25th 2026
+ * Desc:    The main game battle window handling input, state, and rendering.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainWindow extends JFrame {
+
+    private static final int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_HEIGHT = 750;
+    private static final double GRAVITY = 9.81;
+    private static final double HIT_RADIUS = 1.0;
+    private static final int MAX_BATTLEFIELD_WIDTH = 200;
+    private static final int P1_START_POS = 0;
+    private static final int P2_START_POS = 100;
 
     private final Color background = UIComponents.THEME_BACKGROUND;
     private final Color foreground = UIComponents.THEME_FOREGROUND;
@@ -36,20 +49,20 @@ public class MainWindow extends JFrame {
         loadFont();
 
         setTitle("BIT-REKT // BATTLE");
-        setSize(1000, 750);
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        p1.randomizePosition(0);
-        p2.randomizePosition(100);
+        p1.randomizePosition(P1_START_POS);
+        p2.randomizePosition(P2_START_POS);
 
         buildUI();
         refreshTurnUI();
     }
 
     public MainWindow() {
-        this("PLAYER_1", new TankData("M8 GREYHOUND", 63.5, 88.2), 0,
-             "PLAYER_2", new TankData("FLAK 88", 78.0, 41.5), 1);
+        this("PLAYER_1", new M8Greyhound(63.5, 88.2), 0,
+             "PLAYER_2", new Flak88(78.0, 41.5), 1);
     }
 
     private void loadFont() {
@@ -309,9 +322,8 @@ public class MainWindow extends JFrame {
             }
         }
 
-        activePlayer.setPosition(Math.max(0, Math.min(200, activePlayer.getPosition() + (p1Turn ? positionShift : -positionShift))));
+        activePlayer.setPosition(Math.max(0, Math.min(MAX_BATTLEFIELD_WIDTH, activePlayer.getPosition() + (p1Turn ? positionShift : -positionShift))));
 
-        final double GRAVITY = 9.81;
         double pwr = tank.getOffensivePower();
         double rad = Math.toRadians(angle);
         double tof = (2 * pwr * Math.sin(rad)) / GRAVITY;
@@ -319,7 +331,7 @@ public class MainWindow extends JFrame {
         double landX = startX + (p1Turn ? 1 : -1) * pwr * Math.cos(rad) * tof;
 
         double dist = Math.abs(landX - targetPos);
-        boolean hit = dist < 1.0;
+        boolean hit = dist < HIT_RADIUS;
 
         animationPanel.updateGameState(p1.getTank(), p1.getPosition(), p2.getTank(), p2.getPosition(), roundNum, statusText);
         animationPanel.setLastShot(startX, landX, hit);
@@ -329,11 +341,11 @@ public class MainWindow extends JFrame {
             if (p1Turn) p1ScoreLabel.setText(String.valueOf(p1.getScore()));
             else        p2ScoreLabel.setText(String.valueOf(p2.getScore()));
             
-            Main.gamesPlayed++;
+            Main.incrementGamesPlayed();
             int gameNum = DataManager.getNextGameNumber();
             MatchRecord record = new MatchRecord(gameNum, p1.getName(), p1.getSelectedTankIndex(), p1.getScore(), p2.getName(), p2.getSelectedTankIndex(), p2.getScore());
             DataManager.appendMatchRecord(record);
-            LeaderboardPanel.sessionHistory.add(record);
+            LeaderboardPanel.addMatchRecord(record);
 
             int choice = JOptionPane.showOptionDialog(this,
                     String.format("%s lands at %.1f \u2014 DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
