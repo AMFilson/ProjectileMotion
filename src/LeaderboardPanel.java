@@ -69,7 +69,16 @@ public class LeaderboardPanel extends JPanel {
      */
     public LeaderboardPanel(Font font) {
         this.pixelFont = font;
-        refreshLeaderboardData(); // Reload latest stats whenever panel is created
+        refreshUI();
+    }
+
+    /**
+     * Clears the current UI components and rebuilds the leaderboard view 
+     * with the latest session data.
+     */
+    public void refreshUI() {
+        refreshLeaderboardData();
+        removeAll();
 
         setLayout(new GridBagLayout());
         setOpaque(false);
@@ -170,6 +179,9 @@ public class LeaderboardPanel extends JPanel {
         layoutConstraints.weighty = 1.0;
         rightPanel.setPreferredSize(new Dimension(185, 0));
         add(rightPanel, layoutConstraints);
+        
+        revalidate();
+        repaint();
     }
 
     /** Builds one leaderboard row showing rank badge, tank art, name, and score. */

@@ -53,6 +53,17 @@ public class MainMenu extends JFrame {
     private java.util.List<JPanel> navItemsList = new java.util.ArrayList<>();
     private java.util.List<Runnable> navHighlightResetters = new java.util.ArrayList<>();
 
+    // Timer fields for lifecycle management
+    private Timer blinkTimer;
+    private Timer timeTaker;
+    private Timer flickerAct;
+
+    // Card Panel fields to prevent duplicate instantiation
+    private JPanel homePanel;
+    private LeaderboardPanel leaderboardPanel;
+    private CharacterSelectPanel characterSelectPanel;
+    private HowToPlayPanel howToPlayPanel;
+
     public MainMenu() {
         setTitle("BIT-REKT");
         setSize(1000, 750);
@@ -65,7 +76,7 @@ public class MainMenu extends JFrame {
         tanks.add(new TankData("BLACK CAT"));
 
         // Global repaint timer — drives the blinking/flicker animations
-        Timer blinkTimer = new Timer(600, e -> {
+        blinkTimer = new Timer(600, e -> {
             for (Window w : Window.getWindows()) {
                 if (w instanceof MainMenu)
                     w.repaint();
@@ -210,7 +221,7 @@ public class MainMenu extends JFrame {
         updateInfoPanel();
         infoPanel.setPreferredSize(new Dimension(185, 0));
 
-        JPanel homePanel = new JPanel(new GridBagLayout());
+        homePanel = new JPanel(new GridBagLayout());
         homePanel.setOpaque(false);
         GridBagConstraints homeLayoutConstraints = new GridBagConstraints();
         homeLayoutConstraints.fill = GridBagConstraints.BOTH;
@@ -223,6 +234,11 @@ public class MainMenu extends JFrame {
         homeLayoutConstraints.weightx = 0.0;
         homePanel.add(infoPanel, homeLayoutConstraints);
 
+        // Pre-instantiate card panels
+        leaderboardPanel = new LeaderboardPanel(pixelFont);
+        characterSelectPanel = new CharacterSelectPanel(tanks, pixelFont);
+        howToPlayPanel = new HowToPlayPanel(pixelFont);
+
         // =====================================================================
         // CARD LAYOUT (HOME / LEADERBOARD / NEW_GAME)
         // =====================================================================
@@ -231,9 +247,9 @@ public class MainMenu extends JFrame {
         cardContentPanel.setOpaque(false);
 
         cardContentPanel.add(homePanel, "HOME");
-        cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
-        cardContentPanel.add(new CharacterSelectPanel(tanks, pixelFont), "NEW_GAME");
-        cardContentPanel.add(new HowToPlayPanel(pixelFont), "HOW_TO_PLAY");
+        cardContentPanel.add(leaderboardPanel, "LEADERBOARD");
+        cardContentPanel.add(characterSelectPanel, "NEW_GAME");
+        cardContentPanel.add(howToPlayPanel, "HOW_TO_PLAY");
 
         layoutConstraints.gridx = 1;
         layoutConstraints.gridy = 1;
@@ -267,7 +283,7 @@ public class MainMenu extends JFrame {
         add(rootPanel);
 
         // Live clock (updates system status label every second)
-        Timer timeTaker = new Timer(1000, e -> {
+        timeTaker = new Timer(1000, e -> {
             String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
             systemStatus.setText("<html><p align='right' style='line-height:0.8'>LOCATION: CAMP 30<br>TIME: "
                     + time + "</p></html>");
@@ -275,7 +291,7 @@ public class MainMenu extends JFrame {
         timeTaker.start();
 
         // Subtle opacity flicker animation on the main frame
-        Timer flickerAct = new Timer(100, e -> {
+        flickerAct = new Timer(100, e -> {
             flickerStep = (flickerStep + 1) % 40;
             float frameOpacity = 1.0f;
             if (flickerStep == 5)
@@ -286,6 +302,14 @@ public class MainMenu extends JFrame {
             mainFrame.repaint();
         });
         flickerAct.start();
+    }
+
+    @Override
+    public void dispose() {
+        if (blinkTimer != null) blinkTimer.stop();
+        if (timeTaker != null) timeTaker.stop();
+        if (flickerAct != null) flickerAct.stop();
+        super.dispose();
     }
 
     // =========================================================================
@@ -401,7 +425,7 @@ public class MainMenu extends JFrame {
         else if (title.equals("HOW TO PLAY"))
             cardLayout.show(cardContentPanel, "HOW_TO_PLAY");
         else if (title.equals("LEADERBOARD")) {
-            cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
+            leaderboardPanel.refreshUI();
             cardLayout.show(cardContentPanel, "LEADERBOARD");
         } else if (title.equals("SAVE/LOAD"))
             handleSaveLoad();
@@ -453,7 +477,7 @@ public class MainMenu extends JFrame {
                 }
                 LeaderboardPanel.refreshLeaderboardData();
                 Main.gamesPlayed = LeaderboardPanel.sessionHistory.size();
-                cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
+                leaderboardPanel.refreshUI();
                 cardLayout.show(cardContentPanel, "LEADERBOARD");
             }
         }

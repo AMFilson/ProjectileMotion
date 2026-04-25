@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import javax.swing.text.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -367,6 +368,22 @@ public class CharacterSelectPanel extends JPanel {
 
             // Name input field (styled with DashedBorder)
             nameField = new JTextField(defaultName, 8);
+            ((AbstractDocument) nameField.getDocument()).setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                    if (isValid(string)) super.insertString(fb, offset, string, attr);
+                }
+
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    if (isValid(text)) super.replace(fb, offset, length, text, attrs);
+                }
+
+                private boolean isValid(String text) {
+                    // Disallow commas and most punctuation to preserve CSV integrity
+                    return text != null && text.matches("[a-zA-Z0-9 ]*");
+                }
+            });
             nameField.setFont(pixelFont.deriveFont(24f));
             nameField.setForeground(UIComponents.THEME_FOREGROUND);
             nameField.setBackground(UIComponents.THEME_BACKGROUND);
