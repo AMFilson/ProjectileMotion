@@ -176,10 +176,9 @@ public class MainMenu extends JFrame {
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
         String[] navNames = { "NEW GAME", "HOW TO PLAY", "LEADERBOARD", "SAVE/LOAD", "TERMINATE" };
-        String[] navIds = { "01", "02", "03", "04", "05" };
 
         for (int i = 0; i < navNames.length; i++) {
-            JPanel navItem = createNavItem(navNames[i], navIds[i]);
+            JPanel navItem = createNavItem(navNames[i]);
             navItemsList.add(navItem);
             if (i == 0) {
                 // Auto-focus "NEW GAME" on launch so keyboard navigation works immediately
@@ -190,7 +189,7 @@ public class MainMenu extends JFrame {
         }
 
         sidebar.add(Box.createVerticalGlue());
-        JPanel homeBtn = createNavItem("HOME", "06");
+        JPanel homeBtn = createNavItem("HOME");
         homeBtn.setToolTipText("Return to the main command center");
         navItemsList.add(homeBtn);
         sidebar.add(homeBtn);
@@ -328,7 +327,7 @@ public class MainMenu extends JFrame {
     // NAV ITEM FACTORY
     // =========================================================================
 
-    private JPanel createNavItem(String title, String num) {
+    private JPanel createNavItem(String title) {
         JPanel panel = new JPanel(new BorderLayout());
 
         // Tooltip for each nav item
@@ -348,10 +347,9 @@ public class MainMenu extends JFrame {
                 BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 2),
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
-        JLabel navTitleLabel = createLabel("□ " + title, 24f);
-        JLabel navNumberLabel = createLabel(num, 24f);
-        panel.add(navTitleLabel, BorderLayout.WEST);
-        panel.add(navNumberLabel, BorderLayout.EAST);
+        JLabel navTitleLabel = createLabel(title, 24f);
+        navTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(navTitleLabel, BorderLayout.CENTER);
         panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.setFocusable(true);
 
@@ -359,15 +357,11 @@ public class MainMenu extends JFrame {
             panel.setOpaque(true);
             panel.setBackground(UIComponents.THEME_FOREGROUND);
             navTitleLabel.setForeground(UIComponents.THEME_BACKGROUND);
-            navTitleLabel.setText("■ " + title);
-            navNumberLabel.setForeground(UIComponents.THEME_BACKGROUND);
             panel.repaint();
         };
         Runnable onUnhover = () -> {
             panel.setOpaque(false);
             navTitleLabel.setForeground(UIComponents.THEME_FOREGROUND);
-            navTitleLabel.setText("□ " + title);
-            navNumberLabel.setForeground(UIComponents.THEME_FOREGROUND);
             panel.repaint();
         };
 
