@@ -7,20 +7,12 @@ import java.util.Map;
 
 public class MainWindow extends JFrame {
 
-    private final Color background = new Color(239, 243, 241);
-    private final Color foreground = new Color(0, 0, 0);
+    private final Color background = UIComponents.THEME_BACKGROUND;
+    private final Color foreground = UIComponents.THEME_FOREGROUND;
     private Font pixelFont;
 
-    private String p1Name;
-    private TankData p1Tank;
-    private String p2Name;
-    private TankData p2Tank;
-    private int p1TankIndex, p2TankIndex;
-
-    private int p1Position;
-    private int p2Position;
-    private int p1Score = 0;
-    private int p2Score = 0;
+    private Player p1;
+    private Player p2;
     private int roundNum = 0;
     private boolean p1Turn = true;
     private String statusText = "";
@@ -33,12 +25,13 @@ public class MainWindow extends JFrame {
     private AnimationPanel animationPanel;
 
     public MainWindow(String p1Name, TankData p1Tank, int p1Idx, String p2Name, TankData p2Tank, int p2Idx) {
-        this.p1Name = p1Name;
-        this.p1Tank = p1Tank;
-        this.p1TankIndex = p1Idx;
-        this.p2Name = p2Name;
-        this.p2Tank = p2Tank;
-        this.p2TankIndex = p2Idx;
+        p1 = new Player(p1Name);
+        p1.setTank(p1Tank);
+        p1.setSelectedTankIndex(p1Idx);
+
+        p2 = new Player(p2Name);
+        p2.setTank(p2Tank);
+        p2.setSelectedTankIndex(p2Idx);
 
         loadFont();
 
@@ -47,8 +40,8 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        p1Position = (int) (Math.random() * 100);
-        p2Position = 100 + (int) (Math.random() * 100);
+        p1.randomizePosition(0);
+        p2.randomizePosition(100);
 
         buildUI();
         refreshTurnUI();
@@ -95,7 +88,7 @@ public class MainWindow extends JFrame {
 
         animationPanel = new AnimationPanel();
         if (pixelFont != null) animationPanel.setFont(pixelFont);
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
+        animationPanel.updateGameState(p1.getTank(), p1.getPosition(), p2.getTank(), p2.getPosition(), roundNum, statusText);
         innerFrame.add(animationPanel, BorderLayout.CENTER);
 
         innerFrame.add(buildPlayer2Strip(), BorderLayout.SOUTH);
@@ -127,13 +120,13 @@ public class MainWindow extends JFrame {
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         
-        JLabel nameLbl = lbl("P1: " + p1Name, 18f);
+        JLabel nameLbl = lbl("P1: " + p1.getName(), 18f);
         nameLbl.setOpaque(true);
         nameLbl.setBackground(foreground);
         nameLbl.setForeground(background);
         nameLbl.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
         
-        JLabel tankLbl = lbl(p1Tank.getName(), 12f);
+        JLabel tankLbl = lbl(p1.getTank().getName(), 12f);
         tankLbl.setOpaque(true);
         tankLbl.setBackground(foreground);
         tankLbl.setForeground(background);
@@ -146,14 +139,14 @@ public class MainWindow extends JFrame {
 
         JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 24, 8));
         statsPanel.setOpaque(false);
-        statsPanel.add(buildHorizontalStat("PWR", (int)p1Tank.getOffensivePower(), "Power affects the strength of your shot"));
-        statsPanel.add(buildHorizontalStat("MOB", (int)p1Tank.getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
+        statsPanel.add(buildHorizontalStat("PWR", (int)p1.getTank().getOffensivePower(), "Power affects the strength of your shot"));
+        statsPanel.add(buildHorizontalStat("MOB", (int)p1.getTank().getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
         
-        p1ScoreLabel = lbl("0", 33f);
+        p1ScoreLabel = lbl(String.valueOf(p1.getScore()), 33f);
         p1ScoreLabel.setFont(p1ScoreLabel.getFont().deriveFont(Font.BOLD));
         statsPanel.add(buildHorizontalStatWithLabel("SCORE", p1ScoreLabel, "Score is the amount of games you have won"));
         
-        p1PosLabel = lbl(String.valueOf(p1Position), 33f);
+        p1PosLabel = lbl(String.valueOf(p1.getPosition()), 33f);
         p1PosLabel.setFont(p1PosLabel.getFont().deriveFont(Font.BOLD));
         statsPanel.add(buildHorizontalStatWithLabel("POS", p1PosLabel, "Position is your current position on the map"));
 
@@ -180,10 +173,10 @@ public class MainWindow extends JFrame {
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         
-        JLabel nameLbl = lbl("P2: " + p2Name, 18f);
+        JLabel nameLbl = lbl("P2: " + p2.getName(), 18f);
         nameLbl.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(foreground, 2), BorderFactory.createEmptyBorder(2, 6, 2, 6)));
         
-        JLabel tankLbl = lbl(p2Tank.getName(), 12f);
+        JLabel tankLbl = lbl(p2.getTank().getName(), 12f);
         tankLbl.setOpaque(true);
         tankLbl.setBackground(foreground);
         tankLbl.setForeground(background);
@@ -196,14 +189,14 @@ public class MainWindow extends JFrame {
 
         JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 24, 8));
         statsPanel.setOpaque(false);
-        statsPanel.add(buildHorizontalStat("PWR", (int)p2Tank.getOffensivePower(), "Power affects the strength of your shot"));
-        statsPanel.add(buildHorizontalStat("MOB", (int)p2Tank.getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
+        statsPanel.add(buildHorizontalStat("PWR", (int)p2.getTank().getOffensivePower(), "Power affects the strength of your shot"));
+        statsPanel.add(buildHorizontalStat("MOB", (int)p2.getTank().getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
         
-        p2ScoreLabel = lbl("0", 33f);
+        p2ScoreLabel = lbl(String.valueOf(p2.getScore()), 33f);
         p2ScoreLabel.setFont(p2ScoreLabel.getFont().deriveFont(Font.BOLD));
         statsPanel.add(buildHorizontalStatWithLabel("SCORE", p2ScoreLabel, "Score is the amount of games you have won"));
         
-        p2PosLabel = lbl(String.valueOf(p2Position), 33f);
+        p2PosLabel = lbl(String.valueOf(p2.getPosition()), 33f);
         p2PosLabel.setFont(p2PosLabel.getFont().deriveFont(Font.BOLD));
         statsPanel.add(buildHorizontalStatWithLabel("POS", p2PosLabel, "Position is your current position on the map"));
 
@@ -271,11 +264,11 @@ public class MainWindow extends JFrame {
 
     private void refreshTurnUI() {
         roundNum++;
-        String activePlayerName = p1Turn ? p1Name : p2Name;
+        String activePlayerName = p1Turn ? p1.getName() : p2.getName();
         statusText = "ACTIVE: " + activePlayerName + "'s TURN";
-        p1PosLabel.setText(String.valueOf(p1Position));
-        p2PosLabel.setText(String.valueOf(p2Position));
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
+        p1PosLabel.setText(String.valueOf(p1.getPosition()));
+        p2PosLabel.setText(String.valueOf(p2.getPosition()));
+        animationPanel.updateGameState(p1.getTank(), p1.getPosition(), p2.getTank(), p2.getPosition(), roundNum, statusText);
         errorLabel.setText("");
         angleField.setText("");
         posShiftField.setText("");
@@ -283,9 +276,11 @@ public class MainWindow extends JFrame {
     }
 
     private void handleFire() {
-        String activePlayerName = p1Turn ? p1Name : p2Name;
-        TankData tank = p1Turn ? p1Tank : p2Tank;
-        int targetPos = p1Turn ? p2Position : p1Position;
+        Player activePlayer = p1Turn ? p1 : p2;
+        Player targetPlayer = p1Turn ? p2 : p1;
+        String activePlayerName = activePlayer.getName();
+        TankData tank = activePlayer.getTank();
+        int targetPos = targetPlayer.getPosition();
 
         errorLabel.setText("");
 
@@ -314,40 +309,41 @@ public class MainWindow extends JFrame {
             }
         }
 
-        if (p1Turn) p1Position = Math.max(0, Math.min(200, p1Position + positionShift));
-        else        p2Position = Math.max(0, Math.min(200, p2Position - positionShift));
+        activePlayer.setPosition(Math.max(0, Math.min(200, activePlayer.getPosition() + (p1Turn ? positionShift : -positionShift))));
 
         final double GRAVITY = 9.81;
         double pwr = tank.getOffensivePower();
         double rad = Math.toRadians(angle);
         double tof = (2 * pwr * Math.sin(rad)) / GRAVITY;
-        double startX = p1Turn ? p1Position : p2Position;
+        double startX = activePlayer.getPosition();
         double landX = startX + (p1Turn ? 1 : -1) * pwr * Math.cos(rad) * tof;
 
         double dist = Math.abs(landX - targetPos);
         boolean hit = dist < 1.0;
 
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
-        animationPanel.setLastShot(startX, landX, hit, p1Turn);
+        animationPanel.updateGameState(p1.getTank(), p1.getPosition(), p2.getTank(), p2.getPosition(), roundNum, statusText);
+        animationPanel.setLastShot(startX, landX, hit);
 
         if (hit) {
-            if (p1Turn) { p1Score++; p1ScoreLabel.setText(String.valueOf(p1Score)); }
-            else { p2Score++; p2ScoreLabel.setText(String.valueOf(p2Score)); }
+            activePlayer.setScore(activePlayer.getScore() + 1);
+            if (p1Turn) p1ScoreLabel.setText(String.valueOf(p1.getScore()));
+            else        p2ScoreLabel.setText(String.valueOf(p2.getScore()));
+            
             Main.gamesPlayed++;
             int gameNum = DataManager.getNextGameNumber();
-            MatchRecord record = new MatchRecord(gameNum, p1Name, p1TankIndex, p1Score, p2Name, p2TankIndex, p2Score);
+            MatchRecord record = new MatchRecord(gameNum, p1.getName(), p1.getSelectedTankIndex(), p1.getScore(), p2.getName(), p2.getSelectedTankIndex(), p2.getScore());
             DataManager.appendMatchRecord(record);
             LeaderboardPanel.sessionHistory.add(record);
 
             int choice = JOptionPane.showOptionDialog(this,
                     String.format("%s lands at %.1f \u2014 DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
-                            activePlayerName, landX, p1Name, p1Score, p2Name, p2Score),
+                            activePlayerName, landX, p1.getName(), p1.getScore(), p2.getName(), p2.getScore()),
                     "HIT!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new Object[]{"BATTLE AGAIN", "MAIN MENU"}, "BATTLE AGAIN");
 
             if (choice == JOptionPane.YES_OPTION) {
-                p1Position = (int) (Math.random() * 100);
-                p2Position = 100 + (int) (Math.random() * 100);
+                p1.randomizePosition(0);
+                p2.randomizePosition(100);
                 roundNum = 0;
                 animationPanel.clearShot();
                 refreshTurnUI();
@@ -356,7 +352,7 @@ public class MainWindow extends JFrame {
             p1Turn = !p1Turn;
             refreshTurnUI();
             statusText = "\u26a0 " + String.format("%s: landed %.1f", activePlayerName, landX) + " | " + statusText;
-            animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
+            animationPanel.updateGameState(p1.getTank(), p1.getPosition(), p2.getTank(), p2.getPosition(), roundNum, statusText);
         }
     }
 

@@ -36,8 +36,8 @@ import java.util.function.IntSupplier;
  */
 public class CanvasArea extends JPanel {
 
-    private final Color foreground = new Color(0, 0, 0);
-    private final Color background = new Color(239, 243, 241);
+    private final Color foreground = UIComponents.THEME_FOREGROUND;
+    private final Color background = UIComponents.THEME_BACKGROUND;
 
     private final List<TankData> tanks;
     private final IntSupplier tankIndexGetter;

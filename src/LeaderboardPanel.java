@@ -57,8 +57,8 @@ public class LeaderboardPanel extends JPanel {
         }
     }
 
-    private final Color foreground = new Color(0, 0, 0);
-    private final Color background = new Color(239, 243, 241);
+    private final Color foreground = UIComponents.THEME_FOREGROUND;
+    private final Color background = UIComponents.THEME_BACKGROUND;
     private Font pixelFont;
 
     /**

@@ -34,8 +34,6 @@ import java.util.Date;
 public class MainMenu extends JFrame {
 
     private Font pixelFont;
-    private Color background = new Color(239, 243, 241);
-    private Color foreground = new Color(0, 0, 0);
 
     // Shared tank roster — passed by reference to CanvasArea and
     // CharacterSelectPanel
@@ -90,9 +88,9 @@ public class MainMenu extends JFrame {
 
         // Global Tooltip Style (matches uicomponents aesthetic)
         UIManager.put("ToolTip.font", pixelFont.deriveFont(18f));
-        UIManager.put("ToolTip.background", background);
-        UIManager.put("ToolTip.foreground", foreground);
-        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(foreground, 2));
+        UIManager.put("ToolTip.background", UIComponents.THEME_BACKGROUND);
+        UIManager.put("ToolTip.foreground", UIComponents.THEME_FOREGROUND);
+        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 2));
 
         // Custom crosshair cursor
         BufferedImage cursorImg = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB);
@@ -108,10 +106,10 @@ public class MainMenu extends JFrame {
             @Override
             protected void paintComponent(Graphics graphics) {
                 super.paintComponent(graphics);
-                graphics.setColor(background);
+                graphics.setColor(UIComponents.THEME_BACKGROUND);
                 graphics.fillRect(0, 0, getWidth(), getHeight());
                 Graphics2D graphics2d = (Graphics2D) graphics.create();
-                graphics2d.setColor(foreground);
+                graphics2d.setColor(UIComponents.THEME_FOREGROUND);
                 graphics2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.05f));
                 for (int y = 0; y < getHeight(); y += 4)
                     for (int x = 0; x < getWidth(); x += 4)
@@ -134,7 +132,7 @@ public class MainMenu extends JFrame {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
         headerPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, foreground),
+                BorderFactory.createMatteBorder(0, 0, 2, 0, UIComponents.THEME_FOREGROUND),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
 
         JPanel titleBlock = new JPanel();
@@ -163,7 +161,7 @@ public class MainMenu extends JFrame {
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setOpaque(false);
         sidebar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, foreground),
+                BorderFactory.createMatteBorder(0, 0, 0, 1, UIComponents.THEME_FOREGROUND),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
         String[] navNames = { "NEW GAME", "HOW TO PLAY", "LEADERBOARD", "SAVE/LOAD", "TERMINATE" };
@@ -201,13 +199,13 @@ public class MainMenu extends JFrame {
         canvas.setOpaque(false);
         canvas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                new DashedBorder(foreground, 1, 4)));
+                new DashedBorder(UIComponents.THEME_FOREGROUND, 1, 4)));
 
         infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setOpaque(false);
         infoPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 1, 0, 0, foreground),
+                BorderFactory.createMatteBorder(0, 1, 0, 0, UIComponents.THEME_FOREGROUND),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)));
         updateInfoPanel();
         infoPanel.setPreferredSize(new Dimension(185, 0));
@@ -250,7 +248,7 @@ public class MainMenu extends JFrame {
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setOpaque(false);
         footerPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(2, 0, 0, 0, foreground),
+                BorderFactory.createMatteBorder(2, 0, 0, 0, UIComponents.THEME_FOREGROUND),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         footerPanel.add(createLabel("CREATED BY ANDREW FILSON", 16f), BorderLayout.WEST);
 
@@ -297,7 +295,7 @@ public class MainMenu extends JFrame {
     private JLabel createLabel(String text, float fontSize) {
         JLabel label = new JLabel(text);
         label.setFont(pixelFont.deriveFont(fontSize));
-        label.setForeground(foreground);
+        label.setForeground(UIComponents.THEME_FOREGROUND);
         label.setOpaque(false);
         return label;
     }
@@ -323,7 +321,7 @@ public class MainMenu extends JFrame {
 
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(foreground, 2),
+                BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 2),
                 BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
         JLabel navTitleLabel = createLabel("□ " + title, 24f);
@@ -335,17 +333,17 @@ public class MainMenu extends JFrame {
 
         Runnable onHover = () -> {
             panel.setOpaque(true);
-            panel.setBackground(foreground);
-            navTitleLabel.setForeground(background);
+            panel.setBackground(UIComponents.THEME_FOREGROUND);
+            navTitleLabel.setForeground(UIComponents.THEME_BACKGROUND);
             navTitleLabel.setText("■ " + title);
-            navNumberLabel.setForeground(background);
+            navNumberLabel.setForeground(UIComponents.THEME_BACKGROUND);
             panel.repaint();
         };
         Runnable onUnhover = () -> {
             panel.setOpaque(false);
-            navTitleLabel.setForeground(foreground);
+            navTitleLabel.setForeground(UIComponents.THEME_FOREGROUND);
             navTitleLabel.setText("□ " + title);
-            navNumberLabel.setForeground(foreground);
+            navNumberLabel.setForeground(UIComponents.THEME_FOREGROUND);
             panel.repaint();
         };
 
@@ -515,12 +513,12 @@ public class MainMenu extends JFrame {
         statBox.setOpaque(false);
         statBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         statBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(foreground, 1),
+                BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
         statBox.setToolTipText("Detailed stats for the selected unit: " + labelText);
 
         JLabel statLabel = createLabel(labelText, 12f);
-        statLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        statLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UIComponents.THEME_FOREGROUND));
         statLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         statBox.add(statLabel);
@@ -546,7 +544,7 @@ public class MainMenu extends JFrame {
         expBox.setOpaque(false);
         expBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         expBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(foreground, 1),
+                BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 1),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)));
         expBox.setToolTipText("Your current level and pilot proficiency");
 
@@ -556,7 +554,7 @@ public class MainMenu extends JFrame {
         levelHeaderRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         levelHeaderRow.add(createLabel("CURRENT LVL", 12f), BorderLayout.WEST);
         levelHeaderRow.add(createLabel("L_12", 12f), BorderLayout.EAST);
-        levelHeaderRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
+        levelHeaderRow.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UIComponents.THEME_FOREGROUND));
         expBox.add(levelHeaderRow);
 
         JLabel expValueLabel = createLabel(" ", 24f);
@@ -580,7 +578,7 @@ public class MainMenu extends JFrame {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(foreground, 1),
+                BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 1),
                 BorderFactory.createEmptyBorder(8, 16, 8, 16)));
         panel.setToolTipText(title.equals("^") ? "Previous tank" : "Next tank");
 
@@ -592,13 +590,13 @@ public class MainMenu extends JFrame {
 
         Runnable onHover = () -> {
             panel.setOpaque(true);
-            panel.setBackground(foreground);
-            arrowLabel.setForeground(background);
+            panel.setBackground(UIComponents.THEME_FOREGROUND);
+            arrowLabel.setForeground(UIComponents.THEME_BACKGROUND);
             panel.repaint();
         };
         Runnable onUnhover = () -> {
             panel.setOpaque(false);
-            arrowLabel.setForeground(foreground);
+            arrowLabel.setForeground(UIComponents.THEME_FOREGROUND);
             panel.repaint();
         };
 
@@ -644,7 +642,7 @@ public class MainMenu extends JFrame {
                 setAlignmentX(Component.LEFT_ALIGNMENT);
                 setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
                 setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(foreground, 1),
+                        BorderFactory.createLineBorder(UIComponents.THEME_FOREGROUND, 1),
                         BorderFactory.createEmptyBorder(8, 16, 8, 16)));
                 setToolTipText("Randomize tank unit specifications");
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -654,7 +652,7 @@ public class MainMenu extends JFrame {
                     public void focusGained(FocusEvent e) {
                         isHovered = true;
                         setOpaque(true);
-                        setBackground(foreground);
+                        setBackground(UIComponents.THEME_FOREGROUND);
                         repaint();
                     }
 
@@ -675,7 +673,7 @@ public class MainMenu extends JFrame {
                     public void mouseEntered(MouseEvent e) {
                         isHovered = true;
                         setOpaque(true);
-                        setBackground(foreground);
+                        setBackground(UIComponents.THEME_FOREGROUND);
                         repaint();
                     }
 
@@ -699,7 +697,7 @@ public class MainMenu extends JFrame {
                 super.paintComponent(graphics);
                 Graphics2D graphics2d = (Graphics2D) graphics.create();
                 graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-                graphics2d.setColor(isHovered ? background : foreground);
+                graphics2d.setColor(isHovered ? UIComponents.THEME_BACKGROUND : UIComponents.THEME_FOREGROUND);
                 int centerX = getWidth() / 2;
                 int centerY = getHeight() / 2;
                 graphics2d.translate(centerX - 8, centerY - 8);

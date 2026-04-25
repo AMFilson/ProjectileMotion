@@ -10,6 +10,11 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+public class UIComponents {
+    public static final Color THEME_BACKGROUND = new Color(239, 243, 241);
+    public static final Color THEME_FOREGROUND = new Color(0, 0, 0);
+}
+
 /**
  * UIComponents.java
  *
@@ -96,7 +101,7 @@ class DitheredBar extends JPanel {
 
     // FILL_COLOR is the colour used to draw the filled portion of the bar.
     // Hardcoded to match the BIT-REKT palette (pure black).
-    private static final Color FILL_COLOR = new Color(0, 0, 0);
+    private static final Color FILL_COLOR = UIComponents.THEME_FOREGROUND;
 
     public DitheredBar(int percent, boolean dithered) {
         this.percent = percent;
@@ -148,9 +153,6 @@ class DitheredBar extends JPanel {
  * frame.setLayout(new BorderLayout());
  */
 class MainFramePanel extends JPanel {
-    private final Color foreground = new Color(0, 0, 0);
-    private final Color background = new Color(239, 243, 241);
-
     // Opacity support for the flicker animation effect in MainMenu
     private float opacity = 1.0f;
 
@@ -167,11 +169,11 @@ class MainFramePanel extends JPanel {
         graphics2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
 
         // Fill background
-        graphics2d.setColor(background);
+        graphics2d.setColor(UIComponents.THEME_BACKGROUND);
         graphics2d.fillRect(0, 0, getWidth(), getHeight());
 
         // Inner thick border (4px stroke, inset 4px from edges)
-        graphics2d.setColor(foreground);
+        graphics2d.setColor(UIComponents.THEME_FOREGROUND);
         graphics2d.setStroke(new BasicStroke(4));
         graphics2d.drawRect(4, 4, getWidth() - 8, getHeight() - 8);
 
@@ -204,7 +206,7 @@ class MainFramePanel extends JPanel {
      */
     private void drawBracket(Graphics2D graphics2d, int originX, int originY, int armLength, boolean armAtTop,
             boolean armAtLeft) {
-        graphics2d.setColor(foreground);
+        graphics2d.setColor(UIComponents.THEME_FOREGROUND);
         if (armAtTop && armAtLeft) {
             graphics2d.fillRect(originX, originY, armLength, 2); // Horizontal arm (top)
             graphics2d.fillRect(originX, originY, 2, armLength); // Vertical arm (left)
@@ -234,14 +236,11 @@ class MainFramePanel extends JPanel {
  * - No arrow buttons (minimalist look)
  */
 class BitRektScrollBarUI extends BasicScrollBarUI {
-    private final Color background = new Color(239, 243, 241);
-    private final Color foreground = new Color(0, 0, 0);
-
     @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-        g.setColor(background);
+        g.setColor(UIComponents.THEME_BACKGROUND);
         g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
-        g.setColor(foreground);
+        g.setColor(UIComponents.THEME_FOREGROUND);
         g.drawRect(trackBounds.x, trackBounds.y, trackBounds.width - 1, trackBounds.height - 1);
     }
 
@@ -249,7 +248,7 @@ class BitRektScrollBarUI extends BasicScrollBarUI {
     protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
         if (thumbBounds.isEmpty() || !scrollbar.isEnabled())
             return;
-        g.setColor(foreground);
+        g.setColor(UIComponents.THEME_FOREGROUND);
         // Fill the thumb with a solid color, inset slightly for better aesthetics
         g.fillRect(thumbBounds.x + 2, thumbBounds.y + 2, thumbBounds.width - 4, thumbBounds.height - 4);
     }

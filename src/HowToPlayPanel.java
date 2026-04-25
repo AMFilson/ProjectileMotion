@@ -4,8 +4,7 @@ import java.awt.*;
 public class HowToPlayPanel extends JPanel {
 
     private Font pixelFont;
-    private Color background = new Color(239, 243, 241);
-    private Color foreground = new Color(0, 0, 0);
+    private Color foreground = UIComponents.THEME_FOREGROUND;
 
     public HowToPlayPanel(Font font) {
         this.pixelFont = font;

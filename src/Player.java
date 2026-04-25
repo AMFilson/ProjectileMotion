@@ -51,10 +51,12 @@ public class Player {
     private int angle;
 
     /**
-     * The player's X-coordinate starting position on the battlefield (0–120).
-     * Assigned randomly at the start of each game by setStartingPosition().
+     * The player's X-coordinate current position on the battlefield (0–200).
      */
-    private int startingPosition;
+    private int position;
+
+    /** The tank data associated with this player */
+    private TankData tank;
 
     /**
      * Cumulative wins across multiple rounds in a session.
@@ -111,6 +113,16 @@ public class Player {
         this.selectedTankIndex = index;
     }
 
+    /** @return The TankData assigned to this player */
+    public TankData getTank() {
+        return tank;
+    }
+
+    /** @param tank The TankData to assign */
+    public void setTank(TankData tank) {
+        this.tank = tank;
+    }
+
     /** @return This player's current display name. */
     public String getName() {
         return name;
@@ -156,9 +168,14 @@ public class Player {
         this.score = score;
     }
 
-    /** @return This player's current X-axis starting position (0–120). */
-    public int getStartingPosition() {
-        return startingPosition;
+    /** @return This player's current X-axis position. */
+    public int getPosition() {
+        return position;
+    }
+
+    /** @param position The new position to assign. */
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     // -----------------------------------------------------------------------
@@ -198,27 +215,12 @@ public class Player {
         // Step 2: Calculate the total horizontal distance travelled, then add
         // the player's starting position to get the absolute X-coordinate of impact.
         // Formula: distance = velocity * cos(angle) * time
-        // Then: landX = startingPosition + distance
-        return (getPower() * Math.cos(Math.toRadians(getAngle())) * timeToLand) + getStartingPosition();
+        // Then: landX = position + distance
+        return (getPower() * Math.cos(Math.toRadians(getAngle())) * timeToLand) + getPosition();
     }
 
-    /**
-     * Randomly assigns a new starting position between 0 and 120 (inclusive)
-     * to this player, and returns the assigned value.
-     *
-     * LEARNING (Math.random() and casting):
-     * Math.random() → returns a double in [0.0, 1.0) (i.e., 0 to 0.999...)
-     * * 121 → scales it to [0.0, 120.999...)
-     * (int) → truncates the decimal (NOT rounding), giving 0 to 120.
-     * This is a clean, zero-dependency way to get random integers in a range.
-     *
-     * NOTE: This method both SETS and RETURNS the value, which is a bit unusual.
-     * You could separate these responsibilities in a future refactor.
-     *
-     * @return The newly assigned starting position.
-     */
-    public int setStartingPosition() {
-        return startingPosition = (int) (Math.random() * 121);
+    public int randomizePosition(int offset) {
+        return position = offset + (int) (Math.random() * 100);
     }
 
 }

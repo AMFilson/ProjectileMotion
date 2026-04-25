@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class AnimationPanel extends JPanel {
 
-    private final Color foreground = new Color(0, 0, 0);
-    private final Color background = new Color(255, 255, 255);
+    private final Color foreground = UIComponents.THEME_FOREGROUND;
+    private final Color background = UIComponents.THEME_BACKGROUND;
 
     private TankData p1Tank;
     private TankData p2Tank;
@@ -24,7 +24,6 @@ public class AnimationPanel extends JPanel {
     private double shotStartX = 0;
     private double shotLandX = 0;
     private boolean isHit = false;
-    private boolean wasP1Shot = true;
 
     private Font pixelFont;
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
@@ -48,12 +47,11 @@ public class AnimationPanel extends JPanel {
         repaint();
     }
 
-    public void setLastShot(double startX, double landX, boolean isHit, boolean isP1Shot) {
+    public void setLastShot(double startX, double landX, boolean isHit) {
         this.shotFired = true;
         this.shotStartX = startX;
         this.shotLandX = landX;
         this.isHit = isHit;
-        this.wasP1Shot = isP1Shot;
         repaint();
     }
     
