@@ -265,6 +265,12 @@ public class CharacterSelectPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             MainWindow mw = new MainWindow(p1Name, t1, p1TankIdx, p2Name, t2, p2TankIdx);
             mw.setVisible(true);
+            
+            // Close the main menu window
+            Window mainMenuWindow = SwingUtilities.getWindowAncestor(this);
+            if (mainMenuWindow != null) {
+                mainMenuWindow.dispose();
+            }
         });
     }
 

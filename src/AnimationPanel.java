@@ -151,15 +151,19 @@ public class AnimationPanel extends JPanel {
 
         // 7. Shot Trajectory
         if (shotFired) {
-            int startPx = 100 + (int)(shotStartX * positionScale);
+            int startPx = 100 + (int)(shotStartX * positionScale) + 36; // Center on tank (72px wide / 2)
             int landPx = 100 + (int)(shotLandX * positionScale);
+            int startPy = (int)(285 * scaleY);
             int arcPeakY = (int)(50 * scaleY);
-            QuadCurve2D arc = new QuadCurve2D.Float(startPx, (int)(285 * scaleY), (startPx + landPx) / 2f, arcPeakY, landPx, (int)(310 * scaleY));
+            
+            // For P2 (shotStartX > 100 roughly), startPy might need adjustment if they are on a hill
+            // But for now, let's just make it consistent.
+            QuadCurve2D arc = new QuadCurve2D.Float(startPx, startPy, (startPx + landPx) / 2f, arcPeakY, landPx, (int)(345 * scaleY));
             g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{6}, 0));
             g2d.draw(arc);
             if (pixelFont != null) {
                 g2d.setFont(pixelFont.deriveFont(16f));
-                g2d.drawString(isHit ? "HIT!" : "MISS", landPx - 15, (int)(280 * scaleY));
+                g2d.drawString(isHit ? "HIT!" : "MISS", landPx - 15, (int)(335 * scaleY));
             }
         }
         g2d.dispose();
