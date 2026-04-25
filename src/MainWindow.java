@@ -2,8 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainWindow extends JFrame {
 
@@ -23,10 +23,11 @@ public class MainWindow extends JFrame {
     private int p2Score = 0;
     private int roundNum = 0;
     private boolean p1Turn = true;
+    private String statusText = "";
 
     private JLabel p1ScoreLabel, p2ScoreLabel;
     private JLabel p1PosLabel, p2PosLabel;
-    private JLabel statusLabel;
+    private JLabel errorLabel;
     private JTextField angleField;
     private JTextField posShiftField;
     private AnimationPanel animationPanel;
@@ -65,6 +66,7 @@ public class MainWindow extends JFrame {
                     ? Font.createFont(Font.TRUETYPE_FONT, fontFile)
                     : new Font("Monospaced", Font.PLAIN, 16);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(pixelFont);
+            
             UIManager.put("ToolTip.font", pixelFont.deriveFont(18f));
             UIManager.put("ToolTip.background", background);
             UIManager.put("ToolTip.foreground", foreground);
@@ -93,34 +95,23 @@ public class MainWindow extends JFrame {
 
         animationPanel = new AnimationPanel();
         if (pixelFont != null) animationPanel.setFont(pixelFont);
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum);
+        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
         innerFrame.add(animationPanel, BorderLayout.CENTER);
 
-        JPanel bottomSection = new JPanel();
-        bottomSection.setLayout(new BoxLayout(bottomSection, BoxLayout.Y_AXIS));
-        bottomSection.setOpaque(false);
-        bottomSection.add(buildPlayer2Strip());
-
-        JPanel footer = new JPanel(new BorderLayout());
-        footer.setBackground(foreground);
-        footer.setForeground(background);
-        footer.setBorder(BorderFactory.createEmptyBorder(4, 16, 4, 16));
-        footer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
-        
-        JPanel leftFooter = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 0));
-        leftFooter.setOpaque(false);
-        
-        statusLabel = lbl("ACTIVE: MIGGY'S TURN", 14f);
-        statusLabel.setForeground(background);
-        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.BOLD));
-        
-        leftFooter.add(statusLabel);
-        footer.add(leftFooter, BorderLayout.WEST);
-
-        bottomSection.add(footer);
-        innerFrame.add(bottomSection, BorderLayout.SOUTH);
-
+        innerFrame.add(buildPlayer2Strip(), BorderLayout.SOUTH);
         frame.add(innerFrame, BorderLayout.CENTER);
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        footer.setOpaque(false);
+        JLabel endBtn = lbl("[ END GAME ]", 14f);
+        endBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        endBtn.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) { goToMainMenu(); }
+            public void mouseEntered(MouseEvent e) { endBtn.setForeground(new Color(100, 100, 100)); }
+            public void mouseExited(MouseEvent e) { endBtn.setForeground(foreground); }
+        });
+        footer.add(endBtn);
+        root.add(footer, BorderLayout.SOUTH);
     }
 
     private JPanel buildPlayer1Strip() {
@@ -129,8 +120,7 @@ public class MainWindow extends JFrame {
         strip.setOpaque(true);
         strip.setBackground(background);
         strip.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, foreground));
-        strip.setPreferredSize(new Dimension(1024, 60));
-        strip.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        strip.setPreferredSize(new Dimension(1024, 110));
 
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
@@ -156,16 +146,16 @@ public class MainWindow extends JFrame {
 
         JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 24, 8));
         statsPanel.setOpaque(false);
-        statsPanel.add(buildHorizontalStat("PWR", (int)p1Tank.getOffensivePower()));
-        statsPanel.add(buildHorizontalStat("MOB", (int)p1Tank.getMobilityIndex()));
+        statsPanel.add(buildHorizontalStat("PWR", (int)p1Tank.getOffensivePower(), "Power affects the strength of your shot"));
+        statsPanel.add(buildHorizontalStat("MOB", (int)p1Tank.getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
         
-        p1ScoreLabel = lbl("0", 22f);
+        p1ScoreLabel = lbl("0", 33f);
         p1ScoreLabel.setFont(p1ScoreLabel.getFont().deriveFont(Font.BOLD));
-        statsPanel.add(buildHorizontalStatWithLabel("SCORE", p1ScoreLabel));
+        statsPanel.add(buildHorizontalStatWithLabel("SCORE", p1ScoreLabel, "Score is the amount of games you have won"));
         
-        p1PosLabel = lbl(String.valueOf(p1Position), 22f);
+        p1PosLabel = lbl(String.valueOf(p1Position), 33f);
         p1PosLabel.setFont(p1PosLabel.getFont().deriveFont(Font.BOLD));
-        statsPanel.add(buildHorizontalStatWithLabel("POS", p1PosLabel));
+        statsPanel.add(buildHorizontalStatWithLabel("POS", p1PosLabel, "Position is your current position on the map"));
 
         strip.add(Box.createHorizontalGlue());
         strip.add(statsPanel);
@@ -175,13 +165,15 @@ public class MainWindow extends JFrame {
     }
 
     private JPanel buildPlayer2Strip() {
-        JPanel strip = new JPanel();
-        strip.setLayout(new BoxLayout(strip, BoxLayout.X_AXIS));
+        JPanel strip = new JPanel(new BorderLayout());
         strip.setOpaque(true);
         strip.setBackground(background);
         strip.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, foreground));
-        strip.setPreferredSize(new Dimension(1024, 60));
-        strip.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        strip.setPreferredSize(new Dimension(1024, 120));
+
+        JPanel mainContent = new JPanel();
+        mainContent.setLayout(new BoxLayout(mainContent, BoxLayout.X_AXIS));
+        mainContent.setOpaque(false);
 
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
@@ -189,10 +181,7 @@ public class MainWindow extends JFrame {
         infoPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         
         JLabel nameLbl = lbl("P2: " + p2Name, 18f);
-        nameLbl.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(foreground, 2),
-            BorderFactory.createEmptyBorder(2, 6, 2, 6)
-        ));
+        nameLbl.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(foreground, 2), BorderFactory.createEmptyBorder(2, 6, 2, 6)));
         
         JLabel tankLbl = lbl(p2Tank.getName(), 12f);
         tankLbl.setOpaque(true);
@@ -203,24 +192,24 @@ public class MainWindow extends JFrame {
         infoPanel.add(nameLbl);
         infoPanel.add(Box.createVerticalStrut(4));
         infoPanel.add(tankLbl);
-        strip.add(infoPanel);
+        mainContent.add(infoPanel);
 
         JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 24, 8));
         statsPanel.setOpaque(false);
-        statsPanel.add(buildHorizontalStat("PWR", (int)p2Tank.getOffensivePower()));
-        statsPanel.add(buildHorizontalStat("MOB", (int)p2Tank.getMobilityIndex()));
+        statsPanel.add(buildHorizontalStat("PWR", (int)p2Tank.getOffensivePower(), "Power affects the strength of your shot"));
+        statsPanel.add(buildHorizontalStat("MOB", (int)p2Tank.getMobilityIndex(), "Mobility index affects how many units your tank can move in one turn"));
         
-        p2ScoreLabel = lbl("0", 22f);
+        p2ScoreLabel = lbl("0", 33f);
         p2ScoreLabel.setFont(p2ScoreLabel.getFont().deriveFont(Font.BOLD));
-        statsPanel.add(buildHorizontalStatWithLabel("SCORE", p2ScoreLabel));
+        statsPanel.add(buildHorizontalStatWithLabel("SCORE", p2ScoreLabel, "Score is the amount of games you have won"));
         
-        p2PosLabel = lbl(String.valueOf(p2Position), 22f);
+        p2PosLabel = lbl(String.valueOf(p2Position), 33f);
         p2PosLabel.setFont(p2PosLabel.getFont().deriveFont(Font.BOLD));
-        statsPanel.add(buildHorizontalStatWithLabel("POS", p2PosLabel));
+        statsPanel.add(buildHorizontalStatWithLabel("POS", p2PosLabel, "Position is your current position on the map"));
 
-        strip.add(Box.createHorizontalGlue());
-        strip.add(statsPanel);
-        strip.add(Box.createHorizontalGlue());
+        mainContent.add(Box.createHorizontalGlue());
+        mainContent.add(statsPanel);
+        mainContent.add(Box.createHorizontalGlue());
 
         JPanel inputArea = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         inputArea.setOpaque(true);
@@ -233,14 +222,16 @@ public class MainWindow extends JFrame {
         
         JPanel angRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         angRow.setOpaque(false);
-        angRow.add(lbl("ANG:", 12f));
+        angRow.add(lbl("SHOT ANGLE:", 12f));
         angleField = styledField(4);
+        angleField.setToolTipText("Enter launch angle (0-180 degrees)");
         angRow.add(angleField);
         
         JPanel sftRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         sftRow.setOpaque(false);
-        sftRow.add(lbl("SFT:", 12f));
+        sftRow.add(lbl("ADJUST POSITION:", 12f));
         posShiftField = styledField(4);
+        posShiftField.setToolTipText("Enter units to move (forward is positive, backward is negative)");
         sftRow.add(posShiftField);
         
         inputFields.add(angRow);
@@ -248,36 +239,44 @@ public class MainWindow extends JFrame {
         inputFields.add(sftRow);
         
         inputArea.add(inputFields);
-        inputArea.add(createButton("FIRE", () -> handleFire()));
+        inputArea.add(createButton("FIRE", () -> handleFire(), "Fire the projectile"));
+        mainContent.add(inputArea);
 
-        strip.add(inputArea);
+        strip.add(mainContent, BorderLayout.CENTER);
+        
+        errorLabel = lbl("", 14f);
+        errorLabel.setForeground(new Color(200, 0, 0));
+        errorLabel.setBorder(BorderFactory.createEmptyBorder(0, 16, 4, 16));
+        strip.add(errorLabel, BorderLayout.SOUTH);
 
         return strip;
     }
 
-    private JPanel buildHorizontalStat(String label, int value) {
-        JLabel valLbl = lbl(String.valueOf(value), 22f);
+    private JPanel buildHorizontalStat(String label, int value, String tooltip) {
+        JLabel valLbl = lbl(String.valueOf(value), 33f);
         valLbl.setFont(valLbl.getFont().deriveFont(Font.BOLD));
-        return buildHorizontalStatWithLabel(label, valLbl);
+        return buildHorizontalStatWithLabel(label, valLbl, tooltip);
     }
     
-    private JPanel buildHorizontalStatWithLabel(String label, JLabel valueLabel) {
+    private JPanel buildHorizontalStatWithLabel(String label, JLabel valueLabel, String tooltip) {
         JPanel statBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         statBox.setOpaque(false);
-        JLabel lbl = lbl(label, 12f);
+        JLabel lbl = lbl(label, 18f);
         lbl.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, foreground));
         statBox.add(lbl);
         statBox.add(valueLabel);
+        statBox.setToolTipText(tooltip);
         return statBox;
     }
 
     private void refreshTurnUI() {
         roundNum++;
         String activePlayerName = p1Turn ? p1Name : p2Name;
-        statusLabel.setText("ACTIVE: " + activePlayerName + "'s TURN");
+        statusText = "ACTIVE: " + activePlayerName + "'s TURN";
         p1PosLabel.setText(String.valueOf(p1Position));
         p2PosLabel.setText(String.valueOf(p2Position));
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum);
+        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
+        errorLabel.setText("");
         angleField.setText("");
         posShiftField.setText("");
         angleField.requestFocusInWindow();
@@ -288,12 +287,14 @@ public class MainWindow extends JFrame {
         TankData tank = p1Turn ? p1Tank : p2Tank;
         int targetPos = p1Turn ? p2Position : p1Position;
 
+        errorLabel.setText("");
+
         double angle;
         try {
             angle = Double.parseDouble(angleField.getText().trim());
             if (angle < 0 || angle > 180) throw new NumberFormatException();
         } catch (NumberFormatException ex) {
-            flash("INVALID ANGLE — must be 0–180");
+            flash("INVALID ANGLE \u2014 must be 0\u2013180");
             return;
         }
 
@@ -308,25 +309,25 @@ public class MainWindow extends JFrame {
                     return;
                 }
             } catch (NumberFormatException ex) {
-                flash("INVALID SHIFT — must be a whole number");
+                flash("INVALID SHIFT \u2014 must be a whole number");
                 return;
             }
         }
 
         if (p1Turn) p1Position = Math.max(0, Math.min(200, p1Position + positionShift));
-        else        p2Position = Math.max(0, Math.min(200, p2Position + positionShift));
+        else        p2Position = Math.max(0, Math.min(200, p2Position - positionShift));
 
         final double GRAVITY = 9.81;
         double pwr = tank.getOffensivePower();
         double rad = Math.toRadians(angle);
         double tof = (2 * pwr * Math.sin(rad)) / GRAVITY;
         double startX = p1Turn ? p1Position : p2Position;
-        double landX = startX + pwr * Math.cos(rad) * tof;
+        double landX = startX + (p1Turn ? 1 : -1) * pwr * Math.cos(rad) * tof;
 
         double dist = Math.abs(landX - targetPos);
         boolean hit = dist < 1.0;
 
-        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum);
+        animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
         animationPanel.setLastShot(startX, landX, hit, p1Turn);
 
         if (hit) {
@@ -339,7 +340,7 @@ public class MainWindow extends JFrame {
             LeaderboardPanel.sessionHistory.add(record);
 
             int choice = JOptionPane.showOptionDialog(this,
-                    String.format("%s lands at %.1f — DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
+                    String.format("%s lands at %.1f \u2014 DIRECT HIT!\n\nScore: %s %d  |  %s %d\n\nPlay another round?",
                             activePlayerName, landX, p1Name, p1Score, p2Name, p2Score),
                     "HIT!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                     new Object[]{"BATTLE AGAIN", "MAIN MENU"}, "BATTLE AGAIN");
@@ -354,11 +355,14 @@ public class MainWindow extends JFrame {
         } else {
             p1Turn = !p1Turn;
             refreshTurnUI();
-            statusLabel.setText("⚠ " + String.format("%s: landed %.1f", activePlayerName, landX) + " | " + statusLabel.getText());
+            statusText = "\u26a0 " + String.format("%s: landed %.1f", activePlayerName, landX) + " | " + statusText;
+            animationPanel.updateGameState(p1Tank, p1Position, p2Tank, p2Position, roundNum, statusText);
         }
     }
 
-    private void flash(String msg) { statusLabel.setText("⚠ " + msg); }
+    private void flash(String msg) { 
+        errorLabel.setText("\u26a0 " + msg); 
+    }
 
     private void goToMainMenu() {
         dispose();
@@ -382,20 +386,37 @@ public class MainWindow extends JFrame {
         return tf;
     }
 
-    private JPanel createButton(String label, Runnable action) {
+    private JPanel createButton(String label, Runnable action, String tooltip) {
         JPanel bp = new JPanel(new BorderLayout());
         bp.setOpaque(true);
         bp.setBackground(foreground);
         bp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(foreground, 2), BorderFactory.createEmptyBorder(6, 20, 6, 20)));
         bp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        bp.setFocusable(true);
+        bp.setToolTipText(tooltip);
+
         JLabel bl = lbl(label, 24f);
         bl.setForeground(background);
         bl.setHorizontalAlignment(SwingConstants.CENTER);
         bp.add(bl, BorderLayout.CENTER);
+
+        Runnable onHover = () -> { bp.setBackground(background); bl.setForeground(foreground); };
+        Runnable onUnhover = () -> { bp.setBackground(foreground); bl.setForeground(background); };
+
+        bp.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) { onHover.run(); }
+            public void focusLost(FocusEvent e) { onUnhover.run(); }
+        });
+
+        bp.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "onEnter");
+        bp.getActionMap().put("onEnter", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) { action.run(); }
+        });
+
         bp.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) { action.run(); }
-            public void mouseEntered(MouseEvent e) { bp.setBackground(background); bl.setForeground(foreground); }
-            public void mouseExited(MouseEvent e) { bp.setBackground(foreground); bl.setForeground(background); }
+            public void mouseEntered(MouseEvent e) { onHover.run(); }
+            public void mouseExited(MouseEvent e) { if (!bp.hasFocus()) onUnhover.run(); }
         });
         return bp;
     }

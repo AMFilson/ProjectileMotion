@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
 
 /*
@@ -55,12 +56,17 @@ public class DataManager {
      *   rather than crashing the whole program.
      */
     public static void saveGame(Component parent, String[] data) {
-        // Create a file chooser dialogue with no pre-selected directory
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files (*.txt)", "txt"));
 
         // showSaveDialog() blocks until the user picks a file or cancels
         if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            
+            // Auto-append .txt if not present
+            if (!file.getName().toLowerCase().endsWith(".txt")) {
+                file = new File(file.getAbsolutePath() + ".txt");
+            }
 
             // try-with-resources: writer is automatically closed when the block exits
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -97,6 +103,7 @@ public class DataManager {
      */
     public static String[] loadGame(Component parent) {
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files (*.txt)", "txt"));
 
         // showOpenDialog() blocks until the user picks a file or cancels
         if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {

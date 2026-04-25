@@ -6,6 +6,7 @@
  */
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -217,5 +218,60 @@ class MainFramePanel extends JPanel {
             graphics2d.fillRect(originX, originY + armLength - 2, armLength, 2); // Horizontal arm (bottom)
             graphics2d.fillRect(originX + armLength - 2, originY, 2, armLength); // Vertical arm (right)
         }
+    }
+}
+
+// =============================================================================
+// BIT-REKT SCROLLBAR UI
+// =============================================================================
+
+/**
+ * A custom ScrollBarUI that gives scrollbars a high-contrast terminal look.
+ *
+ * Features:
+ * - Pure black thumb (solid rectangle)
+ * - Off-white track with a thin black outline
+ * - No arrow buttons (minimalist look)
+ */
+class BitRektScrollBarUI extends BasicScrollBarUI {
+    private final Color background = new Color(239, 243, 241);
+    private final Color foreground = new Color(0, 0, 0);
+
+    @Override
+    protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+        g.setColor(background);
+        g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
+        g.setColor(foreground);
+        g.drawRect(trackBounds.x, trackBounds.y, trackBounds.width - 1, trackBounds.height - 1);
+    }
+
+    @Override
+    protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+        if (thumbBounds.isEmpty() || !scrollbar.isEnabled())
+            return;
+        g.setColor(foreground);
+        // Fill the thumb with a solid color, inset slightly for better aesthetics
+        g.fillRect(thumbBounds.x + 2, thumbBounds.y + 2, thumbBounds.width - 4, thumbBounds.height - 4);
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    /**
+     * Creates a dummy button with zero size to hide the scrollbar arrows.
+     */
+    private JButton createZeroButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
     }
 }

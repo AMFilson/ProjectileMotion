@@ -235,6 +235,7 @@ public class MainMenu extends JFrame {
         cardContentPanel.add(homePanel, "HOME");
         cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
         cardContentPanel.add(new CharacterSelectPanel(tanks, pixelFont), "NEW_GAME");
+        cardContentPanel.add(new HowToPlayPanel(pixelFont), "HOW_TO_PLAY");
 
         layoutConstraints.gridx = 1;
         layoutConstraints.gridy = 1;
@@ -399,6 +400,8 @@ public class MainMenu extends JFrame {
 
         if (title.equals("NEW GAME"))
             cardLayout.show(cardContentPanel, "NEW_GAME");
+        else if (title.equals("HOW TO PLAY"))
+            cardLayout.show(cardContentPanel, "HOW_TO_PLAY");
         else if (title.equals("LEADERBOARD")) {
             cardContentPanel.add(new LeaderboardPanel(pixelFont), "LEADERBOARD");
             cardLayout.show(cardContentPanel, "LEADERBOARD");
@@ -436,14 +439,15 @@ public class MainMenu extends JFrame {
             if (loadedData != null) {
                 LeaderboardPanel.sessionHistory.clear();
                 for (String line : loadedData) {
-                    if (line.equals("No match records found.")) continue;
+                    if (line.equals("No match records found."))
+                        continue;
                     String[] parts = line.split(",");
                     if (parts.length == 7) {
                         try {
                             LeaderboardPanel.sessionHistory.add(new MatchRecord(
-                                Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]),
-                                parts[4], Integer.parseInt(parts[5]), Integer.parseInt(parts[6])
-                            ));
+                                    Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]),
+                                    Integer.parseInt(parts[3]),
+                                    parts[4], Integer.parseInt(parts[5]), Integer.parseInt(parts[6])));
                         } catch (NumberFormatException e) {
                             // Ignore malformed lines
                         }

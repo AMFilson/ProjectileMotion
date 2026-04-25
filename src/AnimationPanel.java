@@ -18,6 +18,7 @@ public class AnimationPanel extends JPanel {
     private int p1Position = 0;
     private int p2Position = 150;
     private int roundNum = 1;
+    private String statusText = "";
     
     private boolean shotFired = false;
     private double shotStartX = 0;
@@ -37,12 +38,13 @@ public class AnimationPanel extends JPanel {
         this.pixelFont = font;
     }
 
-    public void updateGameState(TankData p1Tank, int p1Pos, TankData p2Tank, int p2Pos, int roundNum) {
+    public void updateGameState(TankData p1Tank, int p1Pos, TankData p2Tank, int p2Pos, int roundNum, String statusText) {
         this.p1Tank = p1Tank;
         this.p1Position = p1Pos;
         this.p2Tank = p2Tank;
         this.p2Position = p2Pos;
         this.roundNum = roundNum;
+        this.statusText = statusText;
         repaint();
     }
 
@@ -89,10 +91,16 @@ public class AnimationPanel extends JPanel {
         
         if (pixelFont != null) {
             g2d.setFont(pixelFont.deriveFont(18f));
-            g2d.drawString(String.format("ROUND %02d", roundNum), 45, 24);
+            String roundStr = String.format("ROUND %02d", roundNum);
+            g2d.drawString(roundStr, 45, 24);
+            
+            if (statusText != null && !statusText.isEmpty()) {
+                g2d.drawString("|", 125, 24);
+                g2d.drawString(statusText.toUpperCase(), 145, 24);
+            }
             
             g2d.setFont(pixelFont.deriveFont(14f));
-            g2d.drawString("WIND: 12 KM/H [E]", w - 140, 24);
+            g2d.drawString("GAMES PLAYED: " + Main.gamesPlayed, w - 140, 24);
         }
 
         // 4. Grid

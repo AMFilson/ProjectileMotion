@@ -125,11 +125,11 @@ public class CharacterSelectPanel extends JPanel {
     void onStatusChanged() {
         boolean p1Ready = p1Col.isReady();
         boolean p2Ready = p2Col.isReady();
-        
+
         String p1Name = p1Col.getPlayerNameRaw();
         String p2Name = p2Col.getPlayerNameRaw();
         boolean namesEntered = !p1Name.trim().isEmpty() && !p2Name.trim().isEmpty();
-        
+
         boolean canBattle = p1Ready && p2Ready && namesEntered;
         battleBtn.setEnabled(canBattle);
 
@@ -194,7 +194,8 @@ public class CharacterSelectPanel extends JPanel {
         battleButtonPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (battleButtonPanel.isEnabled()) triggerBattleAction(battleButtonPanel);
+                if (battleButtonPanel.isEnabled())
+                    triggerBattleAction(battleButtonPanel);
             }
 
             @Override
@@ -225,6 +226,7 @@ public class CharacterSelectPanel extends JPanel {
                     battleLabel.setForeground(background);
                 }
             }
+
             public void focusLost(FocusEvent e) {
                 battleButtonPanel.setOpaque(false);
                 battleLabel.setForeground(foreground);
@@ -232,7 +234,8 @@ public class CharacterSelectPanel extends JPanel {
         });
         battleButtonPanel.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-                if ((e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) && battleButtonPanel.isEnabled()) {
+                if ((e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE)
+                        && battleButtonPanel.isEnabled()) {
                     triggerBattleAction(battleButtonPanel);
                 }
             }
@@ -384,9 +387,17 @@ public class CharacterSelectPanel extends JPanel {
                 }
             });
             nameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-                public void insertUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
-                public void removeUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
-                public void changedUpdate(javax.swing.event.DocumentEvent e) { onStatusChanged(); }
+                public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                    onStatusChanged();
+                }
+
+                public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                    onStatusChanged();
+                }
+
+                public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                    onStatusChanged();
+                }
             });
             nameField.setToolTipText("Enter your Username");
             nameAndStatusRow.add(nameField);
@@ -444,6 +455,7 @@ public class CharacterSelectPanel extends JPanel {
                     statusLbl.setForeground(background);
                     statusVal.setForeground(background);
                 }
+
                 public void focusLost(FocusEvent e) {
                     applyStatusStyle(); // Revert to based on state
                 }
@@ -583,7 +595,8 @@ public class CharacterSelectPanel extends JPanel {
         /** Helper for status button release animation */
         private void releaseStatusBtn() {
             statusBtnMain.setLocation(0, 0);
-            if (ready) statusBtnShadow.setVisible(true);
+            if (ready)
+                statusBtnShadow.setVisible(true);
         }
 
         /**
@@ -691,6 +704,7 @@ public class CharacterSelectPanel extends JPanel {
                     carouselButtonPanel.setBackground(foreground);
                     carouselArrowLabel.setForeground(background);
                 }
+
                 public void focusLost(FocusEvent e) {
                     carouselButtonPanel.setOpaque(false);
                     carouselArrowLabel.setForeground(foreground);

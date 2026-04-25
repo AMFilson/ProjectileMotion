@@ -4,28 +4,37 @@
 
 ## Key Features
 
-- **Tactical Versus Combat**: Two players compete head-to-head, adjusting angles and velocity to land the killing blow.
-- **Persistent Career Tracking**: Every shot counts. All matches are automatically logged to `match_history.csv`, tracking winners, losers, and record-breaking scores.
+- **Tactical Versus Combat**: Two players compete head-to-head. Adjust your **SHOT ANGLE** (0-180°) and **POSITION** using the **MOBILITY** system to land the killing blow.
+- **Directional Physics**: Full support for directional firing and movement. Player 1 faces East (+X) and Player 2 faces West (-X), requiring distinct tactical adjustments for each.
+- **Persistent Career Tracking**: Every shot counts. All matches are automatically logged to `match_history.csv`, tracking winners, losers, and record-breaking scores across sessions.
+- **Integrated "How to Play"**: A comprehensive, in-game manual detailing unit selection, combat mechanics, and data management systems.
 - **Dynamic Leaderboard**: A real-time ranking system that aggregates historical data to identify the top pilots in the division.
 - **Keyboard-First Design**: Fully accessible UI with comprehensive Tab and Enter/Space support for all menu items and combat controls.
-- **Retro-Industrial UI**: A custom-built Swing interface featuring dithered progress bars, dashed borders, and the signature VT323 pixel font.
+- **Retro-Industrial UI**: A custom-built Swing interface featuring:
+    - Ultrawide battle layout with a "Round #" HUD and "GAMES PLAYED" counter.
+    - Dithered progress bars and dashed borders.
+    - Custom stylized high-contrast scrollbars.
+    - Context-sensitive tooltips for all controls.
+    - Signature VT323 pixel font.
 - **Tank Roster**: Choose from specialized units like the **M8 Greyhound**, **Flak 88**, or the experimental **Black Cat**, each with unique performance metrics.
 
 ## Technical Stack
 
 - **Language**: Java 25 (OpenJDK)
 - **Framework**: Java Swing (Custom UI Components)
-- **Data Persistence**: CSV Flat-file storage (`match_history.csv`)
+- **Data Persistence**: CSV Flat-file storage (`match_history.csv`) and support for session exports/imports in `.txt` format.
 - **Graphics**: 2D Graphics engine with manual pixel-art rendering and interpolation.
 
 ## Project Structure
 
-- `src/Main.java`: The application entry point.
+- `src/Main.java`: The application entry point and session state manager.
 - `src/MainMenu.java`: The primary hub and navigation system.
 - `src/MainWindow.java`: The core battle interface and physics simulation logic.
+- `src/HowToPlayPanel.java`: Interactive instruction manual component.
 - `src/DataManager.java`: Handles all file I/O for saving, loading, and match logging.
 - `src/LeaderboardPanel.java`: Aggregates and displays the global rankings.
 - `src/CharacterSelectPanel.java`: Username validation and tank configuration.
+- `src/UIComponents.java`: Shared library of custom dithered and stylized Swing components.
 
 ## How to Run
 
@@ -37,5 +46,5 @@
 ## Author
 
 **Andrew Filson**  
-_A projectile motion project for CS1200_
+_A projectile motion project for CS1200_  
 _March - April 2026_
