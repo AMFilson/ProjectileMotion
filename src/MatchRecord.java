@@ -6,6 +6,25 @@
  *          Used for logging match history to persistent storage.
  */
 
+/* 
+ * =========================================================================
+ * LEARNING: POJOs & DATA SERIALIZATION
+ * =========================================================================
+ * 
+ * POJO (Plain Old Java Object):
+ * MatchRecord is an excellent example of a POJO. It doesn't extend any special 
+ * Swing components or implement complex logic. Its sole purpose is to hold data 
+ * (game number, player names, scores) and provide getters/setters. It acts as 
+ * a simple, structured container to pass data around the application cleanly.
+ * 
+ * Data Serialization (toCSV):
+ * 'Serialization' is the process of translating data structures or object state 
+ * into a format that can be stored (in a file) and reconstructed later. 
+ * The 'toCSV()' method here serializes a MatchRecord object into a single 
+ * comma-separated String, perfect for writing to our match_history.csv file!
+ * =========================================================================
+ */
+
 public class MatchRecord {
     private int gameNumber;
     private String p1Name;

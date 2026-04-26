@@ -7,11 +7,36 @@
  */
 
 import javax.swing.*;
+import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+/* 
+ * =========================================================================
+ * LEARNING: CARDLAYOUT & SWING TIMERS
+ * =========================================================================
+ * 
+ * CardLayout:
+ * CardLayout is a layout manager that lets you share the same display area 
+ * with multiple components (like a deck of cards). Only one "card" (JPanel) 
+ * is visible at a time. This is perfect for building wizards or, in our case,
+ * a Main Menu with different screens (HOME, NEW_GAME, LEADERBOARD, HOW_TO_PLAY).
+ * We navigate between them using cardLayout.show(parent, "CARD_NAME").
+ * 
+ * javax.swing.Timer:
+ * A Swing Timer fires an ActionEvent repeatedly at a fixed interval.
+ * In this menu, we use a Timer running every 50 milliseconds to trigger 
+ * visual updates (like the flickering border opacity). Because Swing is not
+ * thread-safe, all UI updates MUST happen on the Event Dispatch Thread (EDT).
+ * Swing Timers automatically execute their action on the EDT, making them
+ * safe for animations!
+ * =========================================================================
+ */
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -425,15 +450,15 @@ public class MainMenu extends JFrame {
     }
 
     private void handleSaveLoad() {
-        Object[] options = { "Save", "Load", "Cancel" };
-        int dialogChoice = JOptionPane.showOptionDialog(this,
+        String[] options = { "Save", "Load", "Cancel" };
+        int dialogChoice = UIComponents.showThemedDialog(this,
                 "Would you like to Save or Load a game file?",
                 "SAVE/LOAD",
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null, options, options[2]);
+                options,
+                "?",
+                pixelFont);
 
-        if (dialogChoice == JOptionPane.YES_OPTION) {
+        if (dialogChoice == 0) { // Save
             java.util.List<MatchRecord> history = LeaderboardPanel.getSessionHistory();
             String[] dataToSave;
             if (history.isEmpty()) {
@@ -445,7 +470,7 @@ public class MainMenu extends JFrame {
                 }
             }
             DataManager.saveGame(this, dataToSave);
-        } else if (dialogChoice == JOptionPane.NO_OPTION) {
+        } else if (dialogChoice == 1) { // Load
             String[] loadedData = DataManager.loadGame(this);
             if (loadedData != null) {
                 LeaderboardPanel.clearSessionHistory();

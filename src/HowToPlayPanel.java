@@ -7,6 +7,20 @@
 
 import javax.swing.*;
 import java.awt.*;
+/* 
+ * =========================================================================
+ * LEARNING: HTML IN SWING COMPONENTS
+ * =========================================================================
+ * 
+ * HTML Formatting:
+ * Swing's JLabel component has built-in support for basic HTML rendering! 
+ * By simply starting the text string with "<html>", we can use standard 
+ * tags like <h1>, <p>, <b>, and <ul> to create rich, formatted text blocks.
+ * This is incredibly useful for instruction screens, tooltips, or any text
+ * that needs varying sizes and styles without having to manually position 
+ * multiple separate JLabel objects.
+ * =========================================================================
+ */
 
 public class HowToPlayPanel extends JPanel {
 

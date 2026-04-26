@@ -16,6 +16,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/* 
+ * =========================================================================
+ * LEARNING: INNER CLASSES & FOCUS MANAGEMENT
+ * =========================================================================
+ * 
+ * Inner Classes (Nested Classes):
+ * Notice the 'PlayerColumn' class defined entirely inside 'CharacterSelectPanel'.
+ * This is an inner class! We use it when a class makes sense only within the 
+ * context of its parent. A PlayerColumn needs direct access to the outer 
+ * panel's font and tank lists. By making it an inner class, it can use the 
+ * outer class's fields seamlessly without passing them around.
+ * 
+ * Focus Management (Accessibility):
+ * When building custom components (like the carousel arrows or the Battle 
+ * button), they don't automatically know how to handle keyboard inputs like 
+ * pressing ENTER. By explicitly setting 'setFocusable(true)' and adding a 
+ * FocusListener, we make the game fully playable with just a keyboard, 
+ * greatly improving accessibility!
+ * =========================================================================
+ */
+
 /**
  * CharacterSelectPanel.java
  *

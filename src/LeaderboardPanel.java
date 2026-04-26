@@ -7,6 +7,26 @@
 
 import javax.swing.*;
 import java.awt.*;
+/* 
+ * =========================================================================
+ * LEARNING: STRING FORMATTING & SORTING
+ * =========================================================================
+ * 
+ * String Formatting:
+ * We use 'String.format("%,d", score)' and 'String.format("#%02d", rank)' here.
+ * The % symbol marks a format specifier. 
+ * '%,d' formats an integer with comma separators (e.g., 10,000).
+ * '%02d' formats an integer to be at least 2 digits long, padding with a 
+ * leading zero if necessary (e.g., '1' becomes '01'). This ensures our 
+ * leaderboard ranks align perfectly!
+ * 
+ * Sorting Collections:
+ * To display the leaderboard correctly, we must sort the data. We use 
+ * 'Collections.sort(records, Comparator)' to sort our List of MatchRecords 
+ * based on their scores in descending order. The Comparator tells Java exactly
+ * how to compare two Custom Objects (MatchRecord A vs MatchRecord B).
+ * =========================================================================
+ */
 
 /**
  * LeaderboardPanel.java

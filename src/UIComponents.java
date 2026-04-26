@@ -8,7 +8,29 @@
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
+
+/* 
+ * =========================================================================
+ * LEARNING: INHERITANCE & STATIC UTILITIES
+ * =========================================================================
+ * 
+ * Inheritance (extends):
+ * You'll see classes here using the 'extends' keyword (e.g., 'class MainFramePanel 
+ * extends JPanel'). Inheritance is a core OOP concept where a new class takes on 
+ * (inherits) the properties and methods of an existing class. By extending JPanel, 
+ * MainFramePanel *is* a JPanel, but we can add our own custom drawing logic on 
+ * top of it while keeping all of JPanel's default behavior!
+ * 
+ * Static Utility Methods:
+ * The 'createLabel' method is marked as 'public static'. The 'static' keyword 
+ * means the method belongs to the UIComponents class itself, rather than to any 
+ * specific instance of it. This allows us to call UIComponents.createLabel(...) 
+ * from anywhere in our project without having to create a 'new UIComponents()' 
+ * object first. It's a great way to build a library of shared tools!
+ * =========================================================================
+ */
 
 public class UIComponents {
     public static final Color THEME_BACKGROUND = new Color(239, 243, 241);
@@ -29,6 +51,172 @@ public class UIComponents {
         label.setForeground(THEME_FOREGROUND);
         label.setOpaque(false);
         return label;
+    }
+
+    /**
+     * A custom Icon class that draws pixel-art style icons.
+     */
+    public static class PixelIcon implements Icon {
+        private String type;
+        private int size = 48;
+
+        public PixelIcon(String type) {
+            this.type = type;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+            // Draw pixelated border box
+            g2.setColor(THEME_FOREGROUND);
+            g2.fillRect(x, y, size, size);
+            g2.setColor(THEME_BACKGROUND);
+            g2.fillRect(x + 4, y + 4, size - 8, size - 8);
+
+            g2.setColor(THEME_FOREGROUND);
+            if (type.equals("?")) {
+                int[][] pixels = {
+                        { 0, 0, 1, 1, 1, 0, 0 },
+                        { 0, 1, 0, 0, 0, 1, 0 },
+                        { 0, 0, 0, 0, 0, 1, 0 },
+                        { 0, 0, 0, 1, 1, 0, 0 },
+                        { 0, 0, 1, 0, 0, 0, 0 },
+                        { 0, 0, 0, 0, 0, 0, 0 },
+                        { 0, 0, 1, 0, 0, 0, 0 }
+                };
+                drawPixels(g2, x + 10, y + 10, pixels, 4);
+            } else if (type.equals("!")) {
+                int[][] pixels = {
+                        { 0, 1, 1, 0 },
+                        { 0, 1, 1, 0 },
+                        { 0, 1, 1, 0 },
+                        { 0, 1, 1, 0 },
+                        { 0, 0, 0, 0 },
+                        { 0, 1, 1, 0 }
+                };
+                drawPixels(g2, x + 14, y + 10, pixels, 5);
+            }
+            g2.dispose();
+        }
+
+        private void drawPixels(Graphics2D g, int x, int y, int[][] pixels, int scale) {
+            for (int r = 0; r < pixels.length; r++) {
+                for (int c = 0; c < pixels[r].length; c++) {
+                    if (pixels[r][c] == 1) {
+                        g.fillRect(x + c * scale, y + r * scale, scale, scale);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public int getIconWidth() {
+            return size;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return size;
+        }
+    }
+
+    /**
+     * Displays a customized, themed dialog box that matches the BIT-REKT aesthetic.
+     */
+    public static int showThemedDialog(Component parent, String message, String title, String[] options,
+            String iconType, Font font) {
+        final int[] result = { -1 };
+        Window parentWindow = SwingUtilities.getWindowAncestor(parent);
+        JDialog dialog = new JDialog(parentWindow, title, Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setUndecorated(true);
+        dialog.setResizable(false);
+
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(THEME_BACKGROUND);
+        root.setBorder(BorderFactory.createLineBorder(THEME_FOREGROUND, 4));
+
+        // Custom Header/Title Bar
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        header.setBackground(THEME_FOREGROUND);
+        JLabel titleLbl = createLabel(title.toUpperCase(), font, 14f);
+        titleLbl.setForeground(THEME_BACKGROUND);
+        header.add(titleLbl);
+        root.add(header, BorderLayout.NORTH);
+
+        // Body Content
+        JPanel body = new JPanel(new BorderLayout(20, 10));
+        body.setOpaque(false);
+        body.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
+
+        if (iconType != null) {
+            body.add(new JLabel(new PixelIcon(iconType)), BorderLayout.WEST);
+        }
+
+        JLabel msgLbl = createLabel("<html><div style='text-align: center;'>" + message + "</div></html>", font, 18f);
+        msgLbl.setHorizontalAlignment(SwingConstants.CENTER);
+        body.add(msgLbl, BorderLayout.CENTER);
+
+        // Custom Button Area
+        JPanel btnArea = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        btnArea.setOpaque(false);
+        btnArea.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+
+        for (int i = 0; i < options.length; i++) {
+            final int index = i;
+            JPanel btn = createThemedButton(options[i].toUpperCase(), () -> {
+                result[0] = index;
+                dialog.dispose();
+            }, font);
+            btnArea.add(btn);
+        }
+        body.add(btnArea, BorderLayout.SOUTH);
+
+        root.add(body, BorderLayout.CENTER);
+        dialog.add(root);
+        dialog.pack();
+        dialog.setLocationRelativeTo(parent);
+        dialog.setVisible(true);
+
+        return result[0];
+    }
+
+    private static JPanel createThemedButton(String label, Runnable action, Font font) {
+        JPanel btn = new JPanel(new BorderLayout());
+        btn.setOpaque(true);
+        btn.setBackground(THEME_FOREGROUND);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(THEME_FOREGROUND, 2),
+                BorderFactory.createEmptyBorder(8, 20, 8, 20)));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JLabel lbl = createLabel(label, font, 18f);
+        lbl.setForeground(THEME_BACKGROUND);
+        lbl.setHorizontalAlignment(SwingConstants.CENTER);
+        btn.add(lbl, BorderLayout.CENTER);
+
+        MouseAdapter ma = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                action.run();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(THEME_BACKGROUND);
+                lbl.setForeground(THEME_FOREGROUND);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(THEME_FOREGROUND);
+                lbl.setForeground(THEME_BACKGROUND);
+            }
+        };
+        btn.addMouseListener(ma);
+
+        return btn;
     }
 }
 

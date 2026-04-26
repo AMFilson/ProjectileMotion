@@ -15,6 +15,28 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/* 
+ * =========================================================================
+ * LEARNING: CUSTOM PAINTING & GRAPHICS2D
+ * =========================================================================
+ * 
+ * Custom Painting:
+ * By default, JPanels are just empty rectangles. To draw our own graphics
+ * (like the tank battlefield and projectiles), we override the 
+ * paintComponent(Graphics g) method. This method is called automatically 
+ * by Swing whenever the panel needs to be redrawn (e.g., when the window 
+ * is resized or when we call repaint()).
+ * 
+ * Graphics2D & RenderingHints:
+ * The 'Graphics' object passed to paintComponent is actually a 'Graphics2D' 
+ * object under the hood, which provides much richer drawing capabilities 
+ * (like drawing arcs, rotating, and setting stroke thickness). 
+ * We cast it (Graphics2D g2d = (Graphics2D) g) to access these features.
+ * We also apply 'RenderingHints.KEY_ANTIALIASING' to smooth out the jagged 
+ * edges of our drawn lines, making the graphics look polished!
+ * =========================================================================
+ */
+
 public class AnimationPanel extends JPanel {
 
     private final Color foreground = UIComponents.THEME_FOREGROUND;
