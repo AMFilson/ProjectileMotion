@@ -148,7 +148,7 @@ public class MainMenu extends JFrame {
         JPanel titleBlock = new JPanel();
         titleBlock.setLayout(new BoxLayout(titleBlock, BoxLayout.Y_AXIS));
         titleBlock.setOpaque(false);
-        titleBlock.add(createLabel("HEAVY ARMORED DIVISION", 12f));
+        titleBlock.add(createLabel("A PROJECTILE MOTION MVP", 12f));
         titleBlock.add(Box.createVerticalStrut(-5));
         titleBlock.add(createLabel("BIT-REKT", 48f));
 

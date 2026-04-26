@@ -253,7 +253,7 @@ Run the dev command so the user can see the app once finished.
 
     <header class="header" vid="13">
         <div class="title-block" vid="14">
-            <span style="font-size: 12px; letter-spacing: 2px;" vid="15">HEAVY ARMORED DIVISION</span>
+            <span style="font-size: 12px; letter-spacing: 2px;" vid="15">A PROJECTILE MOTION MVP</span>
             <h1 vid="16">PANZER-BIT</h1>
         </div>
         <div class="system-status" vid="17">
