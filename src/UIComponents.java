@@ -13,6 +13,23 @@ import java.awt.image.BufferedImage;
 public class UIComponents {
     public static final Color THEME_BACKGROUND = new Color(239, 243, 241);
     public static final Color THEME_FOREGROUND = new Color(0, 0, 0);
+    public static final Color THEME_ERROR = new Color(200, 0, 0);
+    public static final Color THEME_HIGHLIGHT = new Color(100, 100, 100);
+    public static final Color THEME_PANEL_BG = new Color(245, 245, 245);
+
+    /**
+     * Creates a standardized JLabel with the specified text, font, and size.
+     * It sets the foreground color to THEME_FOREGROUND and makes it transparent.
+     */
+    public static JLabel createLabel(String text, Font font, float fontSize) {
+        JLabel label = new JLabel(text);
+        if (font != null) {
+            label.setFont(font.deriveFont(fontSize));
+        }
+        label.setForeground(THEME_FOREGROUND);
+        label.setOpaque(false);
+        return label;
+    }
 }
 
 /**

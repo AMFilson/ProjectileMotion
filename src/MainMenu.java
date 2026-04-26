@@ -315,11 +315,7 @@ public class MainMenu extends JFrame {
     // =========================================================================
 
     private JLabel createLabel(String text, float fontSize) {
-        JLabel label = new JLabel(text);
-        label.setFont(pixelFont.deriveFont(fontSize));
-        label.setForeground(UIComponents.THEME_FOREGROUND);
-        label.setOpaque(false);
-        return label;
+        return UIComponents.createLabel(text, pixelFont, fontSize);
     }
 
     // =========================================================================

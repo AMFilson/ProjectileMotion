@@ -332,10 +332,6 @@ public class LeaderboardPanel extends JPanel {
 
     /** Shared label factory — matches BIT-REKT typography. */
     private JLabel createLabel(String text, float fontSize) {
-        JLabel label = new JLabel(text);
-        label.setFont(pixelFont.deriveFont(fontSize));
-        label.setForeground(foreground);
-        label.setOpaque(false);
-        return label;
+        return UIComponents.createLabel(text, pixelFont, fontSize);
     }
 }

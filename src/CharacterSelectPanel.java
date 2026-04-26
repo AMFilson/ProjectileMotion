@@ -41,8 +41,8 @@ public class CharacterSelectPanel extends JPanel {
     private final List<TankData> tanks;
     private Font pixelFont;
 
-    private PlayerColumn p1Col;
-    private PlayerColumn p2Col;
+    private PlayerColumn playerOneColumn;
+    private PlayerColumn playerTwoColumn;
     private JLabel battleStatusLabel;
     private JPanel battleBtn;
     private boolean isBlinkVisible = true;
@@ -66,10 +66,10 @@ public class CharacterSelectPanel extends JPanel {
         };
         columnsPanel.setOpaque(false);
 
-        p1Col = new PlayerColumn(1, "MIGGY", true);
-        p2Col = new PlayerColumn(2, "", false);
-        columnsPanel.add(p1Col);
-        columnsPanel.add(p2Col);
+        playerOneColumn = new PlayerColumn(1, "MIGGY", true);
+        playerTwoColumn = new PlayerColumn(2, "", false);
+        columnsPanel.add(playerOneColumn);
+        columnsPanel.add(playerTwoColumn);
         add(columnsPanel, BorderLayout.CENTER);
 
         // --- Footer: BATTLE button + status label ---
@@ -86,7 +86,7 @@ public class CharacterSelectPanel extends JPanel {
             @Override
             protected void paintComponent(Graphics graphics) {
                 isBlinkVisible = (System.currentTimeMillis() / 600) % 2 == 0;
-                if (isBlinkVisible || (p1Col.isReady() && p2Col.isReady())) {
+                if (isBlinkVisible || (playerOneColumn.isReady() && playerTwoColumn.isReady())) {
                     super.paintComponent(graphics);
                 }
             }
@@ -121,11 +121,11 @@ public class CharacterSelectPanel extends JPanel {
      * Updates the BATTLE button's enabled state and the status label text.
      */
     void onStatusChanged() {
-        boolean p1Ready = p1Col.isReady();
-        boolean p2Ready = p2Col.isReady();
+        boolean p1Ready = playerOneColumn.isReady();
+        boolean p2Ready = playerTwoColumn.isReady();
 
-        String p1Name = p1Col.getPlayerNameRaw();
-        String p2Name = p2Col.getPlayerNameRaw();
+        String p1Name = playerOneColumn.getPlayerNameRaw();
+        String p2Name = playerTwoColumn.getPlayerNameRaw();
         boolean namesEntered = !p1Name.trim().isEmpty() && !p2Name.trim().isEmpty();
 
         boolean canBattle = p1Ready && p2Ready && namesEntered;
@@ -253,10 +253,10 @@ public class CharacterSelectPanel extends JPanel {
 
     private void triggerBattleAction(JPanel battleButtonPanel) {
         // Collect selected data from both player columns
-        String p1Name = p1Col.getPlayerName();
-        int p1TankIdx = p1Col.getSelectedTankIndex();
-        String p2Name = p2Col.getPlayerName();
-        int p2TankIdx = p2Col.getSelectedTankIndex();
+        String p1Name = playerOneColumn.getPlayerName();
+        int p1TankIdx = playerOneColumn.getSelectedTankIndex();
+        String p2Name = playerTwoColumn.getPlayerName();
+        int p2TankIdx = playerTwoColumn.getSelectedTankIndex();
 
         // Retrieve the TankData objects and launch the battle window
         TankData t1 = tanks.get(p1TankIdx);
@@ -278,11 +278,7 @@ public class CharacterSelectPanel extends JPanel {
     // -------------------------------------------------------------------------
 
     private JLabel createLabel(String text, float fontSize) {
-        JLabel label = new JLabel(text);
-        label.setFont(pixelFont.deriveFont(fontSize));
-        label.setForeground(UIComponents.THEME_FOREGROUND);
-        label.setOpaque(false);
-        return label;
+        return UIComponents.createLabel(text, pixelFont, fontSize);
     }
 
     // =========================================================================
